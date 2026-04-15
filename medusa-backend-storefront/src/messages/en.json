@@ -1,0 +1,77 @@
+{
+  "Metadata": {
+    "defaultTitle": "Storefront",
+    "defaultDescription": "A performant ecommerce storefront with Next.js and Medusa."
+  },
+  "Nav": {
+    "storeName": "Medusa Store",
+    "account": "Account",
+    "cart": "Cart",
+    "menu": "Menu",
+    "shippingTo": "Shipping to:",
+    "language": "Language:",
+    "uiLanguage": "Site language",
+    "switchToEnglish": "English",
+    "switchToVietnamese": "Tiếng Việt"
+  },
+  "Footer": {
+    "categories": "Categories",
+    "collections": "Collections",
+    "medusa": "Medusa"
+  },
+  "Home": {
+    "heroBadge": "New season · curated drops",
+    "heroCtaShop": "Shop the store",
+    "heroCtaCollection": "Open a featured collection",
+    "heroCtaCatalog": "Browse the catalog",
+    "heroHintWithImage": "Hero imagery from your brand settings.",
+    "heroHintNoImage": "Add a hero image and logo in admin to replace these placeholders.",
+    "subtitleFallback": "Thoughtfully selected pieces, seamless checkout, and delivery you can count on.",
+    "collectionsBadge": "Collections",
+    "collectionsEmpty": "No collections yet. Create collections in Medusa Admin to surface them here—this block is a placeholder until data is available.",
+    "collectionsEyebrow": "Shop by collection",
+    "collectionsTitle": "Find your lane",
+    "valueEyebrow": "Why shop with us",
+    "valueTitle": "Crafted experience, from first click to unboxing",
+    "valueDescription": "Placeholder copy—replace with your brand voice, policies, and differentiators.",
+    "valueCard1Title": "Careful fulfillment",
+    "valueCard1Desc": "Orders are packed with intent. Tracking updates keep customers in the loop from checkout to delivery.",
+    "valueCard2Title": "Secure checkout",
+    "valueCard2Desc": "Industry-standard payments and encryption. Your data stays protected at every step.",
+    "valueCard3Title": "Here when you need us",
+    "valueCard3Desc": "Questions about sizing, returns, or an order? Our team is ready to help—placeholder until live support hours are set.",
+    "categoryEyebrowLive": "Shop by category",
+    "categoryEyebrowMock": "Example categories",
+    "categoryTitle": "Browse by category",
+    "categoryDescriptionLive": "Jump straight into the part of the catalog you care about.",
+    "categoryDescriptionMock": "Your catalog has no categories yet. Showing placeholder categories—create product categories in Medusa Admin to replace this section.",
+    "categoryItemFallback": "Browse products in this category.",
+    "viewFullCatalog": "View full catalog",
+    "exploreLink": "Explore",
+    "featuredBadgeLive": "Featured",
+    "featuredBadgeMock": "Example products",
+    "featuredTitle": "Featured products",
+    "featuredDescriptionLive": "A curated snapshot of what is live in your catalog right now.",
+    "featuredDescriptionMock": "No products returned for this region yet. Showing demo items—add products and publish to Medusa to populate this block.",
+    "viewAllProducts": "View all products",
+    "newsletterTitle": "Stay in the loop",
+    "newsletterDescription": "Newsletter signup is a visual placeholder—wire this to your marketing tool or Medusa subscriber flow when ready.",
+    "newsletterPlaceholder": "you@example.com",
+    "newsletterCta": "Notify me",
+    "newsletterNote": "No emails are collected until you connect this form.",
+    "demoProduct": "Demo product",
+    "productsComingSoon": "Products coming soon",
+    "collectionRailEmpty": "No products in this collection for your region yet. Add inventory in Medusa Admin—these cards are placeholders until listings appear.",
+    "viewAll": "View all"
+  },
+  "Checkout": {
+    "backToCart": "Back to shopping cart",
+    "backShort": "Back"
+  },
+  "SideMenu": {
+    "home": "Home",
+    "store": "Store",
+    "account": "Account",
+    "cart": "Cart"
+  }
+}

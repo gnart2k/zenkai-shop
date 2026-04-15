@@ -1,0 +1,77 @@
+{
+  "Metadata": {
+    "defaultTitle": "Cửa hàng",
+    "defaultDescription": "Cửa hàng thương mại điện tử hiệu năng cao với Next.js và Medusa."
+  },
+  "Nav": {
+    "storeName": "Medusa Store",
+    "account": "Tài khoản",
+    "cart": "Giỏ hàng",
+    "menu": "Menu",
+    "shippingTo": "Giao đến:",
+    "language": "Ngôn ngữ:",
+    "uiLanguage": "Ngôn ngữ trang",
+    "switchToEnglish": "English",
+    "switchToVietnamese": "Tiếng Việt"
+  },
+  "Footer": {
+    "categories": "Danh mục",
+    "collections": "Bộ sưu tập",
+    "medusa": "Medusa"
+  },
+  "Home": {
+    "heroBadge": "Mùa mới · sản phẩm tuyển chọn",
+    "heroCtaShop": "Mua sắm ngay",
+    "heroCtaCollection": "Xem bộ sưu tập nổi bật",
+    "heroCtaCatalog": "Xem toàn bộ danh mục",
+    "heroHintWithImage": "Ảnh nền từ cài đặt thương hiệu của bạn.",
+    "heroHintNoImage": "Thêm ảnh nền và logo trong admin để thay thế nội dung mẫu.",
+    "subtitleFallback": "Sản phẩm được chọn kỹ, thanh toán suôn sẻ và giao hàng đáng tin cậy.",
+    "collectionsBadge": "Bộ sưu tập",
+    "collectionsEmpty": "Chưa có bộ sưu tập. Tạo bộ sưu tập trong Medusa Admin để hiển thị tại đây—khối này là nội dung mẫu khi chưa có dữ liệu.",
+    "collectionsEyebrow": "Mua theo bộ sưu tập",
+    "collectionsTitle": "Chọn phong cách của bạn",
+    "valueEyebrow": "Vì sao mua tại đây",
+    "valueTitle": "Trải nghiệm chỉn chu, từ cú nhấp đầu đến khi nhận hàng",
+    "valueDescription": "Nội dung mẫu—thay bằng giọng điệu thương hiệu, chính sách và điểm khác biệt của bạn.",
+    "valueCard1Title": "Giao hàng cẩn thận",
+    "valueCard1Desc": "Đơn được đóng gói có chủ đích. Cập nhật vận chuyển giúp khách nắm rõ hành trình đơn hàng.",
+    "valueCard2Title": "Thanh toán an toàn",
+    "valueCard2Desc": "Thanh toán và mã hóa theo tiêu chuẩn ngành. Dữ liệu của bạn được bảo vệ ở mọi bước.",
+    "valueCard3Title": "Luôn sẵn sàng hỗ trợ",
+    "valueCard3Desc": "Câu hỏi về size, đổi trả hay đơn hàng? Đội ngũ sẵn sàng giúp—nội dung mẫu cho đến khi có giờ hỗ trợ cố định.",
+    "categoryEyebrowLive": "Mua theo danh mục",
+    "categoryEyebrowMock": "Danh mục mẫu",
+    "categoryTitle": "Duyệt theo danh mục",
+    "categoryDescriptionLive": "Vào đúng phần danh mục bạn quan tâm.",
+    "categoryDescriptionMock": "Chưa có danh mục sản phẩm. Đang hiển thị danh mục mẫu—hãy tạo danh mục trong Medusa Admin để thay thế phần này.",
+    "categoryItemFallback": "Xem sản phẩm trong danh mục này.",
+    "viewFullCatalog": "Xem toàn bộ catalog",
+    "exploreLink": "Khám phá",
+    "featuredBadgeLive": "Nổi bật",
+    "featuredBadgeMock": "Sản phẩm mẫu",
+    "featuredTitle": "Sản phẩm nổi bật",
+    "featuredDescriptionLive": "Một phần chọn lọc từ catalog đang hoạt động của bạn.",
+    "featuredDescriptionMock": "Chưa có sản phẩm cho khu vực này. Đang hiển thị sản phẩm mẫu—hãy thêm sản phẩm trong Medusa để điền khối này.",
+    "viewAllProducts": "Xem tất cả sản phẩm",
+    "newsletterTitle": "Nhận thông tin mới",
+    "newsletterDescription": "Đăng ký nhận tin là phần giao diện mẫu—kết nối công cụ marketing hoặc luồng Medusa khi sẵn sàng.",
+    "newsletterPlaceholder": "ban@example.com",
+    "newsletterCta": "Thông báo cho tôi",
+    "newsletterNote": "Chưa thu thập email cho đến khi bạn kết nối biểu mẫu.",
+    "demoProduct": "Sản phẩm demo",
+    "productsComingSoon": "Sản phẩm sắp có",
+    "collectionRailEmpty": "Chưa có sản phẩm trong bộ sưu tập này cho khu vực của bạn. Thêm tồn kho trong Medusa Admin—các thẻ này là nội dung mẫu cho đến khi có sản phẩm.",
+    "viewAll": "Xem tất cả"
+  },
+  "Checkout": {
+    "backToCart": "Quay lại giỏ hàng",
+    "backShort": "Quay lại"
+  },
+  "SideMenu": {
+    "home": "Trang chủ",
+    "store": "Cửa hàng",
+    "account": "Tài khoản",
+    "cart": "Giỏ hàng"
+  }
+}
