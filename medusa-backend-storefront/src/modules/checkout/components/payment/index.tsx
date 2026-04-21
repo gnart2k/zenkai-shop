@@ -41,6 +41,7 @@ const Payment = ({
   const pathname = usePathname()
 
   const isOpen = searchParams.get("step") === "payment"
+  const isCanceledFromPayOS = searchParams.get("payos_status") === "cancel"
 
   const setPaymentMethod = async (method: string) => {
     setError(null)
@@ -86,7 +87,7 @@ const Payment = ({
       const checkActiveSession =
         activeSession?.provider_id === selectedPaymentMethod
 
-      if (!checkActiveSession) {
+      if (!checkActiveSession || (isPayOS(selectedPaymentMethod) && isCanceledFromPayOS)) {
         const response: any = await initiatePaymentSession(cart, {
           provider_id: selectedPaymentMethod,
         })

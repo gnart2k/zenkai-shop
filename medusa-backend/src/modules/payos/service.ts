@@ -197,7 +197,35 @@ class PayOSPaymentProviderService extends AbstractPaymentProvider<PayOSPaymentPr
   }
 
   async cancelPayment(input: CancelPaymentInput): Promise<CancelPaymentOutput> {
-    return { data: input.data }
+    const orderCode = Number(input.data?.order_code)
+
+    if (orderCode) {
+      try {
+        const cancellationReason =
+          typeof input.data?.cancellation_reason === "string"
+            ? input.data.cancellation_reason
+            : "Customer canceled checkout"
+
+        await (this.client_.paymentRequests as any).cancel(
+          orderCode,
+          cancellationReason
+        )
+        this.logger_.info(`[PayOS] canceled payment link orderCode=${orderCode}`)
+      } catch (e) {
+        this.logger_.warn(
+          `[PayOS] cancel payment link failed orderCode=${orderCode}: ${
+            e instanceof Error ? e.message : String(e)
+          }`
+        )
+      }
+    }
+
+    return {
+      data: {
+        ...input.data,
+        status: "CANCELLED",
+      },
+    }
   }
 
   async deletePayment(input: DeletePaymentInput): Promise<DeletePaymentOutput> {

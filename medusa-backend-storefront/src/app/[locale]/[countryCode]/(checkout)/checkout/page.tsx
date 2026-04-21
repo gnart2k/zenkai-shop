@@ -4,7 +4,7 @@ import PaymentWrapper from "@modules/checkout/components/payment-wrapper"
 import CheckoutForm from "@modules/checkout/templates/checkout-form"
 import CheckoutSummary from "@modules/checkout/templates/checkout-summary"
 import { Metadata } from "next"
-import { notFound } from "next/navigation"
+import { notFound, redirect } from "next/navigation"
 
 export const metadata: Metadata = {
   title: "Checkout",
@@ -13,7 +13,23 @@ export const metadata: Metadata = {
 /** Avoid stale RSC payloads so shipping quotes see up-to-date cart + GHN address metadata */
 export const dynamic = "force-dynamic"
 
-export default async function Checkout() {
+export default async function Checkout({
+  searchParams,
+}: {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>
+}) {
+  const resolvedSearchParams = (await searchParams) ?? {}
+  const payosStatus = resolvedSearchParams.payos_status
+  const step = resolvedSearchParams.step
+  const normalizedPayosStatus = Array.isArray(payosStatus)
+    ? payosStatus[0]
+    : payosStatus
+  const normalizedStep = Array.isArray(step) ? step[0] : step
+
+  if (normalizedPayosStatus === "cancel" && normalizedStep !== "payment") {
+    redirect(`?step=payment&payos_status=cancel`)
+  }
+
   const cart = await retrieveCartCheckoutFresh()
 
   if (!cart) {

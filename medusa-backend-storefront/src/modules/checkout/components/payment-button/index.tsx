@@ -1,13 +1,13 @@
 "use client"
 
 import { isManual, isPayOS, isStripeLike } from "@lib/constants"
-import { placeOrder } from "@lib/data/cart"
+import { initiatePaymentSession, placeOrder } from "@lib/data/cart"
 import { cartRequiresShipping } from "@lib/util/physical-variant"
 import { HttpTypes } from "@medusajs/types"
 import { Button } from "@medusajs/ui"
 import { useElements, useStripe } from "@stripe/react-stripe-js"
 import { useSearchParams } from "next/navigation"
-import React, { useState } from "react"
+import React, { useEffect, useRef, useState } from "react"
 import ErrorMessage from "../error-message"
 
 type PaymentButtonProps = {
@@ -213,6 +213,7 @@ const PayOSPaymentButton = ({
 }) => {
   const [submitting, setSubmitting] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const hasAutoCompletedRef = useRef(false)
   const searchParams = useSearchParams()
 
   const paymentSession = cart.payment_collection?.payment_sessions?.find(
@@ -227,6 +228,25 @@ const PayOSPaymentButton = ({
   const payosStatus = searchParams.get("payos_status")
   const isReturnedFromPayOS = payosStatus === "success"
   const isCanceledFromPayOS = payosStatus === "cancel"
+
+  useEffect(() => {
+    if (!isReturnedFromPayOS || hasAutoCompletedRef.current) {
+      return
+    }
+
+    hasAutoCompletedRef.current = true
+    setSubmitting(true)
+    setErrorMessage(null)
+
+    placeOrder()
+      .catch((err) => {
+        setErrorMessage(err.message)
+        hasAutoCompletedRef.current = false
+      })
+      .finally(() => {
+        setSubmitting(false)
+      })
+  }, [isReturnedFromPayOS])
 
   const handlePayment = async () => {
     setSubmitting(true)
@@ -243,15 +263,35 @@ const PayOSPaymentButton = ({
       return
     }
 
-    if (!checkoutUrl) {
-      setErrorMessage(
-        "PayOS payment URL is missing. Please re-select PayOS and try again."
-      )
-      setSubmitting(false)
-      return
-    }
+    try {
+      let nextCheckoutUrl = checkoutUrl
 
-    window.location.href = checkoutUrl
+      if (isCanceledFromPayOS && paymentSession?.provider_id) {
+        const refreshedSession: any = await initiatePaymentSession(cart, {
+          provider_id: paymentSession.provider_id,
+        })
+        const pendingSession =
+          refreshedSession?.payment_collection?.payment_sessions?.find(
+            (s: any) => s?.status === "pending"
+          )
+        nextCheckoutUrl =
+          typeof pendingSession?.data?.checkout_url === "string"
+            ? pendingSession.data.checkout_url
+            : null
+      }
+
+      if (!nextCheckoutUrl) {
+        throw new Error(
+          "PayOS payment URL is missing. Please re-select PayOS and try again."
+        )
+      }
+
+      window.location.href = nextCheckoutUrl
+      return
+    } catch (err: any) {
+      setErrorMessage(err?.message || "Unable to restart PayOS payment.")
+      setSubmitting(false)
+    }
   }
 
   const buttonLabel = isReturnedFromPayOS
