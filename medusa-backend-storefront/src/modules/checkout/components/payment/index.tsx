@@ -1,7 +1,7 @@
 "use client"
 
 import { RadioGroup } from "@headlessui/react"
-import { isStripeLike, paymentInfoMap } from "@lib/constants"
+import { isPayOS, isStripeLike, paymentInfoMap } from "@lib/constants"
 import { initiatePaymentSession } from "@lib/data/cart"
 import { CheckCircleSolid, CreditCard } from "@medusajs/icons"
 import { Button, Container, Heading, Text, clx } from "@medusajs/ui"
@@ -10,15 +10,19 @@ import PaymentContainer, {
   StripeCardContainer,
 } from "@modules/checkout/components/payment-container"
 import Divider from "@modules/common/components/divider"
+import { storefrontDebugLog } from "@lib/util/storefront-debug"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useCallback, useEffect, useState } from "react"
 
 const Payment = ({
   cart,
   availablePaymentMethods,
+  requiresShipping = true,
 }: {
   cart: any
   availablePaymentMethods: any[]
+  /** When false (digital-only cart), payment does not require a shipping method. */
+  requiresShipping?: boolean
 }) => {
   const activeSession = cart.payment_collection?.payment_sessions?.find(
     (paymentSession: any) => paymentSession.status === "pending"
@@ -52,7 +56,9 @@ const Payment = ({
     cart?.gift_cards && cart?.gift_cards?.length > 0 && cart?.total === 0
 
   const paymentReady =
-    (activeSession && cart?.shipping_methods.length !== 0) || paidByGiftcard
+    paidByGiftcard ||
+    (activeSession &&
+      (requiresShipping ? (cart?.shipping_methods?.length ?? 0) > 0 : true))
 
   const createQueryString = useCallback(
     (name: string, value: string) => {
@@ -73,6 +79,7 @@ const Payment = ({
   const handleSubmit = async () => {
     setIsLoading(true)
     try {
+      let latestPendingSession = activeSession
       const shouldInputCard =
         isStripeLike(selectedPaymentMethod) && !activeSession
 
@@ -80,9 +87,28 @@ const Payment = ({
         activeSession?.provider_id === selectedPaymentMethod
 
       if (!checkActiveSession) {
-        await initiatePaymentSession(cart, {
+        const response: any = await initiatePaymentSession(cart, {
           provider_id: selectedPaymentMethod,
         })
+        latestPendingSession = response?.payment_collection?.payment_sessions?.find(
+          (session: any) => session?.status === "pending"
+        )
+      }
+
+      if (isPayOS(selectedPaymentMethod)) {
+        const checkoutUrl =
+          typeof latestPendingSession?.data?.checkout_url === "string"
+            ? latestPendingSession.data.checkout_url
+            : null
+
+        if (!checkoutUrl) {
+          throw new Error(
+            "Unable to create PayOS checkout URL. Please try selecting PayOS again."
+          )
+        }
+
+        window.location.href = checkoutUrl
+        return
       }
 
       if (!shouldInputCard) {
@@ -103,6 +129,27 @@ const Payment = ({
   useEffect(() => {
     setError(null)
   }, [isOpen])
+
+  useEffect(() => {
+    storefrontDebugLog("checkout-payment", "Payment step props", {
+      cart_id: cart?.id ?? null,
+      region_id: cart?.region_id ?? null,
+      requires_shipping: requiresShipping,
+      shipping_methods_count: cart?.shipping_methods?.length ?? 0,
+      provider_count: availablePaymentMethods?.length ?? 0,
+      provider_ids: (availablePaymentMethods ?? []).map((p: { id: string }) => p.id),
+      active_session_provider: activeSession?.provider_id ?? null,
+      payment_collection_status: cart?.payment_collection?.status ?? null,
+    })
+  }, [
+    cart?.id,
+    cart?.region_id,
+    cart?.shipping_methods?.length,
+    cart?.payment_collection?.status,
+    requiresShipping,
+    availablePaymentMethods,
+    activeSession?.provider_id,
+  ])
 
   return (
     <div className="bg-white">
@@ -196,7 +243,9 @@ const Payment = ({
           >
             {!activeSession && isStripeLike(selectedPaymentMethod)
               ? " Enter card details"
-              : "Continue to review"}
+              : isPayOS(selectedPaymentMethod)
+                ? "Continue to PayOS"
+                : "Continue to review"}
           </Button>
         </div>
 

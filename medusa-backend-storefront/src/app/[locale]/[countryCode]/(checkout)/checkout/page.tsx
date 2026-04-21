@@ -1,4 +1,4 @@
-import { retrieveCart } from "@lib/data/cart"
+import { retrieveCartCheckoutFresh } from "@lib/data/cart"
 import { retrieveCustomer } from "@lib/data/customer"
 import PaymentWrapper from "@modules/checkout/components/payment-wrapper"
 import CheckoutForm from "@modules/checkout/templates/checkout-form"
@@ -10,8 +10,11 @@ export const metadata: Metadata = {
   title: "Checkout",
 }
 
+/** Avoid stale RSC payloads so shipping quotes see up-to-date cart + GHN address metadata */
+export const dynamic = "force-dynamic"
+
 export default async function Checkout() {
-  const cart = await retrieveCart()
+  const cart = await retrieveCartCheckoutFresh()
 
   if (!cart) {
     return notFound()

@@ -1,4 +1,5 @@
 import { calculatePriceForShippingOption } from '@lib/data/fulfillment';
+import { resolveCalculatedAmountFromCalculateResponse } from '@lib/util/shipping-calculated-amount';
 import { HttpTypes } from '@medusajs/types';
 import { useEffect, useMemo, useState } from 'react';
 
@@ -16,6 +17,31 @@ type ShippingOptionZone = {
 export type ShippingOptionWithZone = HttpTypes.StoreCartShippingOption &
   ShippingOptionZone;
 
+export { resolveCalculatedAmountFromCalculateResponse };
+
+export function getDisplayAmountForShippingOption(
+  option: ShippingOptionWithZone,
+  calculatedPricesMap: Record<string, number>
+): number | null {
+  const fromMap = calculatedPricesMap[option.id];
+
+  if (typeof fromMap === 'number' && Number.isFinite(fromMap)) {
+    return fromMap;
+  }
+
+  if (option.price_type === 'flat' && typeof option.amount === 'number') {
+    return option.amount;
+  }
+
+  const cap = option.calculated_price?.calculated_amount;
+
+  if (typeof cap === 'number' && Number.isFinite(cap)) {
+    return cap;
+  }
+
+  return null;
+}
+
 type QuotePackageMetrics = {
   weight: number;
   length: number;
@@ -26,6 +52,7 @@ type QuotePackageMetrics = {
 const DEFAULT_PACKAGE_WEIGHT = 200;
 const DEFAULT_PACKAGE_DIMENSION = 20;
 const SHIPPING_TRACE_PREFIX = '[GHN][checkout/shipping]';
+const TRACE = '[GHN][trace]';
 
 const getAddressMetadataString = (
   metadata: Record<string, unknown> | null | undefined,
@@ -124,6 +151,30 @@ export const splitShippingOptions = (options: ShippingOptionWithZone[]) => {
   };
 };
 
+/** Seed `ghn-standard` — GHN Standard (service_type_id 2) */
+export const VN_DEFAULT_GHN_SHIPPING_TYPE_CODE = 'ghn-standard' as const;
+
+/**
+ * For Vietnam ship-to-address, only expose GHN Standard so checkout defaults to that tier.
+ * If Standard is not in the list, fall back to all options so checkout still works.
+ */
+export const filterVnStandardShippingMethods = (
+  shippingMethods: ShippingOptionWithZone[],
+  vnShipToAddress: boolean
+): ShippingOptionWithZone[] => {
+  if (!vnShipToAddress) {
+    return shippingMethods;
+  }
+
+  const standardOnly = shippingMethods.filter(
+    (option) =>
+      option.type?.code === VN_DEFAULT_GHN_SHIPPING_TYPE_CODE ||
+      option.name === 'GHN Standard'
+  );
+
+  return standardOnly.length > 0 ? standardOnly : shippingMethods;
+};
+
 export const useShippingPricing = ({
   cart,
   shippingMethods,
@@ -135,21 +186,31 @@ export const useShippingPricing = ({
   const [calculatedPricesMap, setCalculatedPricesMap] = useState<
     Record<string, number>
   >({});
+  const [calculatePriceErrorsByOptionId, setCalculatePriceErrorsByOptionId] =
+    useState<Record<string, string>>({});
 
   const shippingAddressMetadata = cart.shipping_address?.metadata as
     | Record<string, unknown>
     | undefined;
-  const ghnDistrictId = Number(
-    getAddressMetadataString(shippingAddressMetadata, 'ghn_district_id')
+  const ghnDistrictRaw = getAddressMetadataString(
+    shippingAddressMetadata,
+    'ghn_district_id'
   );
+  const ghnDistrictId = Number(ghnDistrictRaw);
   const ghnWardCode = getAddressMetadataString(
     shippingAddressMetadata,
     'ghn_ward_code'
   );
   const isVietnamShippingAddress =
     cart.shipping_address?.country_code?.toLowerCase() === 'vn';
+  const hasValidGhnDistrict =
+    ghnDistrictRaw !== '' &&
+    Number.isFinite(ghnDistrictId) &&
+    ghnDistrictId > 0;
   const shouldUseGhnQuotes =
-    isVietnamShippingAddress && !Number.isNaN(ghnDistrictId) && !!ghnWardCode;
+    isVietnamShippingAddress &&
+    hasValidGhnDistrict &&
+    ghnWardCode.trim().length > 0;
   const packageMetrics = useMemo(() => getGhnPackageMetrics(cart), [cart]);
 
   useEffect(() => {
@@ -158,8 +219,30 @@ export const useShippingPricing = ({
     const loadShippingPrices = async () => {
       setIsLoadingPrices(true);
       setCalculatedPricesMap({});
+      setCalculatePriceErrorsByOptionId({});
+
+      console.info(`${TRACE} useShippingPricing:start`, {
+        cartId: cart.id,
+        isVietnamShippingAddress,
+        hasValidGhnDistrict,
+        ghnDistrictRaw:
+          ghnDistrictRaw !== '' ? ghnDistrictRaw : '(empty)',
+        ghnDistrictIdParsed: Number.isFinite(ghnDistrictId)
+          ? ghnDistrictId
+          : null,
+        ghnWardCodePresent: ghnWardCode.trim().length > 0,
+        shouldUseGhnQuotes,
+        shippingMethodCount: shippingMethods.length,
+        calculatedCount: shippingMethods.filter(
+          (o) => o.price_type === 'calculated'
+        ).length,
+        packageMetrics,
+      })
 
       if (!shippingMethods.length) {
+        console.info(`${TRACE} useShippingPricing:no shipping methods`, {
+          cartId: cart.id,
+        })
         if (isMounted) {
           setIsLoadingPrices(false);
         }
@@ -172,6 +255,13 @@ export const useShippingPricing = ({
       });
 
       if (!calculatedShippingMethods.length) {
+        console.info(`${TRACE} useShippingPricing:no calculated options`, {
+          cartId: cart.id,
+          optionPriceTypes: shippingMethods.map((o) => ({
+            id: o.id,
+            price_type: o.price_type,
+          })),
+        })
         if (isMounted) {
           setIsLoadingPrices(false);
         }
@@ -197,7 +287,7 @@ export const useShippingPricing = ({
         calculationData: calculationData || null,
       });
 
-      const results = await Promise.allSettled(
+      const outcomes = await Promise.all(
         calculatedShippingMethods.map((shippingMethod) => {
           return calculatePriceForShippingOption(
             shippingMethod.id,
@@ -212,22 +302,56 @@ export const useShippingPricing = ({
       }
 
       const pricesMap: Record<string, number> = {};
+      const errorsMap: Record<string, string> = {};
 
-      results
-        .filter((result) => result.status === 'fulfilled')
-        .forEach((result) => {
-          if (!result.value?.id || typeof result.value.amount !== 'number') {
-            return;
-          }
+      calculatedShippingMethods.forEach((shippingMethod, index) => {
+        const outcome = outcomes[index];
+        if (!outcome) {
+          return;
+        }
 
-          pricesMap[result.value.id] = result.value.amount;
-        });
+        if (outcome.error) {
+          errorsMap[shippingMethod.id] = outcome.error;
+          console.warn(`${TRACE} useShippingPricing:calculate error for option`, {
+            cartId: cart.id,
+            optionId: shippingMethod.id,
+            optionName: shippingMethod.name,
+            error: outcome.error,
+          });
+          return;
+        }
+
+        if (!outcome.shipping_option?.id) {
+          errorsMap[shippingMethod.id] =
+            'No shipping option in calculate response.';
+          return;
+        }
+
+        const resolved = resolveCalculatedAmountFromCalculateResponse(
+          outcome.shipping_option
+        );
+
+        if (typeof resolved === 'number') {
+          pricesMap[shippingMethod.id] = resolved;
+        } else {
+          errorsMap[shippingMethod.id] =
+            outcome.error ||
+            'Medusa returned no price for this option after calculate.';
+        }
+      });
 
       console.info(`${SHIPPING_TRACE_PREFIX} prices:medusa resolved`, {
         pricesMap,
+        errorsMap,
+      });
+      console.info(`${TRACE} useShippingPricing:resolved map`, {
+        cartId: cart.id,
+        pricesMap,
+        errorOptionIds: Object.keys(errorsMap),
       });
 
       setCalculatedPricesMap(pricesMap);
+      setCalculatePriceErrorsByOptionId(errorsMap);
       setIsLoadingPrices(false);
     };
 
@@ -254,13 +378,18 @@ export const useShippingPricing = ({
     packageMetrics,
   ]);
 
+  const vnNeedsGhnAddressMetadata =
+    isVietnamShippingAddress && !shouldUseGhnQuotes;
+
   return {
     isLoadingPrices,
     calculatedPricesMap,
+    calculatePriceErrorsByOptionId,
     packageMetrics,
     shouldUseGhnQuotes,
     ghnDistrictId,
     ghnWardCode,
+    vnNeedsGhnAddressMetadata,
   };
 };
 
@@ -275,14 +404,15 @@ export const buildShippingMethodData = ({
   ghnWardCode: string;
   packageMetrics: QuotePackageMetrics;
 }) => {
-  if (!shouldUseGhnQuotes || !ghnDistrictId || !ghnWardCode) {
+  const ward = ghnWardCode.trim();
+  if (!shouldUseGhnQuotes || !ghnDistrictId || !ward) {
     return undefined;
   }
 
   return {
     carrier: 'ghn',
     to_district_id: ghnDistrictId,
-    to_ward_code: ghnWardCode,
+    to_ward_code: ward,
     package_weight: packageMetrics.weight,
     package_length: packageMetrics.length,
     package_width: packageMetrics.width,

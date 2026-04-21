@@ -22,7 +22,9 @@
     "lint:fix": "biome check --write src/",
     "test:integration:http": "TEST_TYPE=integration:http NODE_OPTIONS=--experimental-vm-modules jest --silent=false --runInBand --forceExit",
     "test:integration:modules": "TEST_TYPE=integration:modules NODE_OPTIONS=--experimental-vm-modules jest --silent=false --runInBand --forceExit",
-    "test:unit": "TEST_TYPE=unit NODE_OPTIONS=--experimental-vm-modules jest --silent --runInBand --forceExit"
+    "test:unit": "TEST_TYPE=unit NODE_OPTIONS=--experimental-vm-modules jest --silent --runInBand --forceExit",
+    "openapi:gen": "medusa-oas oas --type combined --out-dir ./openapi --paths ./src/api",
+    "openapi:ui": "pnpm dlx serve@14 openapi -l 3333"
   },
   "dependencies": {
     "@medusajs/admin-sdk": "2.13.6",
@@ -33,13 +35,16 @@
     "@medusajs/medusa": "2.13.6",
     "@medusajs/types": "2.13.6",
     "@medusajs/ui": "4.1.6",
-    "@tanstack/react-query": "5.64.2"
+    "@payos/node": "^2.0.5",
+    "@tanstack/react-query": "5.64.2",
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.11",
     "@medusajs/admin-shared": "2.13.6",
     "@medusajs/dashboard": "2.13.6",
     "@medusajs/draft-order": "2.13.6",
+    "@medusajs/medusa-oas-cli": "2.13.6",
     "@medusajs/test-utils": "2.13.6",
     "@swc/core": "^1.7.28",
     "@swc/jest": "^0.2.36",

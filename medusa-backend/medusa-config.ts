@@ -30,6 +30,24 @@ module.exports = defineConfig({
       resolve: './src/modules/product-media',
     },
     {
+      resolve: "@medusajs/medusa/payment",
+      options: {
+        providers: [
+          {
+            resolve: "./src/modules/payos",
+            id: "payos",
+            options: {
+              client_id: process.env.PAYOS_CLIENT_ID,
+              api_key: process.env.PAYOS_API_KEY,
+              checksum_key: process.env.PAYOS_CHECKSUM_KEY,
+              return_url: process.env.PAYOS_RETURN_URL,
+              cancel_url: process.env.PAYOS_CANCEL_URL,
+            },
+          },
+        ],
+      },
+    },
+    {
       resolve: '@medusajs/medusa/fulfillment',
       options: {
         providers: [

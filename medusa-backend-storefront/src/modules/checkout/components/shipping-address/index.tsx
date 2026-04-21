@@ -3,7 +3,6 @@ import { Container } from "@medusajs/ui"
 import Checkbox from "@modules/common/components/checkbox"
 import Input from "@modules/common/components/input"
 import { mapKeys } from "lodash"
-import { useParams } from "next/navigation"
 import React, { useEffect, useMemo, useState } from "react"
 import AddressSelect from "../address-select"
 import CountrySelect from "../country-select"
@@ -62,9 +61,9 @@ const ShippingAddress = ({
     ),
     email: cart?.email || "",
   })
-  const { locale } = useParams() as { locale?: string }
   const shippingCountryCode = formData["shipping_address.country_code"]?.toLowerCase()
-  const isGhnShippingEnabled = locale === "vi" && shippingCountryCode === "vn"
+  /** GHN quotes need province/district/ward codes — enable for any locale when shipping to VN */
+  const isGhnShippingEnabled = shippingCountryCode === "vn"
 
   const countriesInRegion = useMemo(
     () => cart?.region?.countries?.map((c) => c.iso_2),

@@ -1,5 +1,6 @@
 import { listCartShippingMethods } from "@lib/data/fulfillment"
 import { listCartPaymentMethods } from "@lib/data/payment"
+import { cartRequiresShipping } from "@lib/util/physical-variant"
 import { HttpTypes } from "@medusajs/types"
 import Addresses from "@modules/checkout/components/addresses"
 import Payment from "@modules/checkout/components/payment"
@@ -17,10 +18,15 @@ export default async function CheckoutForm({
     return null
   }
 
-  const shippingMethods = await listCartShippingMethods(cart.id)
+  const requiresShipping = cartRequiresShipping(cart)
+
+  /** Initial SSR fetch; Medusa often returns [] until a shipping address exists — Shipping refetches on the client. */
+  const shippingMethods = requiresShipping
+    ? await listCartShippingMethods(cart.id)
+    : []
   const paymentMethods = await listCartPaymentMethods(cart.region?.id ?? "")
 
-  if (!shippingMethods || !paymentMethods) {
+  if (!paymentMethods) {
     return null
   }
 
@@ -28,9 +34,19 @@ export default async function CheckoutForm({
     <div className="w-full grid grid-cols-1 gap-y-8">
       <Addresses cart={cart} customer={customer} />
 
-      <Shipping cart={cart} availableShippingMethods={shippingMethods} />
+      {requiresShipping ? (
+        <Shipping
+          cart={cart}
+          availableShippingMethods={shippingMethods ?? []}
+          serverShippingOptionsFailed={shippingMethods === null}
+        />
+      ) : null}
 
-      <Payment cart={cart} availablePaymentMethods={paymentMethods} />
+      <Payment
+        cart={cart}
+        availablePaymentMethods={paymentMethods}
+        requiresShipping={requiresShipping}
+      />
 
       <Review cart={cart} />
     </div>

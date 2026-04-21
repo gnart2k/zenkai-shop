@@ -84,10 +84,15 @@ async function getCountryCode(
       .get("x-vercel-ip-country")
       ?.toLowerCase()
 
-    const segments = request.nextUrl.pathname.split("/").filter(Boolean)
+    const pathname = request.nextUrl.pathname
+    const segments = pathname.split("/").filter(Boolean)
     const first = segments[0]?.toLowerCase()
     const second = segments[1]?.toLowerCase()
-    const localeFromPath = first && isLocaleSegment(first) ? first : undefined
+    let localeFromPath = first && isLocaleSegment(first) ? first : undefined
+    // `/` has no locale segment but redirects to `/{defaultLocale}/{country}/` — use default locale for region rules (e.g. vi → vn).
+    if (pathname === "/" || pathname === "") {
+      localeFromPath = routing.defaultLocale
+    }
 
     let urlCountryCode: string | undefined
     if (first && isLocaleSegment(first) && second) {
@@ -179,6 +184,24 @@ export async function middleware(request: NextRequest) {
   }
 
   /**
+   * Missing locale/country prefix (e.g. `/products/handle`) →
+   * `/{defaultLocale}/{country}/products/handle`
+   */
+  if (
+    first &&
+    !isLocaleSegment(first) &&
+    !regionMap.has(first) &&
+    countryCode
+  ) {
+    const url = new URL(
+      `/${routing.defaultLocale}/${countryCode}${pathname.startsWith("/") ? pathname : `/${pathname}`}`,
+      request.url
+    )
+    url.search = request.nextUrl.search
+    return NextResponse.redirect(url)
+  }
+
+  /**
    * `/vi` or `/en` only → add country segment
    */
   if (
@@ -189,6 +212,27 @@ export async function middleware(request: NextRequest) {
     countryCode
   ) {
     const url = new URL(`/${first}/${countryCode}/`, request.url)
+    url.search = request.nextUrl.search
+    return NextResponse.redirect(url)
+  }
+
+  /**
+   * Path still contains a removed / invalid country (e.g. bookmarks to `/en/dk/...`
+   * after DK was removed from regions). `getCountryCode()` already resolves a fallback,
+   * but `[countryCode]` page params come from the URL segment — redirect so RSC gets
+   * the live country code and product pricing uses the correct region.
+   */
+  if (
+    first &&
+    isLocaleSegment(first) &&
+    second &&
+    countryCode &&
+    !regionMap.has(second)
+  ) {
+    const looksLikeCountryCode = /^[a-z]{2}$/.test(second)
+    const restSegments = looksLikeCountryCode ? segments.slice(2) : segments.slice(1)
+    const tail = restSegments.length ? `/${restSegments.join("/")}` : ""
+    const url = new URL(`/${first}/${countryCode}${tail}`, request.url)
     url.search = request.nextUrl.search
     return NextResponse.redirect(url)
   }

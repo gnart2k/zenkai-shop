@@ -1,10 +1,12 @@
 "use client"
 
-import { isManual, isStripeLike } from "@lib/constants"
+import { isManual, isPayOS, isStripeLike } from "@lib/constants"
 import { placeOrder } from "@lib/data/cart"
+import { cartRequiresShipping } from "@lib/util/physical-variant"
 import { HttpTypes } from "@medusajs/types"
 import { Button } from "@medusajs/ui"
 import { useElements, useStripe } from "@stripe/react-stripe-js"
+import { useSearchParams } from "next/navigation"
 import React, { useState } from "react"
 import ErrorMessage from "../error-message"
 
@@ -17,12 +19,14 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
   cart,
   "data-testid": dataTestId,
 }) => {
+  const needsShipping = cart ? cartRequiresShipping(cart) : true
+
   const notReady =
     !cart ||
     !cart.shipping_address ||
     !cart.billing_address ||
     !cart.email ||
-    (cart.shipping_methods?.length ?? 0) < 1
+    (needsShipping && (cart.shipping_methods?.length ?? 0) < 1)
 
   const paymentSession = cart.payment_collection?.payment_sessions?.[0]
 
@@ -38,6 +42,14 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
     case isManual(paymentSession?.provider_id):
       return (
         <ManualTestPaymentButton notReady={notReady} data-testid={dataTestId} />
+      )
+    case isPayOS(paymentSession?.provider_id):
+      return (
+        <PayOSPaymentButton
+          cart={cart}
+          notReady={notReady}
+          data-testid={dataTestId}
+        />
       )
     default:
       return <Button disabled>Select a payment method</Button>
@@ -185,6 +197,86 @@ const ManualTestPaymentButton = ({ notReady }: { notReady: boolean }) => {
       <ErrorMessage
         error={errorMessage}
         data-testid="manual-payment-error-message"
+      />
+    </>
+  )
+}
+
+const PayOSPaymentButton = ({
+  cart,
+  notReady,
+  "data-testid": dataTestId,
+}: {
+  cart: HttpTypes.StoreCart
+  notReady: boolean
+  "data-testid"?: string
+}) => {
+  const [submitting, setSubmitting] = useState(false)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const searchParams = useSearchParams()
+
+  const paymentSession = cart.payment_collection?.payment_sessions?.find(
+    (s) => s.status === "pending"
+  )
+
+  const checkoutUrl =
+    typeof paymentSession?.data?.checkout_url === "string"
+      ? paymentSession.data.checkout_url
+      : null
+
+  const payosStatus = searchParams.get("payos_status")
+  const isReturnedFromPayOS = payosStatus === "success"
+  const isCanceledFromPayOS = payosStatus === "cancel"
+
+  const handlePayment = async () => {
+    setSubmitting(true)
+    setErrorMessage(null)
+
+    if (isReturnedFromPayOS) {
+      await placeOrder()
+        .catch((err) => {
+          setErrorMessage(err.message)
+        })
+        .finally(() => {
+          setSubmitting(false)
+        })
+      return
+    }
+
+    if (!checkoutUrl) {
+      setErrorMessage(
+        "PayOS payment URL is missing. Please re-select PayOS and try again."
+      )
+      setSubmitting(false)
+      return
+    }
+
+    window.location.href = checkoutUrl
+  }
+
+  const buttonLabel = isReturnedFromPayOS
+    ? "Complete order"
+    : "Pay with PayOS"
+
+  const cancelHint =
+    isCanceledFromPayOS && !isReturnedFromPayOS
+      ? "Payment was canceled. You can try again or choose another method."
+      : null
+
+  return (
+    <>
+      <Button
+        disabled={notReady}
+        isLoading={submitting}
+        onClick={handlePayment}
+        size="large"
+        data-testid={dataTestId}
+      >
+        {buttonLabel}
+      </Button>
+      <ErrorMessage
+        error={errorMessage || cancelHint}
+        data-testid="payos-payment-error"
       />
     </>
   )

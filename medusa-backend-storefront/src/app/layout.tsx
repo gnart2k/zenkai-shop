@@ -15,7 +15,7 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
 
   return (
     <html lang={locale} data-mode="light" suppressHydrationWarning>
-      <body>
+      <body suppressHydrationWarning>
         <main className="relative">{props.children}</main>
       </body>
     </html>

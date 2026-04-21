@@ -27,9 +27,8 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  allowedDevOrigins: [
-    "1.55.30.19:4100",
-  ],
+  // Next compares Origin *hostname* only (no port). Do not use "host:port" strings.
+  allowedDevOrigins: ["1.54.180.73", "192.168.1.237"],
   images: {
     remotePatterns: [
       {

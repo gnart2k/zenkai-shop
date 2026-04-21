@@ -2,6 +2,7 @@
 
 import { addToCart } from "@lib/data/cart"
 import { useIntersection } from "@lib/hooks/use-in-view"
+import { isStoreProductPhysical } from "@lib/util/physical-variant"
 import { HttpTypes } from "@medusajs/types"
 import { Button } from "@medusajs/ui"
 import Divider from "@modules/common/components/divider"
@@ -94,13 +95,30 @@ export default function ProductActions({
 
   // check if the selected variant is in stock
   const inStock = useMemo(() => {
+    if (!isStoreProductPhysical(product)) {
+      return true
+    }
+
+    console.log(
+      "[ProductActions] inStock check - selectedVariant:",
+      selectedVariant?.id,
+      {
+        manage_inventory: selectedVariant?.manage_inventory,
+        allow_backorder: selectedVariant?.allow_backorder,
+        inventory_quantity: selectedVariant?.inventory_quantity,
+        title: selectedVariant?.title,
+      }
+    )
+
     // If we don't manage inventory, we can always add to cart
     if (selectedVariant && !selectedVariant.manage_inventory) {
+      console.log("[ProductActions] inStock: true (manage_inventory is false)")
       return true
     }
 
     // If we allow back orders on the variant, we can add to cart
     if (selectedVariant?.allow_backorder) {
+      console.log("[ProductActions] inStock: true (allow_backorder is true)")
       return true
     }
 
@@ -109,10 +127,12 @@ export default function ProductActions({
       selectedVariant?.manage_inventory &&
       (selectedVariant?.inventory_quantity || 0) > 0
     ) {
+      console.log("[ProductActions] inStock: true (inventory_quantity > 0)")
       return true
     }
 
     // Otherwise, we can't add to cart
+    console.log("[ProductActions] inStock: false (no conditions met)")
     return false
   }, [selectedVariant])
 
@@ -179,8 +199,8 @@ export default function ProductActions({
           {!selectedVariant && !options
             ? "Select variant"
             : !inStock || !isValidVariant
-            ? "Out of stock"
-            : "Add to cart"}
+              ? "Out of stock"
+              : "Add to cart"}
         </Button>
         <MobileActions
           product={product}

@@ -2,6 +2,7 @@
 
 import { Heading, Text, clx } from "@medusajs/ui"
 
+import { cartRequiresShipping } from "@lib/util/physical-variant"
 import PaymentButton from "../payment-button"
 import { useSearchParams } from "next/navigation"
 
@@ -13,9 +14,11 @@ const Review = ({ cart }: { cart: any }) => {
   const paidByGiftcard =
     cart?.gift_cards && cart?.gift_cards?.length > 0 && cart?.total === 0
 
+  const requiresShipping = cartRequiresShipping(cart)
+
   const previousStepsCompleted =
     cart.shipping_address &&
-    cart.shipping_methods.length > 0 &&
+    (requiresShipping ? cart.shipping_methods.length > 0 : true) &&
     (cart.payment_collection || paidByGiftcard)
 
   return (

@@ -60,6 +60,15 @@ type PackageMetrics = {
   height: number;
 };
 
+/** Subset of stock location shape Medusa passes on calculatePrice `context.from_location`. */
+type FulfillmentFromLocation = {
+  id?: string;
+  metadata?: Record<string, unknown> | null;
+  address?: {
+    metadata?: Record<string, unknown> | null;
+  };
+};
+
 const getStringValue = (
   source: Record<string, unknown> | null | undefined,
   key: string
@@ -293,10 +302,15 @@ class GhnFulfillmentProviderService extends AbstractFulfillmentProviderService {
       }
 
       const packageMetrics = this.getPackageMetrics_(context, data);
+      const warehouseOrigin = this.resolveOriginFromWarehouse_(context);
       const fromDistrictId =
-        getNumberValue(data, 'from_district_id') || this.options_.fromDistrictId;
+        getNumberValue(data, 'from_district_id') ||
+        this.options_.fromDistrictId ||
+        warehouseOrigin.fromDistrictId;
       const fromWardCode =
-        getStringValue(data, 'from_ward_code') || this.options_.fromWardCode;
+        getStringValue(data, 'from_ward_code') ||
+        this.options_.fromWardCode ||
+        warehouseOrigin.fromWardCode;
 
       const service = await this.resolveService_(optionData, data, {
         toDistrictId,
@@ -408,6 +422,47 @@ class GhnFulfillmentProviderService extends AbstractFulfillmentProviderService {
 
   async getShipmentDocuments(_data: Record<string, unknown>) {
     return [];
+  }
+
+  /**
+   * Reads GHN "from" (warehouse) district/ward saved on the stock location in Admin
+   * (Settings → Shipping → warehouse address). Address metadata wins over location metadata.
+   */
+  protected resolveOriginFromWarehouse_(
+    context: CalculateShippingOptionPriceDTO['context']
+  ): { fromDistrictId?: number; fromWardCode?: string } {
+    const fromLocation = (context as { from_location?: FulfillmentFromLocation })
+      .from_location;
+
+    if (!fromLocation) {
+      this.logger_.info(
+        '[GHN][provider] calculatePrice: no context.from_location — cannot use warehouse GHN metadata (Medusa should pass the stock location for this shipping option).'
+      );
+      return {};
+    }
+
+    const locMeta = fromLocation.metadata ?? {};
+    const addrMeta = fromLocation.address?.metadata ?? {};
+    const merged: Record<string, unknown> = {
+      ...locMeta,
+      ...addrMeta,
+    };
+
+    const fromDistrictId = getNumberValue(merged, 'ghn_district_id');
+    const fromWardCode = getStringValue(merged, 'ghn_ward_code');
+
+    this.logger_.info(
+      `[GHN][provider] warehouse origin ${JSON.stringify({
+        stockLocationId: fromLocation.id ?? null,
+        fromDistrictId: fromDistrictId ?? null,
+        fromWardCode: fromWardCode ?? null,
+      })}`
+    );
+
+    return {
+      fromDistrictId: fromDistrictId ?? undefined,
+      fromWardCode: fromWardCode ?? undefined,
+    };
   }
 
   protected resolveOptions_(options: GhnFulfillmentOptions): ResolvedGhnFulfillmentOptions {
@@ -542,7 +597,7 @@ class GhnFulfillmentProviderService extends AbstractFulfillmentProviderService {
     if (!input.fromDistrictId) {
       throw new MedusaError(
         MedusaError.Types.INVALID_DATA,
-        'Missing GHN_FROM_DISTRICT_ID to resolve GHN service.'
+        'Missing GHN origin district. Set GHN_FROM_DISTRICT_ID / GHN_FROM_WARD_CODE, or add ghn_district_id and ghn_ward_code to the warehouse (stock location) address metadata in Admin.'
       );
     }
 

@@ -2,6 +2,7 @@
 
 import { Radio, RadioGroup } from "@headlessui/react"
 import { setShippingMethod } from "@lib/data/cart"
+import { listCartShippingMethods } from "@lib/data/fulfillment"
 import { convertToLocale } from "@lib/util/money"
 import { CheckCircleSolid, Loader } from "@medusajs/icons"
 import { HttpTypes } from "@medusajs/types"
@@ -10,12 +11,15 @@ import ErrorMessage from "@modules/checkout/components/error-message"
 import Divider from "@modules/common/components/divider"
 import MedusaRadio from "@modules/common/components/radio"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
-import { useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import {
   buildShippingMethodData,
+  filterVnStandardShippingMethods,
+  getDisplayAmountForShippingOption,
   splitShippingOptions,
   type ShippingOptionWithZone,
   useShippingPricing,
+  VN_DEFAULT_GHN_SHIPPING_TYPE_CODE,
 } from "./shipping-pricing"
 
 const PICKUP_OPTION_ON = "__PICKUP_ON"
@@ -24,27 +28,9 @@ const SHIPPING_TRACE_PREFIX = "[GHN][checkout/shipping]"
 
 type ShippingProps = {
   cart: HttpTypes.StoreCart
-  availableShippingMethods: HttpTypes.StoreCartShippingOption[] | null
-}
-
-const getOptionDisplayAmount = ({
-  option,
-  calculatedPricesMap,
-}: {
-  option: ShippingOptionWithZone
-  calculatedPricesMap: Record<string, number>
-}) => {
-  const calculatedAmount = calculatedPricesMap[option.id]
-
-  if (typeof calculatedAmount === "number") {
-    return calculatedAmount
-  }
-
-  if (option.price_type === "flat" && typeof option.amount === "number") {
-    return option.amount
-  }
-
-  return null
+  availableShippingMethods: HttpTypes.StoreCartShippingOption[]
+  /** True when SSR GET /store/shipping-options failed (null); client refetch may recover */
+  serverShippingOptionsFailed?: boolean
 }
 
 const formatAddress = (address?: HttpTypes.StoreCartAddress) => {
@@ -84,7 +70,69 @@ const formatAddress = (address?: HttpTypes.StoreCartAddress) => {
 const Shipping: React.FC<ShippingProps> = ({
   cart,
   availableShippingMethods,
+  serverShippingOptionsFailed = false,
 }) => {
+  /** Client refetch: options depend on shipping address / geo zones; SSR often runs before address exists. */
+  const [clientShippingOptions, setClientShippingOptions] = useState<
+    HttpTypes.StoreCartShippingOption[] | null
+  >(null)
+  const [isLoadingShippingOptions, setIsLoadingShippingOptions] = useState(
+    () => availableShippingMethods.length === 0 || serverShippingOptionsFailed
+  )
+  const [shippingOptionsFetchError, setShippingOptionsFetchError] = useState<
+    string | null
+  >(serverShippingOptionsFailed ? "Initial load failed; retrying…" : null)
+
+  const addressFingerprint = useMemo(() => {
+    const a = cart.shipping_address
+    if (!a) {
+      return "none"
+    }
+    return [
+      a.country_code ?? "",
+      a.address_1 ?? "",
+      a.postal_code ?? "",
+      JSON.stringify(a.metadata ?? {}),
+    ].join("|")
+  }, [cart.shipping_address])
+
+  useEffect(() => {
+    let cancelled = false
+
+    const load = async () => {
+      setIsLoadingShippingOptions(true)
+      setShippingOptionsFetchError(null)
+
+      const opts = await listCartShippingMethods(cart.id)
+
+      if (cancelled) {
+        return
+      }
+
+      if (opts === null) {
+        setClientShippingOptions([])
+        setShippingOptionsFetchError(
+          "Could not load shipping options. Check the browser Network tab for GET /store/shipping-options and verify x-publishable-api-key."
+        )
+      } else {
+        setClientShippingOptions(opts)
+        console.info(`${SHIPPING_TRACE_PREFIX} client refetch shipping options`, {
+          cartId: cart.id,
+          count: opts.length,
+          addressFingerprint,
+        })
+      }
+
+      setIsLoadingShippingOptions(false)
+    }
+
+    void load()
+
+    return () => {
+      cancelled = true
+    }
+  }, [cart.id, addressFingerprint])
+
   const [isLoading, setIsLoading] = useState(false)
   const [showPickupOptions, setShowPickupOptions] =
     useState<string>(PICKUP_OPTION_OFF)
@@ -98,10 +146,13 @@ const Shipping: React.FC<ShippingProps> = ({
   const searchParams = useSearchParams()
   const isOpen = searchParams.get("step") === "delivery"
 
-  const shippingOptions = useMemo(
-    () => (availableShippingMethods || []) as ShippingOptionWithZone[],
-    [availableShippingMethods]
-  )
+  const shippingOptions = useMemo(() => {
+    const merged =
+      clientShippingOptions !== null
+        ? clientShippingOptions
+        : availableShippingMethods
+    return merged as ShippingOptionWithZone[]
+  }, [availableShippingMethods, clientShippingOptions])
   const { shippingMethods, pickupMethods } = useMemo(
     () => splitShippingOptions(shippingOptions),
     [shippingOptions]
@@ -109,16 +160,27 @@ const Shipping: React.FC<ShippingProps> = ({
 
   const hasPickupOptions = pickupMethods.length > 0
 
+  const isVnShipToAddress =
+    cart.shipping_address?.country_code?.toLowerCase() === "vn" &&
+    showPickupOptions !== PICKUP_OPTION_ON
+
+  const shippingMethodsForDelivery = useMemo(
+    () => filterVnStandardShippingMethods(shippingMethods, isVnShipToAddress),
+    [shippingMethods, isVnShipToAddress]
+  )
+
   const {
     isLoadingPrices,
     calculatedPricesMap,
+    calculatePriceErrorsByOptionId,
     packageMetrics,
     shouldUseGhnQuotes,
     ghnDistrictId,
     ghnWardCode,
+    vnNeedsGhnAddressMetadata,
   } = useShippingPricing({
     cart,
-    shippingMethods,
+    shippingMethods: shippingMethodsForDelivery,
   })
 
   useEffect(() => {
@@ -135,69 +197,135 @@ const Shipping: React.FC<ShippingProps> = ({
     router.push(pathname + "?step=delivery", { scroll: false })
   }
 
-  const handleSetShippingMethod = async (
-    id: string,
-    source: "pickup" | "shipping"
-  ) => {
-    setError(null)
-    setIsLoading(true)
-    let previousMethodId: string | null = shippingMethodId
+  const handleSetShippingMethod = useCallback(
+    async (id: string, source: "pickup" | "shipping") => {
+      setError(null)
+      setIsLoading(true)
+      let previousMethodId: string | null = null
 
-    setShippingMethodId((previousId) => {
-      previousMethodId = previousId
-      return id
-    })
+      setShippingMethodId((previousId) => {
+        previousMethodId = previousId
+        return id
+      })
 
-    const shippingMethodData = buildShippingMethodData({
+      const shippingMethodData = buildShippingMethodData({
+        shouldUseGhnQuotes,
+        ghnDistrictId,
+        ghnWardCode,
+        packageMetrics,
+      })
+
+      console.info(`${SHIPPING_TRACE_PREFIX} setShippingMethod:start`, {
+        id,
+        source,
+        shouldUseGhnQuotes,
+        ghnDistrictId: Number.isNaN(ghnDistrictId) ? null : ghnDistrictId,
+        ghnWardCode: ghnWardCode || null,
+        shippingMethodData,
+      })
+
+      try {
+        await setShippingMethod({
+          cartId: cart.id,
+          shippingMethodId: id,
+          data: shippingMethodData as Record<string, unknown> | undefined,
+        })
+
+        console.info(`${SHIPPING_TRACE_PREFIX} setShippingMethod:success`, {
+          id,
+          source,
+        })
+        setShowPickupOptions(
+          source === "pickup" ? PICKUP_OPTION_ON : PICKUP_OPTION_OFF
+        )
+        // Re-fetch checkout server data so cart shipping totals stay in sync
+        // when moving to the next step.
+        router.refresh()
+      } catch (err) {
+        console.error(`${SHIPPING_TRACE_PREFIX} setShippingMethod:error`, {
+          id,
+          source,
+          error: err instanceof Error ? err.message : String(err),
+        })
+        setShippingMethodId(previousMethodId)
+        setError(err instanceof Error ? err.message : "An error occurred")
+      }
+
+      setIsLoading(false)
+    },
+    [
+      cart.id,
       shouldUseGhnQuotes,
       ghnDistrictId,
       ghnWardCode,
       packageMetrics,
-    })
+    ]
+  )
 
-    console.info(`${SHIPPING_TRACE_PREFIX} setShippingMethod:start`, {
-      id,
-      source,
-      shouldUseGhnQuotes,
-      ghnDistrictId: Number.isNaN(ghnDistrictId) ? null : ghnDistrictId,
-      ghnWardCode: ghnWardCode || null,
-      shippingMethodData,
-    })
-
-    try {
-      await setShippingMethod({
-        cartId: cart.id,
-        shippingMethodId: id,
-        data: shippingMethodData as Record<string, unknown> | undefined,
-      })
-
-      console.info(`${SHIPPING_TRACE_PREFIX} setShippingMethod:success`, {
-        id,
-        source,
-      })
-      setShowPickupOptions(
-        source === "pickup" ? PICKUP_OPTION_ON : PICKUP_OPTION_OFF
-      )
-    } catch (err) {
-      console.error(`${SHIPPING_TRACE_PREFIX} setShippingMethod:error`, {
-        id,
-        source,
-        error: err instanceof Error ? err.message : String(err),
-      })
-      setShippingMethodId(previousMethodId)
-      setError(err instanceof Error ? err.message : "An error occurred")
+  /** Vietnam + ship: select GHN Standard once quotes allow (replaces other tiers left on the cart). */
+  useEffect(() => {
+    if (!isVnShipToAddress) {
+      return
     }
 
-    setIsLoading(false)
-  }
+    if (isLoadingShippingOptions || shippingOptionsFetchError) {
+      return
+    }
+
+    if (isLoading) {
+      return
+    }
+
+    const standard = shippingMethodsForDelivery.find(
+      (option) =>
+        option.type?.code === VN_DEFAULT_GHN_SHIPPING_TYPE_CODE ||
+        option.name === "GHN Standard"
+    )
+
+    if (!standard) {
+      return
+    }
+
+    const isStandardDisabled =
+      standard.price_type === "calculated" &&
+      !isLoadingPrices &&
+      getDisplayAmountForShippingOption(standard, calculatedPricesMap) === null
+
+    if (isStandardDisabled) {
+      return
+    }
+
+    if (shippingMethodId === standard.id) {
+      return
+    }
+
+    void handleSetShippingMethod(standard.id, "shipping")
+  }, [
+    isVnShipToAddress,
+    isLoadingShippingOptions,
+    shippingOptionsFetchError,
+    isLoading,
+    shippingMethodsForDelivery,
+    isLoadingPrices,
+    calculatedPricesMap,
+    shippingMethodId,
+    handleSetShippingMethod,
+  ])
 
   const selectedShippingOption =
-    cart.shipping_methods?.length && availableShippingMethods
-      ? availableShippingMethods?.find(
+    shippingOptions.length
+      ? shippingOptions.find(
           (option) =>
-            option.id === cart.shipping_methods?.[0].shipping_option_id
+            option.id ===
+            (shippingMethodId ?? cart.shipping_methods?.[0]?.shipping_option_id)
         )
       : null
+
+  const selectedShippingAmount =
+    cart.shipping_methods?.at(-1)?.total ??
+    (selectedShippingOption
+      ? getDisplayAmountForShippingOption(selectedShippingOption, calculatedPricesMap)
+      : null)
 
   return (
     <div className="border-b border-gray-200 py-6">
@@ -227,7 +355,7 @@ const Shipping: React.FC<ShippingProps> = ({
             </Text>
             <Text className="txt-medium-plus text-ui-fg-base">
               {convertToLocale({
-                amount: cart.shipping_methods?.at(-1)?.total || 0,
+                amount: selectedShippingAmount ?? 0,
                 currency_code: cart.currency_code,
               })}
             </Text>
@@ -236,6 +364,40 @@ const Shipping: React.FC<ShippingProps> = ({
       ) : (
         <div>
           <div className="grid gap-y-6">
+            {isLoadingShippingOptions && (
+              <div className="flex items-center gap-2 text-ui-fg-subtle">
+                <Loader />
+                <Text size="small">Loading delivery options…</Text>
+              </div>
+            )}
+            {shippingOptionsFetchError && (
+              <ErrorMessage error={shippingOptionsFetchError} />
+            )}
+            {!isLoadingShippingOptions &&
+              !shippingOptionsFetchError &&
+              shippingMethods.length === 0 &&
+              pickupMethods.length === 0 && (
+                <Text size="small" className="text-ui-fg-subtle">
+                  {!cart.shipping_address ? (
+                    <>
+                      Save a shipping address in the step above. Medusa only
+                      returns options after the cart has a shipping address and
+                      it matches a fulfillment geo zone.
+                    </>
+                  ) : (
+                    <>
+                      No shipping methods match this cart yet. Confirm the
+                      address, then check Admin: stock location ↔ sales channel,
+                      shipping profile on products, and fulfillment sets / zones
+                      for region{" "}
+                      <span className="font-mono">
+                        {cart.region?.name ?? cart.region_id}
+                      </span>
+                      .
+                    </>
+                  )}
+                </Text>
+              )}
             <RadioGroup value={shippingMethodId} data-testid="delivery-options-radio-group">
               <div className="grid grid-cols-1 gap-4">
                 {hasPickupOptions && (
@@ -318,15 +480,20 @@ const Shipping: React.FC<ShippingProps> = ({
                     hidden: showPickupOptions === PICKUP_OPTION_ON,
                   })}
                 >
-                  {shippingMethods.map((option) => {
-                    const displayAmount = getOptionDisplayAmount({
+                  {shippingMethodsForDelivery.map((option) => {
+                    const displayAmount = getDisplayAmountForShippingOption(
                       option,
-                      calculatedPricesMap,
-                    })
+                      calculatedPricesMap
+                    )
                     const isDisabled =
                       option.price_type === "calculated" &&
                       !isLoadingPrices &&
-                      typeof calculatedPricesMap[option.id] !== "number"
+                      displayAmount === null
+
+                    const quoteFailureMessage = vnNeedsGhnAddressMetadata
+                      ? "For Vietnam, choose province, district, and ward above so GHN can quote this option."
+                      : calculatePriceErrorsByOptionId[option.id] ||
+                        "Shipping quote unavailable for this option."
 
                     return (
                       <div key={option.id} className="flex flex-col gap-y-2">
@@ -388,7 +555,7 @@ const Shipping: React.FC<ShippingProps> = ({
                         </Radio>
                         {isDisabled && (
                           <Text size="small" className="text-ui-fg-subtle">
-                            Shipping quote unavailable for this option
+                            {quoteFailureMessage}
                           </Text>
                         )}
                       </div>

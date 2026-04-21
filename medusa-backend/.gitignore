@@ -24,3 +24,6 @@ build
 !.yarn/versions
 
 .medusa
+
+# Generated OpenAPI (run: pnpm run openapi:gen)
+openapi/*.oas.json
