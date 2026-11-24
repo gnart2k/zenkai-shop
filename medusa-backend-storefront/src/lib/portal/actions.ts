@@ -101,7 +101,7 @@ export async function login(f: FormData) {
   const opts = {
     httpOnly: true,
     sameSite: "lax" as const,
-    secure: process.env.NODE_ENV === "production",
+    secure: process.env.NODE_ENV === "production" && process.env.COOKIE_SECURE !== "false",
     // Matches the backend token lifetime (JWT_EXPIRES_IN, 7d); the middleware keeps it fresh while in use.
     maxAge: 60 * 60 * 24 * 7,
   }

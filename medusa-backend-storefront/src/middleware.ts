@@ -325,7 +325,7 @@ function previewMiddleware(request: NextRequest): NextResponse {
     res.cookies.set("_sf_preview", token, {
       httpOnly: true,
       sameSite: "lax",
-      secure: process.env.NODE_ENV === "production",
+      secure: process.env.NODE_ENV === "production" && process.env.COOKIE_SECURE !== "false",
       maxAge: 60 * 60,
       path: "/preview",
     })
@@ -446,7 +446,7 @@ export async function middleware(request: NextRequest) {
         response.cookies.set(name, value, {
           httpOnly: true,
           sameSite: "lax",
-          secure: process.env.NODE_ENV === "production",
+          secure: process.env.NODE_ENV === "production" && process.env.COOKIE_SECURE !== "false",
           maxAge: PORTAL_COOKIE_MAX_AGE,
           path: "/",
         })
