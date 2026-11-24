@@ -35,4 +35,5 @@ Thumbs.db
 
 # Medusa
 .cache/
-data/
+/data/
+# (src/lib/data is source code, not data)
