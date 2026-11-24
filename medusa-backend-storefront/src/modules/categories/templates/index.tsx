@@ -1,9 +1,8 @@
 import { notFound } from "next/navigation"
 import { Suspense } from "react"
 
-import InteractiveLink from "@modules/common/components/interactive-link"
 import SkeletonProductGrid from "@modules/skeletons/templates/skeleton-product-grid"
-import RefinementList from "@modules/store/components/refinement-list"
+import ListingShell from "@modules/store/templates/listing-shell"
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
 import PaginatedProducts from "@modules/store/templates/paginated-products"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
@@ -37,46 +36,47 @@ export default function CategoryTemplate({
   getParents(category)
 
   return (
-    <div
-      className="flex flex-col small:flex-row small:items-start py-6 content-container"
-      data-testid="category-container"
-    >
-      <RefinementList sortBy={sort} data-testid="sort-by-container" />
-      <div className="w-full">
-        <div className="flex flex-row mb-8 text-2xl-semi gap-4">
-          {parents &&
-            parents.map((parent) => (
-              <span key={parent.id} className="text-ui-fg-subtle">
+    <div className="content-container py-8 small:py-12">
+      <div className="mb-8">
+        {parents.length > 0 && (
+          <div className="mb-2 flex items-center gap-2 text-xs text-muted-foreground">
+            {parents.map((parent) => (
+              <span key={parent.id} className="flex items-center gap-2">
                 <LocalizedClientLink
-                  className="mr-4 hover:text-black"
                   href={`/categories/${parent.handle}`}
-                  data-testid="sort-by-link"
+                  className="transition-colors hover:text-foreground"
                 >
                   {parent.name}
                 </LocalizedClientLink>
-                /
+                <span>/</span>
               </span>
             ))}
-          <h1 data-testid="category-page-title">{category.name}</h1>
-        </div>
+          </div>
+        )}
+        <h1 className="font-serif text-3xl font-light tracking-tight text-foreground small:text-4xl">
+          {category.name}
+        </h1>
         {category.description && (
-          <div className="mb-8 text-base-regular">
-            <p>{category.description}</p>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {category.description}
+          </p>
+        )}
+        {category.category_children && category.category_children.length > 0 && (
+          <div className="mt-4 flex flex-wrap gap-2">
+            {category.category_children.map((c) => (
+              <LocalizedClientLink
+                key={c.id}
+                href={`/categories/${c.handle}`}
+                className="rounded-full border border-border px-4 py-1.5 text-xs text-muted-foreground transition-colors hover:border-foreground/30 hover:text-foreground"
+              >
+                {c.name}
+              </LocalizedClientLink>
+            ))}
           </div>
         )}
-        {category.category_children && (
-          <div className="mb-8 text-base-large">
-            <ul className="grid grid-cols-1 gap-2">
-              {category.category_children?.map((c) => (
-                <li key={c.id}>
-                  <InteractiveLink href={`/categories/${c.handle}`}>
-                    {c.name}
-                  </InteractiveLink>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
+      </div>
+
+      <ListingShell sortBy={sort}>
         <Suspense
           fallback={
             <SkeletonProductGrid
@@ -91,7 +91,7 @@ export default function CategoryTemplate({
             countryCode={countryCode}
           />
         </Suspense>
-      </div>
+      </ListingShell>
     </div>
   )
 }

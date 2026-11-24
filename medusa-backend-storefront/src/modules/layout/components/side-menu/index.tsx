@@ -1,10 +1,10 @@
 "use client"
 
 import { Popover, PopoverPanel, Transition } from "@headlessui/react"
-import { ArrowRightMini, XMark } from "@medusajs/icons"
-import { Text, clx, useToggleState } from "@medusajs/ui"
+import { X } from "lucide-react"
 import { Fragment } from "react"
 import { useTranslations } from "next-intl"
+import { useToggleState } from "@medusajs/ui"
 
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import CountrySelect from "../country-select"
@@ -18,105 +18,141 @@ const SIDE_LINKS = [
   { labelKey: "cart" as const, href: "/cart" },
 ]
 
+export type SideMenuCategory = { name: string; handle: string }
+
 type SideMenuProps = {
   regions: HttpTypes.StoreRegion[] | null
+  scrolled?: boolean
+  storeName: string
+  categories?: SideMenuCategory[]
 }
 
-const SideMenu = ({ regions }: SideMenuProps) => {
+const SideMenu = ({ regions, scrolled, storeName, categories = [] }: SideMenuProps) => {
   const t = useTranslations("SideMenu")
-  const tNav = useTranslations("Nav")
+  const tl = useTranslations("ShopLayout")
+  const tn = useTranslations("Nav")
   const countryToggleState = useToggleState()
 
+  const iconClass = scrolled
+    ? "text-muted-foreground hover:text-foreground"
+    : "text-white/70 hover:text-white"
+
   return (
-    <div className="h-full">
-      <div className="flex items-center h-full">
-        <Popover className="h-full flex">
-          {({ open, close }) => (
-            <>
-              <div className="relative flex h-full">
-                <Popover.Button
-                  data-testid="nav-menu-button"
-                  className="relative h-full flex items-center transition-all ease-out duration-200 focus:outline-none hover:text-ui-fg-base"
+    <Popover className="h-full">
+      {({ open, close }) => (
+        <>
+          <Popover.Button
+            data-testid="nav-menu-button"
+            className={`transition-colors duration-300 ${iconClass}`}
+            aria-label={tn("menu")}
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <line x1="3" y1="12" x2="21" y2="12" />
+              <line x1="3" y1="18" x2="21" y2="18" />
+            </svg>
+          </Popover.Button>
+
+          <Transition
+            show={open}
+            as={Fragment}
+            enter="transition duration-200 ease-out"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="transition duration-150 ease-in"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <div className="fixed inset-0 z-40 bg-black/40" onClick={close} />
+          </Transition>
+
+          <Transition
+            show={open}
+            as={Fragment}
+            enter="transition duration-300 ease-out"
+            enterFrom="-translate-x-full"
+            enterTo="translate-x-0"
+            leave="transition duration-200 ease-in"
+            leaveFrom="translate-x-0"
+            leaveTo="-translate-x-full"
+          >
+            <PopoverPanel
+              static
+              className="fixed inset-y-0 left-0 z-50 flex w-72 flex-col bg-white p-8 shadow-lg"
+            >
+              <div className="flex justify-end">
+                <button
+                  onClick={close}
+                  className="text-muted-foreground hover:text-foreground"
+                  aria-label={tl("closeMenu")}
                 >
-                  {tNav("menu")}
-                </Popover.Button>
+                  <X className="size-5" />
+                </button>
               </div>
 
-              {open && (
-                <div
-                  className="fixed inset-0 z-[50] bg-black/0 pointer-events-auto"
-                  onClick={close}
-                  data-testid="side-menu-backdrop"
-                />
-              )}
-
-              <Transition
-                show={open}
-                as={Fragment}
-                enter="transition ease-out duration-150"
-                enterFrom="opacity-0"
-                enterTo="opacity-100 backdrop-blur-2xl"
-                leave="transition ease-in duration-150"
-                leaveFrom="opacity-100 backdrop-blur-2xl"
-                leaveTo="opacity-0"
-              >
-                <PopoverPanel className="flex flex-col absolute w-full pr-4 sm:pr-0 sm:w-1/3 2xl:w-1/4 sm:min-w-min h-[calc(100vh-1rem)] z-[51] inset-x-0 text-sm text-ui-fg-on-color m-2 backdrop-blur-2xl">
-                  <div
-                    data-testid="nav-menu-popup"
-                    className="flex flex-col h-full bg-[rgba(3,7,18,0.5)] rounded-rounded justify-between p-6"
+              <nav className="mt-12 flex flex-1 flex-col gap-8">
+                {SIDE_LINKS.map(({ labelKey, href }) => (
+                  <LocalizedClientLink
+                    key={labelKey}
+                    href={href}
+                    className="font-serif text-2xl font-light text-foreground transition-colors hover:text-foreground/60"
+                    onClick={close}
+                    data-testid={`${labelKey}-link`}
                   >
-                    <div className="flex justify-end" id="xmark">
-                      <button data-testid="close-menu-button" onClick={close}>
-                        <XMark />
-                      </button>
-                    </div>
-                    <ul className="flex flex-col gap-6 items-start justify-start">
-                      {SIDE_LINKS.map(({ labelKey, href }) => (
-                        <li key={labelKey}>
-                          <LocalizedClientLink
-                            href={href}
-                            className="text-3xl leading-10 hover:text-ui-fg-disabled"
-                            onClick={close}
-                            data-testid={`${labelKey}-link`}
-                          >
-                            {t(labelKey)}
-                          </LocalizedClientLink>
-                        </li>
-                      ))}
-                    </ul>
-                    <div className="flex flex-col gap-y-6">
-                      <UiLocaleSwitcher />
-                      <div
-                        className="flex justify-between"
-                        onMouseEnter={countryToggleState.open}
-                        onMouseLeave={countryToggleState.close}
+                    {t(labelKey)}
+                  </LocalizedClientLink>
+                ))}
+
+                {categories.length > 0 && (
+                  <div className="flex flex-col gap-3 border-t border-border/40 pt-6">
+                    <p className="text-xs font-medium text-muted-foreground">
+                      {t("categories")}
+                    </p>
+                    {categories.map((c) => (
+                      <LocalizedClientLink
+                        key={c.handle}
+                        href={`/categories/${c.handle}`}
+                        className="font-serif text-lg font-light text-foreground transition-colors hover:text-foreground/60"
+                        onClick={close}
+                        data-testid={`category-${c.handle}-link`}
                       >
-                        {regions && (
-                          <CountrySelect
-                            toggleState={countryToggleState}
-                            regions={regions}
-                          />
-                        )}
-                        <ArrowRightMini
-                          className={clx(
-                            "transition-transform duration-150",
-                            countryToggleState.state ? "-rotate-90" : ""
-                          )}
-                        />
-                      </div>
-                      <Text className="flex justify-between txt-compact-small">
-                        © {new Date().getFullYear()} Medusa Store. All rights
-                        reserved.
-                      </Text>
-                    </div>
+                        {c.name}
+                      </LocalizedClientLink>
+                    ))}
                   </div>
-                </PopoverPanel>
-              </Transition>
-            </>
-          )}
-        </Popover>
-      </div>
-    </div>
+                )}
+              </nav>
+
+              <div className="space-y-6 border-t border-border/40 pt-6">
+                <UiLocaleSwitcher />
+                {regions && (
+                  <CountrySelect
+                    toggleState={countryToggleState}
+                    regions={regions}
+                  />
+                )}
+                <p className="text-xs text-muted-foreground">
+                  {tl("copyright", {
+                    year: new Date().getFullYear(),
+                    name: storeName,
+                  })}
+                </p>
+              </div>
+            </PopoverPanel>
+          </Transition>
+        </>
+      )}
+    </Popover>
   )
 }
 

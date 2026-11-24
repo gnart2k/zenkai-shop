@@ -1,5 +1,6 @@
 import { Modules } from '@medusajs/framework/utils';
 import { createProductsWorkflow } from '@medusajs/medusa/core-flows';
+import { fillMissingSkus, variantsFromProducts } from '../../lib/variant-sku';
 
 type ProductLike = {
   id: string;
@@ -40,6 +41,10 @@ async function applyDigitalVariantPolicy(
 
 createProductsWorkflow.hooks.productsCreated(
   async ({ products, additional_data }, { container }) => {
+    // Every new product gets SKUs on its variants, whether or not is_physical was sent.
+    const { titles, variants } = variantsFromProducts((products ?? []) as any[]);
+    await fillMissingSkus(container, variants, titles);
+
     const isPhysical = readIsPhysical(additional_data as Record<string, unknown> | undefined);
     if (isPhysical === undefined) {
       return;

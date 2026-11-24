@@ -20,10 +20,13 @@ import { Fragment, useEffect, useRef, useState } from "react"
 
 const CartDropdown = ({
   cart: cartState,
+  scrolled,
 }: {
   cart?: HttpTypes.StoreCart | null
+  scrolled?: boolean
 }) => {
   const t = useTranslations("Nav")
+  const tc = useTranslations("ShopCart")
   const [activeTimer, setActiveTimer] = useState<NodeJS.Timer | undefined>(
     undefined
   )
@@ -56,7 +59,6 @@ const CartDropdown = ({
     open()
   }
 
-  // Clean up the timer when the component unmounts
   useEffect(() => {
     return () => {
       if (activeTimer) {
@@ -67,13 +69,19 @@ const CartDropdown = ({
 
   const pathname = usePathname()
 
-  // open cart dropdown when modifying the cart items, but only if we're not on the cart page
   useEffect(() => {
     if (itemRef.current !== totalItems && !pathname.includes("/cart")) {
       timedOpen()
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [totalItems, itemRef.current])
+
+  const linkClass = scrolled
+    ? "text-muted-foreground hover:text-foreground"
+    : "text-white/70 hover:text-white"
+
+  const badgeClass = scrolled
+    ? "bg-primary text-primary-foreground"
+    : "bg-white text-black"
 
   return (
     <div
@@ -84,10 +92,34 @@ const CartDropdown = ({
       <Popover className="relative h-full">
         <PopoverButton className="h-full">
           <LocalizedClientLink
-            className="hover:text-ui-fg-base"
             href="/cart"
+            className={`relative flex items-center transition-colors duration-300 ${linkClass}`}
             data-testid="nav-cart-link"
-          >{`${t("cart")} (${totalItems})`}</LocalizedClientLink>
+            aria-label={t("cart")}
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <circle cx="8" cy="21" r="1" />
+              <circle cx="21" cy="21" r="1" />
+              <path d="M3 3h2l.4 2M7 13h10l4-8H5.4" />
+            </svg>
+            {totalItems > 0 && (
+              <span
+                className={`absolute -right-2 -top-2 flex size-4 items-center justify-center rounded-full text-[10px] font-medium transition-colors duration-300 ${badgeClass}`}
+              >
+                {totalItems}
+              </span>
+            )}
+          </LocalizedClientLink>
         </PopoverButton>
         <Transition
           show={cartDropdownOpen}
@@ -153,7 +185,7 @@ const CartDropdown = ({
                                   data-testid="cart-item-quantity"
                                   data-value={item.quantity}
                                 >
-                                  Quantity: {item.quantity}
+                                  {tc("dropdown.quantity", { count: item.quantity })}
                                 </span>
                               </div>
                               <div className="flex justify-end">
@@ -170,7 +202,7 @@ const CartDropdown = ({
                             className="mt-1"
                             data-testid="cart-item-remove-button"
                           >
-                            Remove
+                            {tc("remove")}
                           </DeleteButton>
                         </div>
                       </div>
@@ -179,8 +211,10 @@ const CartDropdown = ({
                 <div className="p-4 flex flex-col gap-y-4 text-small-regular">
                   <div className="flex items-center justify-between">
                     <span className="text-ui-fg-base font-semibold">
-                      Subtotal{" "}
-                      <span className="font-normal">(excl. taxes)</span>
+                      {tc("dropdown.subtotal")}{" "}
+                      <span className="font-normal">
+                        {tc("dropdown.exclTaxes")}
+                      </span>
                     </span>
                     <span
                       className="text-large-semi"
@@ -199,7 +233,7 @@ const CartDropdown = ({
                       size="large"
                       data-testid="go-to-cart-button"
                     >
-                      Go to cart
+                      {tc("dropdown.goToCart")}
                     </Button>
                   </LocalizedClientLink>
                 </div>
@@ -210,12 +244,16 @@ const CartDropdown = ({
                   <div className="bg-gray-900 text-small-regular flex items-center justify-center w-6 h-6 rounded-full text-white">
                     <span>0</span>
                   </div>
-                  <span>Your shopping bag is empty.</span>
+                  <span>{tc("dropdown.empty")}</span>
                   <div>
                     <LocalizedClientLink href="/store">
                       <>
-                        <span className="sr-only">Go to all products page</span>
-                        <Button onClick={close}>Explore products</Button>
+                        <span className="sr-only">
+                          {tc("dropdown.allProducts")}
+                        </span>
+                        <Button onClick={close}>
+                          {tc("dropdown.explore")}
+                        </Button>
                       </>
                     </LocalizedClientLink>
                   </div>

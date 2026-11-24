@@ -123,7 +123,7 @@ async function getCountryCode(
   }
 }
 
-export async function middleware(request: NextRequest) {
+async function baseMiddleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname
 
   if (
@@ -136,6 +136,23 @@ export async function middleware(request: NextRequest) {
 
   if (pathname.includes(".") && !pathname.startsWith("/api")) {
     return NextResponse.next()
+  }
+
+  // Draft preview link from the portal: remember the signed token in a cookie, then reload
+  // the same URL without it. The backend verifies the token on every request.
+  const previewToken = request.nextUrl.searchParams.get("_preview")
+  if (previewToken && previewToken.length < 2000) {
+    const clean = request.nextUrl.clone()
+    clean.searchParams.delete("_preview")
+    const res = NextResponse.redirect(clean)
+    res.cookies.set("_sf_preview", previewToken, {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 60 * 60,
+      path: "/",
+    })
+    return res
   }
 
   let cacheIdCookie = request.cookies.get("_medusa_cache_id")
@@ -257,6 +274,67 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/((?!api|_next/static|_next/image|favicon.ico|images|assets|png|svg|jpg|jpeg|gif|webp).*)",
+    "/((?!api|media/|_next/static|_next/image|favicon.ico|images|assets|png|svg|jpg|jpeg|gif|webp).*)",
   ],
+}
+
+/** Seconds left on a JWT (edge-safe decode), or null if it is not a readable JWT. */
+function secondsLeft(token: string): number | null {
+  try {
+    const payload = token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/")
+    const { exp } = JSON.parse(atob(payload))
+    return typeof exp === "number" ? exp - Math.floor(Date.now() / 1000) : null
+  } catch {
+    return null
+  }
+}
+
+const REFRESH_WHEN_LEFT = 3 * 24 * 3600
+const PORTAL_COOKIE_MAX_AGE = 7 * 24 * 3600
+
+/**
+ * Sliding portal session: when a signed-in portal user opens a portal page with less than 3
+ * days left on their token, ask the backend for a fresh one (POST /auth/token/refresh) and
+ * replace the cookie. Active users never get logged out; idle ones expire after 7 days.
+ * Failures are ignored: the old token keeps working until it really expires.
+ */
+async function refreshedPortalToken(request: NextRequest): Promise<string | null> {
+  if (!/^\/(en|vi)\/[a-z]{2}\/portal(\/|$)/.test(request.nextUrl.pathname)) return null
+  if (request.method !== "GET") return null
+  const token = request.cookies.get("_portal_jwt")?.value
+  if (!token) return null
+  const left = secondsLeft(token)
+  if (left === null || left <= 0 || left > REFRESH_WHEN_LEFT) return null
+  try {
+    const res = await fetch(`${BACKEND_URL}/auth/token/refresh`, {
+      method: "POST",
+      headers: { authorization: `Bearer ${token}` },
+      cache: "no-store",
+    })
+    if (!res.ok) return null
+    const { token: fresh } = await res.json()
+    return typeof fresh === "string" ? fresh : null
+  } catch {
+    return null
+  }
+}
+
+export async function middleware(request: NextRequest) {
+  const fresh = await refreshedPortalToken(request)
+  const response = await baseMiddleware(request)
+  if (fresh) {
+    for (const name of ["_portal_jwt", "_portal_actor"]) {
+      const value = name === "_portal_jwt" ? fresh : request.cookies.get(name)?.value
+      if (value) {
+        response.cookies.set(name, value, {
+          httpOnly: true,
+          sameSite: "lax",
+          secure: process.env.NODE_ENV === "production",
+          maxAge: PORTAL_COOKIE_MAX_AGE,
+          path: "/",
+        })
+      }
+    }
+  }
+  return response
 }

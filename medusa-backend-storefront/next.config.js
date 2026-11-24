@@ -16,6 +16,10 @@ const S3_PATHNAME = process.env.MEDUSA_CLOUD_S3_PATHNAME
  */
 const nextConfig = {
   reactStrictMode: true,
+  experimental: {
+    // Portal uploads (deposit proofs, product and storefront images; up to 5 MB each) go through a server action.
+    serverActions: { bodySizeLimit: "25mb" },
+  },
   logging: {
     fetches: {
       fullUrl: true,
@@ -26,6 +30,12 @@ const nextConfig = {
   },
   typescript: {
     ignoreBuildErrors: true,
+  },
+  // Product/reel media (TikTok import) is stored as relative `/media/<file id>` URLs and
+  // streamed by the Medusa backend from the private S3 bucket.
+  async rewrites() {
+    const backend = (process.env.MEDUSA_BACKEND_URL || "http://localhost:4300").replace(/\/$/, "")
+    return [{ source: "/media/:id", destination: `${backend}/media/:id` }]
   },
   // Next compares Origin *hostname* only (no port). Do not use "host:port" strings.
   allowedDevOrigins: ["1.54.180.73", "192.168.1.237"],

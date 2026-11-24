@@ -23,11 +23,25 @@ module.exports = defineConfig({
       authCors: process.env.AUTH_CORS!,
       jwtSecret: process.env.JWT_SECRET || 'supersecret',
       cookieSecret: process.env.COOKIE_SECRET || 'supersecret',
+      // Auth tokens (portal admins and collaborators, storefront customers) last 7 days instead
+      // of Medusa's 1-day default. The portal refreshes them while in use (see the storefront
+      // middleware), so the real limit is 7 days of inactivity. Override with JWT_EXPIRES_IN.
+      jwtExpiresIn: process.env.JWT_EXPIRES_IN || '7d',
+      // Portal actors sign in at /auth/{actor}/emailpass, separate from Medusa admins.
+      authMethodsPerActor: {
+        user: ['emailpass'],
+        customer: ['emailpass'],
+        collaborator: ['emailpass'],
+        portal_admin: ['emailpass'],
+      },
     },
   },
   modules: [
     {
       resolve: './src/modules/product-media',
+    },
+    {
+      resolve: './src/modules/portal',
     },
     {
       resolve: "@medusajs/medusa/payment",

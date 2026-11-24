@@ -7,6 +7,7 @@ import ProductTabs from "@modules/products/components/product-tabs"
 import RelatedProducts from "@modules/products/components/related-products"
 import ProductInfo from "@modules/products/templates/product-info"
 import SkeletonRelatedProducts from "@modules/skeletons/templates/skeleton-related-products"
+import { getStorefront } from "@lib/data/storefront-config"
 import { notFound } from "next/navigation"
 import { HttpTypes } from "@medusajs/types"
 
@@ -19,46 +20,55 @@ type ProductTemplateProps = {
   images: HttpTypes.StoreProductImage[]
 }
 
-const ProductTemplate: React.FC<ProductTemplateProps> = ({
+const ProductTemplate = async ({
   product,
   region,
   countryCode,
   images,
-}) => {
+}: ProductTemplateProps) => {
   if (!product || !product.id) {
     return notFound()
   }
 
+  const { layout } = await getStorefront()
+  const videoUrl =
+    typeof product.metadata?.video_url === "string" ? product.metadata.video_url : null
+
+  const details = (
+    <>
+      <ProductInfo product={product} />
+      <ProductTabs product={product} />
+      <ProductOnboardingCta />
+      <Suspense
+        fallback={<ProductActions disabled={true} product={product} region={region} />}
+      >
+        <ProductActionsWrapper id={product.id} region={region} />
+      </Suspense>
+    </>
+  )
+
   return (
     <>
+      {layout.product === "stacked" ? (
+        // Stacked theme layout: a wide gallery on top, the details in a centered column below.
+        <div className="content-container py-8 small:py-12" data-testid="product-container" data-product-layout="stacked">
+          <div className="mx-auto max-w-3xl">
+            <ImageGallery images={images} videoUrl={videoUrl} />
+          </div>
+          <div className="mx-auto mt-10 flex max-w-2xl flex-col gap-8">{details}</div>
+        </div>
+      ) : (
+        <div className="content-container py-8 small:py-12" data-testid="product-container" data-product-layout="split">
+          <div className="grid gap-8 small:grid-cols-2 small:gap-12">
+            <div className="small:sticky small:top-24 small:self-start">
+              <ImageGallery images={images} videoUrl={videoUrl} />
+            </div>
+            <div className="flex flex-col gap-8">{details}</div>
+          </div>
+        </div>
+      )}
       <div
-        className="content-container  flex flex-col small:flex-row small:items-start py-6 relative"
-        data-testid="product-container"
-      >
-        <div className="flex flex-col small:sticky small:top-48 small:py-0 small:max-w-[300px] w-full py-8 gap-y-6">
-          <ProductInfo product={product} />
-          <ProductTabs product={product} />
-        </div>
-        <div className="block w-full relative">
-          <ImageGallery images={images} />
-        </div>
-        <div className="flex flex-col small:sticky small:top-48 small:py-0 small:max-w-[300px] w-full py-8 gap-y-12">
-          <ProductOnboardingCta />
-          <Suspense
-            fallback={
-              <ProductActions
-                disabled={true}
-                product={product}
-                region={region}
-              />
-            }
-          >
-            <ProductActionsWrapper id={product.id} region={region} />
-          </Suspense>
-        </div>
-      </div>
-      <div
-        className="content-container my-16 small:my-32"
+        className="content-container pb-16 small:pb-24"
         data-testid="related-products-container"
       >
         <Suspense fallback={<SkeletonRelatedProducts />}>

@@ -1,7 +1,8 @@
+import { useTranslations } from "next-intl"
 import { Suspense } from "react"
 
 import SkeletonProductGrid from "@modules/skeletons/templates/skeleton-product-grid"
-import RefinementList from "@modules/store/components/refinement-list"
+import ListingShell from "@modules/store/templates/listing-shell"
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
 
 import PaginatedProducts from "./paginated-products"
@@ -15,19 +16,22 @@ const StoreTemplate = ({
   page?: string
   countryCode: string
 }) => {
+  const t = useTranslations("ShopStore")
   const pageNumber = page ? parseInt(page) : 1
   const sort = sortBy || "created_at"
 
   return (
-    <div
-      className="flex flex-col small:flex-row small:items-start py-6 content-container"
-      data-testid="category-container"
-    >
-      <RefinementList sortBy={sort} />
-      <div className="w-full">
-        <div className="mb-8 text-2xl-semi">
-          <h1 data-testid="store-page-title">All products</h1>
-        </div>
+    <div className="content-container py-8 small:py-12">
+      <div className="mb-8 flex flex-col gap-2">
+        <h1 className="font-serif text-3xl font-light tracking-tight text-foreground small:text-4xl">
+          {t("heading")}
+        </h1>
+        <p className="text-sm text-muted-foreground">
+          {t("subheading")}
+        </p>
+      </div>
+
+      <ListingShell sortBy={sort}>
         <Suspense fallback={<SkeletonProductGrid />}>
           <PaginatedProducts
             sortBy={sort}
@@ -35,7 +39,7 @@ const StoreTemplate = ({
             countryCode={countryCode}
           />
         </Suspense>
-      </div>
+      </ListingShell>
     </div>
   )
 }

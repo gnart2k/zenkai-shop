@@ -1,159 +1,117 @@
 import { listCategories } from "@lib/data/categories"
 import { listCollections } from "@lib/data/collections"
-import { Text, clx } from "@medusajs/ui"
-import { getTranslations } from "next-intl/server"
+import { getStorefront } from "@lib/data/storefront-config"
+import { pickText } from "@lib/storefront/templates"
+import { getLocale, getTranslations } from "next-intl/server"
 
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
-import MedusaCTA from "@modules/layout/components/medusa-cta"
+import SmartLink from "@modules/storefront/smart-link"
 
-export default async function Footer() {
+const linkCls = "text-sm text-muted-foreground transition-colors hover:text-foreground"
+
+export default async function Footer({ countryCode }: { countryCode: string }) {
   const t = await getTranslations("Footer")
   const tNav = await getTranslations("Nav")
+  const tl = await getTranslations("ShopLayout")
+  const locale = await getLocale()
+  const { layout, footer, branding } = await getStorefront()
 
-  const { collections } = await listCollections({
-    fields: "*products",
-  })
-  const productCategories = await listCategories()
+  const { collections } = footer.show_collections ? await listCollections({ fields: "*products" }) : { collections: [] }
+  const productCategories = footer.show_categories ? await listCategories() : []
+  const rootCategories = productCategories?.filter((c) => !c.parent_category_id) ?? []
+
+  const tagline = pickText(footer.tagline, locale)
+  const copyright = tl("copyright", { year: new Date().getFullYear(), name: tNav("storeName") })
+
+  const brandMark = branding.logo ? (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img src={branding.logo} alt="" style={{ height: 28 }} className="mb-3 w-auto object-contain" />
+  ) : null
+
+  const contact = footer.contact.map((c) => (
+    <li key={c.href + c.label}>
+      <SmartLink href={c.href} countryCode={countryCode} className={linkCls}>
+        {c.label}
+      </SmartLink>
+    </li>
+  ))
+
+  if (layout.footer === "minimal") {
+    return (
+      <footer className="border-t bg-background" data-footer="minimal">
+        <div className="content-container flex flex-col items-center gap-5 py-10 text-center">
+          {brandMark}
+          <LocalizedClientLink href="/" className="font-serif text-base tracking-widest text-foreground">
+            {tNav("storeName")}
+          </LocalizedClientLink>
+          {tagline ? <p className="max-w-md text-sm text-muted-foreground">{tagline}</p> : null}
+          {rootCategories.length ? (
+            <ul className="flex flex-wrap justify-center gap-x-6 gap-y-2">
+              {rootCategories.slice(0, 6).map((c) => (
+                <li key={c.id}>
+                  <LocalizedClientLink href={`/categories/${c.handle}`} className={linkCls}>
+                    {c.name}
+                  </LocalizedClientLink>
+                </li>
+              ))}
+            </ul>
+          ) : null}
+          {contact.length ? <ul className="flex flex-wrap justify-center gap-x-6 gap-y-2">{contact}</ul> : null}
+          <p className="text-xs text-muted-foreground">{copyright}</p>
+        </div>
+      </footer>
+    )
+  }
 
   return (
-    <footer className="border-t border-ui-border-base w-full">
-      <div className="content-container flex flex-col w-full">
-        <div className="flex flex-col gap-y-6 xsmall:flex-row items-start justify-between py-40">
+    <footer className="border-t border-border/40 bg-background" data-footer="columns">
+      <div className="content-container py-16 small:py-20">
+        <div className="grid gap-10 small:grid-cols-4">
           <div>
-            <LocalizedClientLink
-              href="/"
-              className="txt-compact-xlarge-plus text-ui-fg-subtle hover:text-ui-fg-base uppercase"
-            >
+            {brandMark}
+            <LocalizedClientLink href="/" className="font-serif text-sm font-light tracking-widest text-foreground">
               {tNav("storeName")}
             </LocalizedClientLink>
+            {tagline ? <p className="mt-3 max-w-xs text-sm text-muted-foreground">{tagline}</p> : null}
+            <p className="mt-3 text-xs text-muted-foreground">{copyright}</p>
           </div>
-          <div className="text-small-regular gap-10 md:gap-x-16 grid grid-cols-2 sm:grid-cols-3">
-            {productCategories && productCategories?.length > 0 && (
-              <div className="flex flex-col gap-y-2">
-                <span className="txt-small-plus txt-ui-fg-base">
-                  {t("categories")}
-                </span>
-                <ul
-                  className="grid grid-cols-1 gap-2"
-                  data-testid="footer-categories"
-                >
-                  {productCategories?.slice(0, 6).map((c) => {
-                    if (c.parent_category) {
-                      return
-                    }
 
-                    const children =
-                      c.category_children?.map((child) => ({
-                        name: child.name,
-                        handle: child.handle,
-                        id: child.id,
-                      })) || null
-
-                    return (
-                      <li
-                        className="flex flex-col gap-2 text-ui-fg-subtle txt-small"
-                        key={c.id}
-                      >
-                        <LocalizedClientLink
-                          className={clx(
-                            "hover:text-ui-fg-base",
-                            children && "txt-small-plus"
-                          )}
-                          href={`/categories/${c.handle}`}
-                          data-testid="category-link"
-                        >
-                          {c.name}
-                        </LocalizedClientLink>
-                        {children && (
-                          <ul className="grid grid-cols-1 ml-3 gap-2">
-                            {children &&
-                              children.map((child) => (
-                                <li key={child.id}>
-                                  <LocalizedClientLink
-                                    className="hover:text-ui-fg-base"
-                                    href={`/categories/${child.handle}`}
-                                    data-testid="category-link"
-                                  >
-                                    {child.name}
-                                  </LocalizedClientLink>
-                                </li>
-                              ))}
-                          </ul>
-                        )}
-                      </li>
-                    )
-                  })}
-                </ul>
-              </div>
-            )}
-            {collections && collections.length > 0 && (
-              <div className="flex flex-col gap-y-2">
-                <span className="txt-small-plus txt-ui-fg-base">
-                  {t("collections")}
-                </span>
-                <ul
-                  className={clx(
-                    "grid grid-cols-1 gap-2 text-ui-fg-subtle txt-small",
-                    {
-                      "grid-cols-2": (collections?.length || 0) > 3,
-                    }
-                  )}
-                >
-                  {collections?.slice(0, 6).map((c) => (
-                    <li key={c.id}>
-                      <LocalizedClientLink
-                        className="hover:text-ui-fg-base"
-                        href={`/collections/${c.handle}`}
-                      >
-                        {c.title}
-                      </LocalizedClientLink>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-            <div className="flex flex-col gap-y-2">
-              <span className="txt-small-plus txt-ui-fg-base">{t("medusa")}</span>
-              <ul className="grid grid-cols-1 gap-y-2 text-ui-fg-subtle txt-small">
-                <li>
-                  <a
-                    href="https://github.com/medusajs"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="hover:text-ui-fg-base"
-                  >
-                    GitHub
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="https://docs.medusajs.com"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="hover:text-ui-fg-base"
-                  >
-                    Documentation
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="https://github.com/medusajs/nextjs-starter-medusa"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="hover:text-ui-fg-base"
-                  >
-                    Source code
-                  </a>
-                </li>
+          {rootCategories.length > 0 && (
+            <div>
+              <h4 className="mb-4 text-xs font-medium text-muted-foreground">{t("categories")}</h4>
+              <ul className="space-y-2">
+                {rootCategories.slice(0, 6).map((c) => (
+                  <li key={c.id}>
+                    <LocalizedClientLink href={`/categories/${c.handle}`} className={linkCls}>
+                      {c.name}
+                    </LocalizedClientLink>
+                  </li>
+                ))}
               </ul>
             </div>
-          </div>
-        </div>
-        <div className="flex w-full mb-16 justify-between text-ui-fg-muted">
-          <Text className="txt-compact-small">
-            © {new Date().getFullYear()} Medusa Store. All rights reserved.
-          </Text>
-          <MedusaCTA />
+          )}
+
+          {collections && collections.length > 0 && (
+            <div>
+              <h4 className="mb-4 text-xs font-medium text-muted-foreground">{t("collections")}</h4>
+              <ul className="space-y-2">
+                {collections.slice(0, 6).map((c) => (
+                  <li key={c.id}>
+                    <LocalizedClientLink href={`/collections/${c.handle}`} className={linkCls}>
+                      {c.title}
+                    </LocalizedClientLink>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {contact.length > 0 && (
+            <div>
+              <h4 className="mb-4 text-xs font-medium text-muted-foreground">{t("contact")}</h4>
+              <ul className="space-y-2">{contact}</ul>
+            </div>
+          )}
         </div>
       </div>
     </footer>

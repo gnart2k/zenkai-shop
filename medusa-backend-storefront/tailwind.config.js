@@ -102,7 +102,10 @@ module.exports = {
         "3xl": "2rem",
       },
       fontFamily: {
+        // Templates set --font-heading / --font-body; the fallbacks keep the old look.
+        serif: ["var(--font-heading, ui-serif)", "Georgia", "Cambria", "Times New Roman", "serif"],
         sans: [
+          "var(--font-body, Inter)",
           "Inter",
           "-apple-system",
           "BlinkMacSystemFont",

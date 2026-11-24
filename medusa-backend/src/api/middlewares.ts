@@ -1,8 +1,35 @@
-import { defineMiddlewares } from '@medusajs/framework/http';
+import { authenticate, defineMiddlewares } from '@medusajs/framework/http';
 import { z } from '@medusajs/framework/zod';
+import { portalCors, requirePortalAdmin, requireStoreMembership } from '../lib/portal/http';
+import { COLLABORATOR_ACTOR, PORTAL_ADMIN_ACTOR } from '../modules/portal/lib/constants';
 
 export default defineMiddlewares({
   routes: [
+    // --- Portal: collaborators and single-store portal admins -----------------
+    { matcher: '/portal*', middlewares: [portalCors] },
+    {
+      // Base64 proof files exceed Medusa's default 100kb JSON limit.
+      matcher: '/portal/collaborator/uploads',
+      method: ['POST'],
+      bodyParser: { sizeLimit: '8mb' },
+    },
+    {
+      matcher: '/portal/admin/uploads',
+      method: ['POST'],
+      bodyParser: { sizeLimit: '8mb' },
+    },
+    {
+      matcher: '/portal/collaborator*',
+      middlewares: [authenticate(COLLABORATOR_ACTOR, ['session', 'bearer'])],
+    },
+    {
+      matcher: '/portal/collaborator/stores/:store_id*',
+      middlewares: [requireStoreMembership],
+    },
+    {
+      matcher: '/portal/admin*',
+      middlewares: [authenticate(PORTAL_ADMIN_ACTOR, ['session', 'bearer']), requirePortalAdmin],
+    },
     {
       matcher: '/admin/products',
       method: ['POST'],

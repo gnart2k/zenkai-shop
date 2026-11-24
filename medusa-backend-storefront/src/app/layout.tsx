@@ -1,3 +1,4 @@
+import { getStorefront } from "@lib/data/storefront-config"
 import { getBaseURL } from "@lib/util/env"
 import { Metadata } from "next"
 import { headers } from "next/headers"
@@ -5,8 +6,12 @@ import "styles/globals.css"
 
 import { routing } from "@/i18n/routing"
 
-export const metadata: Metadata = {
-  metadataBase: new URL(getBaseURL()),
+export async function generateMetadata(): Promise<Metadata> {
+  const { branding } = await getStorefront()
+  return {
+    metadataBase: new URL(getBaseURL()),
+    ...(branding.favicon ? { icons: { icon: branding.favicon } } : {}),
+  }
 }
 
 export default async function RootLayout(props: { children: React.ReactNode }) {
