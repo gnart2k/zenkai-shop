@@ -9,6 +9,7 @@ import CartMismatchBanner from "@modules/layout/components/cart-mismatch-banner"
 import Footer from "@modules/layout/templates/footer"
 import Nav from "@modules/layout/templates/nav"
 import FreeShippingPriceNudge from "@modules/shipping/components/free-shipping-price-nudge"
+import ContactWidget from "@modules/storefront/contact-widget"
 import AnnouncementBar from "@modules/storefront/announcement-bar"
 import PreviewBanner from "@modules/storefront/preview-banner"
 import ThemeStyle from "@modules/storefront/theme-style"
@@ -24,7 +25,7 @@ export default async function PageLayout(props: {
   const { countryCode } = await props.params
   const customer = await retrieveCustomer()
   const cart = await retrieveCart()
-  const { theme, layout } = await getStorefront()
+  const { theme, layout, contactWidget } = await getStorefront()
   let shippingOptions: StoreCartShippingOption[] = []
 
   if (cart) {
@@ -56,6 +57,7 @@ export default async function PageLayout(props: {
       )}
       {props.children}
       <Footer countryCode={countryCode} />
+      <ContactWidget config={contactWidget} countryCode={countryCode} />
     </div>
   )
 }

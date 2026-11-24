@@ -27,6 +27,7 @@ const schema = z.object({
   footer: z.any().nullable().optional(),
   branding: z.any().nullable().optional(),
   texts: z.record(z.any()).optional(),
+  contact_widget: z.any().nullable().optional(),
 });
 
 /** Published config + the unpublished draft (if any) of the admin's own store. */

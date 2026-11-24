@@ -1,6 +1,7 @@
 "use client"
 
 import { Eye } from "lucide-react"
+import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 
 /**
@@ -24,16 +25,39 @@ export default function PreviewBannerView({
   exitHref: string
 }) {
   const [visible, setVisible] = useState(false)
+  const router = useRouter()
 
   useEffect(() => {
-    // Strip the signed token from the address bar (it is already in an httpOnly cookie).
-    const url = new URL(window.location.href)
-    if (url.searchParams.has("_preview")) {
-      url.searchParams.delete("_preview")
-      window.history.replaceState(null, "", url.pathname + url.search + url.hash)
+    const embedded = window.self !== window.top
+    setVisible(!embedded)
+
+    // Live preview: the portal editor autosaves the draft, then tells this frame to re-render
+    // the server components with it. router.refresh() keeps the scroll position and does not
+    // reload the page. Only same-origin messages are honored.
+    const onMessage = (e: MessageEvent) => {
+      if (embedded && e.origin === window.location.origin && e.data?.type === "sf-refresh") router.refresh()
     }
-    setVisible(window.self === window.top)
-  }, [])
+    // Everything here lives under /preview/...; links in the pages point at the normal
+    // storefront paths, so keep navigation inside /preview (never onto the live routes).
+    const onClick = (e: MouseEvent) => {
+      if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return
+      const a = (e.target as Element | null)?.closest?.("a[href]") as HTMLAnchorElement | null
+      if (!a || (a.target && a.target !== "_self") || a.hasAttribute("download")) return
+      const u = new URL(a.href, window.location.href)
+      if (u.origin !== window.location.origin) return
+      if (/^\/(preview|api|_next|media|portal)(\/|$)/.test(u.pathname) || /^\/[a-z]{2}\/[a-z]{2}\/portal(\/|$)/.test(u.pathname)) return
+      if (u.pathname === window.location.pathname.replace(/^\/preview/, "") && u.hash) return
+      e.preventDefault()
+      e.stopPropagation()
+      router.push(`/preview${u.pathname}${u.search}${u.hash}`)
+    }
+    window.addEventListener("message", onMessage)
+    document.addEventListener("click", onClick, true)
+    return () => {
+      window.removeEventListener("message", onMessage)
+      document.removeEventListener("click", onClick, true)
+    }
+  }, [router])
 
   if (!visible) return null
 

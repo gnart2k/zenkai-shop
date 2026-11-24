@@ -1,6 +1,8 @@
 import {
   cleanImage,
   cleanLink,
+  cleanPhone,
+  cleanZalo,
   DEFAULT_STOREFRONT_CONFIG,
   readStorefrontConfig,
   sanitizeStorefrontConfig,
@@ -33,7 +35,13 @@ describe('storefront config', () => {
       header: {
         announcement: { enabled: true, text: { vi: 'Miễn phí vận chuyển' }, link: '/store' },
       },
-      footer: { contact: [{ label: 'Hotline', href: 'tel:0900000000' }], show_collections: false },
+      footer: {
+        contact: [
+          { label: 'Hotline', href: 'tel:0900000000', kind: 'phone' },
+          { label: '12 Nguyen Trai, Q1', kind: 'address' },
+        ],
+        show_collections: false,
+      },
     });
     expect(cfg.template_id).toBe('warm');
     expect(cfg.home?.[0].settings.heading).toEqual({ vi: 'Xin chào', en: 'Hello' });
@@ -43,6 +51,11 @@ describe('storefront config', () => {
     });
     expect(cfg.header?.announcement.enabled).toBe(true);
     expect(cfg.footer).toMatchObject({ show_categories: true, show_collections: false });
+    // An address has no link and must survive (it used to be dropped).
+    expect(cfg.footer?.contact).toEqual([
+      { label: 'Hotline', href: 'tel:0900000000', kind: 'phone' },
+      { label: '12 Nguyen Trai, Q1', href: '', kind: 'address' },
+    ]);
   });
 
   it('drops unknown themes, bad colors, unknown or duplicate sections and bad keys', () => {
@@ -112,5 +125,94 @@ describe('storefront config', () => {
     });
     expect(cfg.branding?.store_name.en).toBe('Lamp Shop');
     expect(cfg.texts).toEqual({ 'Home.valueTitle': { vi: 'Vì sao chọn name bchúng tôi/b' } });
+  });
+
+  it('keeps contact rows with a bad link as text, defaults the kind, and drops empty labels', () => {
+    const cfg = sanitizeStorefrontConfig({
+      template_id: 'classic',
+      footer: {
+        contact: [
+          { label: 'Shop', href: 'javascript:alert(1)' },
+          { label: '   ', href: '/store' },
+          { label: 'Mail', href: 'mailto:a@b.co', kind: 'weird' },
+        ],
+      },
+    });
+    expect(cfg.footer?.contact).toEqual([
+      { label: 'Shop', href: '', kind: 'link' },
+      { label: 'Mail', href: 'mailto:a@b.co', kind: 'link' },
+    ]);
+  });
+
+  it('does not mistake options like image_side for image URLs', () => {
+    const cfg = sanitizeStorefrontConfig({
+      template_id: 'classic',
+      home: [
+        {
+          id: 'iwt',
+          type: 'image-with-text',
+          settings: {
+            image_side: 'right',
+            image: '/media/a-1.png',
+            button_link: '/store',
+            style: 'pills',
+            link_color: 'x',
+          },
+        },
+      ],
+    });
+    expect(cfg.home?.[0].settings).toEqual({
+      image_side: 'right',
+      image: '/media/a-1.png',
+      button_link: '/store',
+      style: 'pills',
+      link_color: 'x',
+    });
+  });
+
+  it('sanitizes the floating contact buttons (phone, Zalo, position, Vietnam-only)', () => {
+    const cfg = sanitizeStorefrontConfig({
+      template_id: 'classic',
+      contact_widget: {
+        enabled: true,
+        phone: '0866 063 804<script>',
+        zalo: '0866063804',
+        position: 'left',
+        vn_only: false,
+      },
+    });
+    expect(cfg.contact_widget).toEqual({
+      enabled: true,
+      phone: '0866 063 804',
+      zalo: '0866063804',
+      position: 'left',
+      vn_only: false,
+    });
+    // defaults when fields are missing: right side, Vietnam only
+    expect(sanitizeStorefrontConfig({ contact_widget: { enabled: true } }).contact_widget).toEqual({
+      enabled: true,
+      phone: '',
+      zalo: '',
+      position: 'right',
+      vn_only: true,
+    });
+    expect(sanitizeStorefrontConfig({}).contact_widget).toBeNull();
+  });
+
+  it('only accepts safe Zalo values and tidy phone numbers', () => {
+    expect(cleanZalo('https://zalo.me/0866063804')).toBe('https://zalo.me/0866063804');
+    expect(cleanZalo('https://chat.zalo.me/?id=1')).toBe('https://chat.zalo.me/?id=1');
+    expect(cleanZalo('+84 866 063 804')).toBe('+84866063804');
+    expect(cleanZalo('https://evil.com/zalo.me/1')).toBe('');
+    expect(cleanZalo('javascript:alert(1)')).toBe('');
+    expect(cleanZalo('12')).toBe('');
+    expect(cleanPhone('(028) 3822-1234 ext<b>')).toBe('(028) 3822-1234');
+  });
+
+  it('accepts zalo as a footer contact kind', () => {
+    const cfg = sanitizeStorefrontConfig({
+      footer: { contact: [{ label: '0866 063 804', kind: 'zalo' }] },
+    });
+    expect(cfg.footer?.contact).toEqual([{ label: '0866 063 804', href: '', kind: 'zalo' }]);
   });
 });

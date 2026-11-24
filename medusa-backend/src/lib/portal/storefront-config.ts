@@ -31,9 +31,13 @@ export type SectionInstance = {
   settings: Record<string, SettingValue>;
 };
 export type HeaderConfig = { announcement: { enabled: boolean; text: L10n; link: string } };
+export const CONTACT_KINDS = ['link', 'phone', 'email', 'address', 'zalo'] as const;
+export type ContactKind = (typeof CONTACT_KINDS)[number];
+
 export type FooterConfig = {
   tagline: L10n;
-  contact: { label: string; href: string }[];
+  /** Footer contact rows. href is optional: an address or plain text needs no link. */
+  contact: { label: string; href: string; kind: ContactKind }[];
   show_categories: boolean;
   show_collections: boolean;
 };
@@ -51,6 +55,18 @@ export type BrandingConfig = {
   favicon: string;
 };
 
+/** Floating Call / Zalo buttons. */
+export type ContactWidgetConfig = {
+  enabled: boolean;
+  /** Phone number shown to call (digits, spaces, + - . ( ) only). */
+  phone: string;
+  /** Zalo phone number, or a https://zalo.me/... link. */
+  zalo: string;
+  position: 'left' | 'right';
+  /** Only show for shoppers in Vietnam (the /vn storefront region). */
+  vn_only: boolean;
+};
+
 export type StorefrontConfig = {
   template_id: TemplateId;
   /** #rrggbb accent override, null = the theme's own primary. */
@@ -65,6 +81,8 @@ export type StorefrontConfig = {
    * The storefront ignores keys that are not in its editable catalog.
    */
   texts: Record<string, L10n>;
+  /** null = the theme default (see the storefront). */
+  contact_widget: ContactWidgetConfig | null;
 };
 
 export const DEFAULT_STOREFRONT_CONFIG: StorefrontConfig = {
@@ -75,6 +93,7 @@ export const DEFAULT_STOREFRONT_CONFIG: StorefrontConfig = {
   footer: null,
   branding: null,
   texts: {},
+  contact_widget: null,
 };
 
 export const MAX_TEXTS = 200;
@@ -106,6 +125,9 @@ function cleanL10n(v: unknown): L10n {
   return out;
 }
 
+const IMAGE_KEY = /^(image|logo|favicon)$|_image$/;
+const LINK_KEY = /^link$|_link$/;
+
 function cleanSettings(raw: unknown): Record<string, SettingValue> {
   const out: Record<string, SettingValue> = {};
   if (!isObj(raw)) return out;
@@ -115,7 +137,9 @@ function cleanSettings(raw: unknown): Record<string, SettingValue> {
     else if (typeof v === 'number' && Number.isFinite(v))
       out[key] = Math.max(-1e6, Math.min(1e6, v));
     else if (typeof v === 'string') {
-      out[key] = /image/.test(key) ? cleanImage(v) : /link/.test(key) ? cleanLink(v) : text(v);
+      // Only real image / link settings get URL treatment. Matching on a substring would
+      // also catch plain options such as image_side and wipe their value.
+      out[key] = IMAGE_KEY.test(key) ? cleanImage(v) : LINK_KEY.test(key) ? cleanLink(v) : text(v);
     } else if (isObj(v)) out[key] = cleanL10n(v);
   }
   return out;
@@ -151,12 +175,20 @@ function cleanHeader(raw: unknown): HeaderConfig | null {
 
 function cleanFooter(raw: unknown): FooterConfig | null {
   if (!isObj(raw)) return null;
+  // A row needs a label; the link is optional (an address is just text). A bad link is
+  // dropped but the row is kept, so owner text is never silently lost.
   const contact = Array.isArray(raw.contact)
     ? raw.contact
-        .slice(0, 8)
+        .slice(0, 10)
         .filter(isObj)
-        .map((c) => ({ label: text(c.label, 80), href: cleanLink(c.href) }))
-        .filter((c) => c.label && c.href)
+        .map((c) => ({
+          label: text(c.label, 160).trim(),
+          href: cleanLink(c.href),
+          kind: ((CONTACT_KINDS as readonly string[]).includes(c.kind as string)
+            ? c.kind
+            : 'link') as ContactKind,
+        }))
+        .filter((c) => c.label)
     : [];
   return {
     tagline: cleanL10n(raw.tagline),
@@ -206,6 +238,32 @@ function cleanTexts(raw: unknown): Record<string, L10n> {
   return out;
 }
 
+/** A phone number as typed: digits plus the usual separators, never markup. */
+export function cleanPhone(v: unknown): string {
+  return text(v, 30)
+    .replace(/[^\d+\-.() ]/g, '')
+    .trim();
+}
+
+/** A Zalo phone number (digits) or a link on zalo.me / chat.zalo.me. Anything else is dropped. */
+export function cleanZalo(v: unknown): string {
+  const s = text(v, 200).trim();
+  if (/^https:\/\/(zalo\.me|chat\.zalo\.me)\/[\w\-./?=&%+]*$/i.test(s)) return s;
+  const digits = s.replace(/[^\d+]/g, '');
+  return /^\+?\d{8,15}$/.test(digits) ? digits : '';
+}
+
+function cleanContactWidget(raw: unknown): ContactWidgetConfig | null {
+  if (!isObj(raw)) return null;
+  return {
+    enabled: raw.enabled === true,
+    phone: cleanPhone(raw.phone),
+    zalo: cleanZalo(raw.zalo),
+    position: raw.position === 'left' ? 'left' : 'right',
+    vn_only: raw.vn_only !== false,
+  };
+}
+
 /** Validates and sanitizes anything (stored metadata or a PUT body) into a safe config. */
 export function sanitizeStorefrontConfig(raw: unknown): StorefrontConfig {
   const r = isObj(raw) ? raw : {};
@@ -224,6 +282,7 @@ export function sanitizeStorefrontConfig(raw: unknown): StorefrontConfig {
     footer: cleanFooter(r.footer),
     branding: cleanBranding(r.branding),
     texts: cleanTexts(r.texts),
+    contact_widget: cleanContactWidget(r.contact_widget),
   };
 }
 

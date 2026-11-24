@@ -1,7 +1,9 @@
 import { listCategories } from "@lib/data/categories"
 import { listCollections } from "@lib/data/collections"
 import { getStorefront } from "@lib/data/storefront-config"
+import { contactHref, contactKind } from "@lib/storefront/contact"
 import { pickText } from "@lib/storefront/templates"
+import { Globe, Mail, MapPin, MessageCircle, Phone } from "lucide-react"
 import { getLocale, getTranslations } from "next-intl/server"
 
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
@@ -28,13 +30,30 @@ export default async function Footer({ countryCode }: { countryCode: string }) {
     <img src={branding.logo} alt="" style={{ height: 28 }} className="mb-3 w-auto object-contain" />
   ) : null
 
-  const contact = footer.contact.map((c) => (
-    <li key={c.href + c.label}>
-      <SmartLink href={c.href} countryCode={countryCode} className={linkCls}>
-        {c.label}
-      </SmartLink>
-    </li>
-  ))
+  const ICONS = { phone: Phone, email: Mail, address: MapPin, link: Globe, zalo: MessageCircle } as const
+  // A row is an icon + text; it becomes a link only when it has one (an address is plain text).
+  const contact = footer.contact.map((c) => {
+    const kind = contactKind(c)
+    const Icon = ICONS[kind]
+    const href = contactHref(c)
+    const inner = (
+      <span className="inline-flex items-start gap-2">
+        <Icon className="mt-0.5 size-3.5 shrink-0" aria-hidden />
+        <span>{c.label}</span>
+      </span>
+    )
+    return (
+      <li key={`${kind}-${c.label}`}>
+        {href ? (
+          <SmartLink href={href} countryCode={countryCode} className={linkCls}>
+            {inner}
+          </SmartLink>
+        ) : (
+          <span className="text-sm text-muted-foreground">{inner}</span>
+        )}
+      </li>
+    )
+  })
 
   if (layout.footer === "minimal") {
     return (

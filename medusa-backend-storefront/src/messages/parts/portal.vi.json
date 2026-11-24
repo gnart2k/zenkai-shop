@@ -364,7 +364,7 @@
       "saved": "Đã lưu. Cửa hàng đã được cập nhật.",
       "templates": "Giao diện",
       "templatesHint": "Giao diện quyết định toàn bộ cấu trúc cửa hàng: thanh đầu trang, trang chủ, trang danh sách và sản phẩm, chân trang, cùng màu sắc và chữ.",
-      "themeResets": "Đổi giao diện sẽ đặt lại các mục trang chủ, thanh đầu trang và chân trang theo mặc định của giao diện mới. Logo, chữ và màu nhấn của bạn được giữ nguyên.",
+      "themeResets": "Đổi giao diện sẽ đổi cấu trúc (thanh đầu trang, chân trang, bố cục danh sách, thứ tự và kiểu các mục ở trang chủ). Mọi thứ bạn đã viết đều được giữ lại: logo, nội dung chữ, màu nhấn, chân trang, thông báo, và chữ/ảnh/liên kết trong các mục.",
       "selected": "Đang chọn",
       "primaryColor": "Màu nhấn",
       "primaryHint": "Dùng cho nút bấm và điểm nhấn trên toàn cửa hàng.",
@@ -405,7 +405,7 @@
       "footerContact": "Liên kết liên hệ",
       "contactLabel": "Nhãn",
       "addContact": "Thêm liên hệ",
-      "contactHint": "Dùng tel:0900000000, mailto:you@example.com hoặc liên kết https://.",
+      "contactHint": "Số điện thoại và email tự thành liên kết bấm để gọi / gửi thư. Địa chỉ hiển thị dạng chữ; hãy thêm liên kết Google Maps nếu muốn bấm được.",
       "showCategories": "Hiện danh mục",
       "showCollections": "Hiện bộ sưu tập",
       "textsTitle": "Nội dung chữ",
@@ -455,10 +455,10 @@
       "publish": "Xuất bản",
       "discard": "Hủy bản nháp",
       "statusDraft": "Bản nháp chưa xuất bản",
-      "statusLive": "Bạn đang chỉnh bản đang hiển thị. Hãy lưu bản nháp để thử trước.",
+      "statusLive": "Bạn đang chỉnh bản đang hiển thị. Thay đổi được tự lưu thành bản nháp.",
       "liveNeedsDraft": "Hãy lưu bản nháp để xem trang thật tại đây.",
       "noProductForPreview": "Hãy thêm sản phẩm để xem trước trang sản phẩm.",
-      "liveNote": "Bản nháp đã lưu trên cửa hàng thật. Lưu lại để làm mới. Khách hàng vẫn thấy bản đã xuất bản.",
+      "liveNote": "Cửa hàng thật ở đúng kích thước thiết bị. Tự cập nhật sau mỗi chỉnh sửa; chỉ khi bấm Xuất bản khách hàng mới thấy.",
       "savedDraft": "Đã lưu bản nháp. Khách hàng vẫn thấy bản đã xuất bản.",
       "published": "Đã xuất bản. Cửa hàng đã được cập nhật.",
       "discarded": "Đã hủy bản nháp. Bạn đang chỉnh bản đang hiển thị.",
@@ -469,7 +469,48 @@
       "devices": {
         "desktop": "Máy tính",
         "mobile": "Điện thoại"
-      }
+      },
+      "autosaving": "Đang tự lưu bản nháp…",
+      "autosaved": "Đã tự lưu bản nháp · chưa xuất bản",
+      "autosaveFailed": "Không lưu được bản nháp.",
+      "uploading": "Đang tải lên…",
+      "uploadFailed": "Tải lên thất bại.",
+      "sessionExpired": "Phiên đăng nhập đã hết hạn. Hãy tải lại trang và đăng nhập lại.",
+      "contactKind": "Loại",
+      "contactLink": "Liên kết (không bắt buộc)",
+      "contactKinds": {
+        "phone": "Điện thoại",
+        "email": "Email",
+        "address": "Địa chỉ",
+        "link": "Liên kết",
+        "zalo": "Zalo"
+      },
+      "contactPlaceholders": {
+        "phone": "0900 000 000",
+        "email": "hello@cuahang.com",
+        "address": "12 Nguyễn Trãi, Quận 1, TP. Hồ Chí Minh",
+        "link": "TikTok @cuahang",
+        "zalo": "0900 000 000"
+      },
+      "contactLinkPlaceholders": {
+        "phone": "Không bắt buộc: để trống sẽ dùng số điện thoại",
+        "email": "Không bắt buộc: để trống sẽ dùng email",
+        "address": "Không bắt buộc: liên kết Google Maps",
+        "link": "https://…",
+        "zalo": "Tùy chọn: để trống để dùng số điện thoại"
+      },
+      "widgetTitle": "Nút Gọi & Zalo",
+      "widgetHint": "Nút nổi giúp khách gọi điện hoặc nhắn tin với bạn chỉ bằng một chạm.",
+      "widgetEnabled": "Hiển thị nút nổi",
+      "widgetPhone": "Số điện thoại",
+      "widgetZalo": "Số Zalo hoặc liên kết",
+      "widgetZaloHint": "Zalo: số điện thoại hoặc liên kết zalo.me. Để trống ô nào thì ẩn nút đó.",
+      "widgetPosition": "Vị trí trên màn hình",
+      "widgetPositions": {
+        "left": "Bên trái",
+        "right": "Bên phải"
+      },
+      "widgetVnOnly": "Chỉ hiển thị cho khách ở Việt Nam"
     },
     "preview": {
       "banner": "Đang xem trước bản nháp chưa xuất bản",

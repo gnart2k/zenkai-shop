@@ -15,11 +15,15 @@ export async function POST(request: NextRequest) {
     ? returnTo.replace(/\/portal\/.*$/, "")
     : "/"
 
+  // Open the page the owner was looking at in the editor, not always the home page.
+  const rawPath = String(f.get("previewPath") ?? "")
+  const path = /^\/(store|products\/[\w-]+)$/.test(rawPath) ? rawPath : ""
+
   try {
     const cfg = await buildStorefrontConfig(f)
     await portalFetch("/portal/admin/storefront/draft", { method: "PUT", body: cfg })
     const { token } = await portalFetch<{ token: string }>("/portal/admin/storefront/preview", { body: {} })
-    return NextResponse.redirect(new URL(`${site}?_preview=${encodeURIComponent(token)}`, request.url), 303)
+    return NextResponse.redirect(new URL(`/preview${site}${path}?_preview=${encodeURIComponent(token)}`, request.url), 303)
   } catch (e) {
     if (e instanceof PortalError) {
       const msg = e.message.replace(/[<>&]/g, "")
@@ -30,4 +34,9 @@ export async function POST(request: NextRequest) {
     }
     throw e
   }
+}
+
+/** The editor posts here. A GET (e.g. a form without an explicit method) is refused. */
+export async function GET() {
+  return new NextResponse("Use POST from the storefront editor.", { status: 405, headers: { Allow: "POST" } })
 }

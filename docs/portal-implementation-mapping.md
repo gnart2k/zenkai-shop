@@ -147,6 +147,10 @@ The editor also shows the saved draft on the **real** home, listing and product 
 How preview mode is secured: `POST /portal/admin/storefront/preview` returns an HMAC-signed token (`kind: sf-preview`, scoped to one store, valid 1 hour). Opening `/{locale}/{country}?_preview=<token>` makes the storefront middleware store it in an httpOnly cookie (`_sf_preview`) and redirect to the same URL without it. `GET /store/storefront-config?preview=<token>` verifies the token on every request and returns that store's draft with `preview: true`; an invalid, tampered or expired token silently falls back to the published config, so visitors can never see a draft. `/api/preview-exit?to=/path` clears the cookie (same-site targets only). **Open storefront** in the editor goes through that exit route so it always shows the published shop.
 
 
+### Call and Zalo buttons (Vietnam)
+
+Floating **Call** and **Zalo** buttons (`modules/storefront/contact-widget.tsx`, rendered in the `(main)` layout). The owner edits them in the editor under *Header & footer → Call & Zalo buttons*: on/off, phone, Zalo number or `zalo.me` link, left/right side, and **Vietnam only** (default on: shown only on the `/vn` region). An empty field hides that button. Stored as `contact_widget` in the storefront config (so it goes through draft, preview and publish like everything else) and sanitized by the backend (`cleanPhone`, `cleanZalo`: only digits or `https://zalo.me|chat.zalo.me/...`). With no saved value the default is on, using the store's existing number. The footer contact list also has a **Zalo** row type.
+
 ## 7. Not built yet
 
 - Medusa admin UI for settings and portal admins (APIs exist: `/admin/portal/settings`, `/admin/portal/admins`).

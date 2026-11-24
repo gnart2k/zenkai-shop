@@ -6,6 +6,6 @@ export async function GET(request: NextRequest) {
   // Only same-site paths, never an absolute or protocol-relative URL.
   const safe = /^\/(?!\/)/.test(to) ? to : "/"
   const res = NextResponse.redirect(new URL(safe, request.url))
-  res.cookies.set("_sf_preview", "", { maxAge: 0, path: "/" })
+  res.cookies.set("_sf_preview", "", { maxAge: 0, path: "/preview" })
   return res
 }

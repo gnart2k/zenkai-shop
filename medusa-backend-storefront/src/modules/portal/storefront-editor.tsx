@@ -10,6 +10,8 @@ import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
 import {
   DEFAULT_BRANDING,
+  DEFAULT_CONTACT_WIDGET,
+  type ContactWidgetConfig,
   SECTION_DEFS,
   SECTION_TYPES,
   THEMES,
@@ -27,8 +29,9 @@ import {
   type ThemeId,
 } from "@lib/storefront/templates"
 import type { EditableText } from "@lib/storefront/texts"
-import { ArrowDown, ArrowUp, Check, ChevronDown, Eye, ImageIcon, Loader2, Monitor, Plus, RotateCcw, Rocket, Save, Smartphone, Trash2 } from "lucide-react"
-import { useState } from "react"
+import { contactKind, type ContactKind } from "@lib/storefront/contact"
+import { ArrowDown, ArrowUp, Check, ChevronDown, Eye, Globe, ImageIcon, Loader2, Mail, MapPin, MessageCircle, Monitor, Phone, Plus, RotateCcw, Rocket, Save, Smartphone, Trash2 } from "lucide-react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { useFormStatus } from "react-dom"
 import { TemplatePreview, type PreviewPage } from "./template-preview"
 
@@ -40,6 +43,7 @@ type Cfg = {
   footer: FooterConfig
   branding: BrandingConfig
   texts: Record<string, L10n>
+  contact_widget: ContactWidgetConfig
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -85,32 +89,56 @@ function L10nInput({
   )
 }
 
-/** File chooser with preview. The file is uploaded by the server action when saving. */
+/**
+ * File chooser that uploads the image as soon as it is picked (POST /api/portal/upload), so
+ * the live preview can show it immediately. The stored value is the returned /media URL.
+ */
 function ImageField({
-  path,
   value,
-  preview,
   accept,
   labels,
-  onPick,
+  onUploaded,
   onClear,
 }: {
-  path: string
   value: string
-  preview?: string
   accept: string
   labels: Labels
-  onPick: (file: File | undefined) => void
+  onUploaded: (url: string) => void
   onClear: () => void
 }) {
   const [nonce, setNonce] = useState(0)
-  const shown = preview || value
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const pick = async (file: File | undefined) => {
+    if (!file) return
+    setBusy(true)
+    setError(null)
+    try {
+      const body = new FormData()
+      body.append("file", file)
+      const res = await fetch("/api/portal/upload", { method: "POST", body })
+      const json = await res.json().catch(() => ({}))
+      if (!res.ok || !json.url) {
+        throw new Error(res.status === 401 ? labels.sessionExpired : json.error || labels.uploadFailed)
+      }
+      onUploaded(json.url)
+    } catch (e) {
+      setError((e as Error).message)
+    } finally {
+      setBusy(false)
+      setNonce((n) => n + 1)
+    }
+  }
+
   return (
     <div className="flex items-center gap-3">
       <div className="grid size-16 shrink-0 place-items-center overflow-hidden rounded-md border bg-muted">
-        {shown ? (
+        {busy ? (
+          <Loader2 className="size-5 animate-spin text-muted-foreground" />
+        ) : value ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={shown} alt="" className="size-full object-contain" />
+          <img src={value} alt="" className="size-full object-contain" />
         ) : (
           <ImageIcon className="size-5 text-muted-foreground" />
         )}
@@ -119,22 +147,16 @@ function ImageField({
         <input
           key={nonce}
           type="file"
-          name={`file:${path}`}
           accept={accept}
-          onChange={(e) => onPick(e.target.files?.[0])}
+          disabled={busy}
+          onChange={(e) => pick(e.target.files?.[0])}
           className="block w-full max-w-xs cursor-pointer rounded-md border border-input bg-background text-xs file:mr-2 file:cursor-pointer file:border-0 file:bg-muted file:px-2 file:py-1.5 file:text-xs file:font-medium"
         />
         <div className="flex items-center gap-3 text-xs text-muted-foreground">
-          {preview ? <span className="text-emerald-700">{labels.willUpload}</span> : null}
-          {shown ? (
-            <button
-              type="button"
-              className="inline-flex items-center gap-1 hover:text-destructive"
-              onClick={() => {
-                setNonce((n) => n + 1)
-                onClear()
-              }}
-            >
+          {busy ? <span>{labels.uploading}</span> : null}
+          {error ? <span className="text-destructive">{error}</span> : null}
+          {value && !busy ? (
+            <button type="button" className="inline-flex items-center gap-1 hover:text-destructive" onClick={onClear}>
               <Trash2 className="size-3" />
               {labels.remove}
             </button>
@@ -171,7 +193,7 @@ function IntentButton({
       // A server action always redirects the tab that submitted it. A plain URL with
       // formTarget="_blank" is a normal form post, so the result opens in a new tab and the
       // editor (with its unsaved edits) stays as it is.
-      {...(newTabUrl ? { formAction: newTabUrl, formTarget: "_blank", formEncType: "multipart/form-data" } : {})}
+      {...(newTabUrl ? { formAction: newTabUrl, formMethod: "post", formTarget: "_blank", formEncType: "multipart/form-data" } : {})}
       disabled={pending && !newTabUrl}
       className={className}
     >
@@ -189,6 +211,93 @@ const FieldRow = ({ label, hint, children }: { label: string; hint?: string; chi
   </div>
 )
 
+/** Setting fields that hold what the owner WROTE (kept across themes), as opposed to design options. */
+const CONTENT_FIELD_TYPES = new Set(["text", "textarea", "image", "link"])
+
+const hasValue = (v: SettingValue | undefined) =>
+  typeof v === "string" ? v.trim() !== "" : !!v && typeof v === "object" && Object.values(v as L10n).some((x) => (x ?? "").trim() !== "")
+
+/** The content settings (text, images, links) of a section; options like style or count are excluded. */
+function contentOf(section: SectionInstance): Record<string, SettingValue> {
+  const out: Record<string, SettingValue> = {}
+  for (const f of SECTION_DEFS[section.type].fields) {
+    if (CONTENT_FIELD_TYPES.has(f.type) && hasValue(section.settings[f.key])) out[f.key] = section.settings[f.key]
+  }
+  return out
+}
+
+/**
+ * Switching theme gives the new theme's sections, but nothing the owner typed is thrown away:
+ *  - each new section takes over the content of the first unused section of the same type
+ *    (the design options, e.g. hero style or image side, follow the new theme);
+ *  - sections with content that have no counterpart in the new theme are kept at the end.
+ */
+function carryOverSections(current: SectionInstance[], defaults: SectionInstance[]): SectionInstance[] {
+  const used = new Set<string>()
+  const next = defaults.map((d) => {
+    const match = current.find((c) => c.type === d.type && !used.has(c.id) && Object.keys(contentOf(c)).length > 0)
+    if (!match) return d
+    used.add(match.id)
+    return { ...d, settings: { ...d.settings, ...contentOf(match) } }
+  })
+  const taken = new Set(next.map((n) => n.id))
+  const leftovers = current
+    .filter((c) => !used.has(c.id) && Object.keys(contentOf(c)).length > 0)
+    .map((c) => {
+      const id = taken.has(c.id) ? newSectionId(c.type, [...next, ...current]) : c.id
+      taken.add(id)
+      return { ...c, id }
+    })
+  return [...next, ...leftovers]
+}
+
+/**
+ * The real storefront in an iframe at a TRUE device width, scaled down to fit the card.
+ * Rendering it at the card's own (narrow) width would make the storefront switch to its
+ * mobile layout, so desktop and mobile would look the same. Instead the frame is a 1280px
+ * (desktop) or 390px (mobile) viewport and CSS scale() shrinks it, like a device preview.
+ */
+function ScaledFrame({
+  src,
+  device,
+  frameRef,
+  title,
+}: {
+  src: string
+  device: "desktop" | "mobile"
+  frameRef: React.MutableRefObject<HTMLIFrameElement | null>
+  title: string
+}) {
+  const wrapRef = useRef<HTMLDivElement>(null)
+  const [width, setWidth] = useState(0)
+  useEffect(() => {
+    const el = wrapRef.current
+    if (!el) return
+    setWidth(el.clientWidth)
+    const ro = new ResizeObserver(([entry]) => setWidth(entry.contentRect.width))
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
+
+  const viewportW = device === "mobile" ? 390 : 1280
+  const viewportH = device === "mobile" ? 800 : 860
+  const scale = width ? Math.min(1, width / viewportW) : 1
+
+  return (
+    <div ref={wrapRef} className="overflow-hidden rounded-lg border bg-muted/30">
+      <div className="relative mx-auto" style={{ width: viewportW * scale, height: viewportH * scale }}>
+        <iframe
+          ref={frameRef}
+          title={title}
+          src={src}
+          className="absolute left-0 top-0 border-0 bg-background"
+          style={{ width: viewportW, height: viewportH, transform: `scale(${scale})`, transformOrigin: "top left" }}
+        />
+      </div>
+    </div>
+  )
+}
+
 export function StorefrontEditor({
   action,
   returnTo,
@@ -198,8 +307,8 @@ export function StorefrontEditor({
   textCatalog,
   textGroups,
   textDefaults,
-  hasDraft,
-  draftUpdatedAt,
+  hasDraft: hasDraftInitial,
+  draftUpdatedAt: draftUpdatedInitial,
   previewBase,
   previewToken,
   productHandle,
@@ -228,32 +337,76 @@ export function StorefrontEditor({
     footer: clone(initial.footer ?? theme0.footer),
     branding: { ...DEFAULT_BRANDING, ...(initial.branding ?? {}) },
     texts: clone(initial.texts ?? {}),
+    contact_widget: { ...DEFAULT_CONTACT_WIDGET, ...(initial.contact_widget ?? {}) },
   })
-  const [previews, setPreviews] = useState<Record<string, string>>({})
   const [open, setOpen] = useState<string | null>(null)
   const [previewPage, setPreviewPage] = useState<PreviewPage>("home")
-  const [previewMode, setPreviewMode] = useState<"live" | "sketch">(hasDraft ? "live" : "sketch")
+  const [previewMode, setPreviewMode] = useState<"live" | "sketch">("live")
+  const [hasDraft, setHasDraft] = useState(hasDraftInitial)
+  const [draftUpdatedAt, setDraftUpdatedAt] = useState<string | null>(draftUpdatedInitial)
+  const [autosave, setAutosave] = useState<"idle" | "saving" | "saved" | "error">("idle")
+  const [autosaveError, setAutosaveError] = useState<string | null>(null)
   const [device, setDevice] = useState<"desktop" | "mobile">("desktop")
   const [addType, setAddType] = useState<SectionType>("image-with-text")
   const theme = getTheme(cfg.template_id)
 
+  const frameRef = useRef<HTMLIFrameElement | null>(null)
+  const saveSeq = useRef(0)
+  // The content the server already has. Autosave only runs when the editor state differs from
+  // it, so opening the editor (or React re-running effects in dev) never creates a draft.
+  const lastSaved = useRef<string>(JSON.stringify(cfg))
+
+  // Live preview: a moment after the last edit, autosave the draft and tell the preview frame
+  // to re-render with it (a soft refresh inside the frame: no reload, scroll position kept).
+  useEffect(() => {
+    const body = JSON.stringify(cfg)
+    if (body === lastSaved.current) return
+    setAutosave("saving")
+    const seq = ++saveSeq.current
+    const timer = window.setTimeout(async () => {
+      try {
+        const res = await fetch("/api/portal/storefront-draft", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body,
+        })
+        const json = await res.json().catch(() => ({}))
+        if (seq !== saveSeq.current) return // a newer edit is already on its way
+        if (!res.ok) throw new Error(res.status === 401 ? labels.sessionExpired : json.error || labels.autosaveFailed)
+        lastSaved.current = body
+        setHasDraft(true)
+        setDraftUpdatedAt(json.updated_at ?? new Date().toISOString())
+        setAutosave("saved")
+        setAutosaveError(null)
+        frameRef.current?.contentWindow?.postMessage({ type: "sf-refresh" }, window.location.origin)
+      } catch (e) {
+        if (seq !== saveSeq.current) return
+        setAutosave("error")
+        setAutosaveError((e as Error).message)
+      }
+    }, 800)
+    return () => window.clearTimeout(timer)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cfg])
+
   const patch = (p: Partial<Cfg>) => setCfg((c) => ({ ...c, ...p }))
+  const patchWidget = (p: Partial<ContactWidgetConfig>) => setCfg((c) => ({ ...c, contact_widget: { ...c.contact_widget, ...p } }))
   const patchBranding = (p: Partial<BrandingConfig>) => setCfg((c) => ({ ...c, branding: { ...c.branding, ...p } }))
-  const setPreview = (path: string, file: File | undefined) =>
-    setPreviews((p) => {
-      const n = { ...p }
-      if (n[path]) URL.revokeObjectURL(n[path])
-      if (file) n[path] = URL.createObjectURL(file)
-      else delete n[path]
-      return n
-    })
-  const clearPreview = (path: string) => setPreview(path, undefined)
 
   const chooseTheme = (id: ThemeId) => {
-    const t = getTheme(id)
-    // A new theme brings its own structure and starting sections; branding, texts and
-    // the accent color stay.
-    setCfg((c) => ({ ...c, template_id: id, home: clone(t.home), header: clone(t.header), footer: clone(t.footer) }))
+    const next = getTheme(id)
+    const current = getTheme(cfg.template_id)
+    const same = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b)
+    setCfg((c) => ({
+      ...c,
+      template_id: id,
+      // Layout comes from the theme; what the owner wrote in sections is carried over.
+      home: carryOverSections(c.home, clone(next.home)),
+      // The announcement and footer are the owner's content. They only follow the theme while
+      // they are still the previous theme's untouched defaults.
+      header: same(c.header, current.header) ? clone(next.header) : c.header,
+      footer: same(c.footer, current.footer) ? clone(next.footer) : c.footer,
+    }))
     setOpen(null)
   }
 
@@ -277,10 +430,7 @@ export function StorefrontEditor({
     })
 
   // What the preview and the saved config use: pending logo shows before it is uploaded.
-  const previewChoice: StorefrontChoice = {
-    ...cfg,
-    branding: { ...cfg.branding, logo: previews["branding.logo"] || cfg.branding.logo },
-  }
+  const previewChoice: StorefrontChoice = cfg
 
   const logoLabel = (t: { vi: string; en: string }) => t[lang]
 
@@ -307,16 +457,11 @@ export function StorefrontEditor({
         return (
           <FieldRow key={f.key} label={logoLabel(f.label)} hint={labels.imageHint}>
             <ImageField
-              path={path}
               value={typeof value === "string" ? value : ""}
-              preview={previews[path]}
               accept="image/png,image/jpeg,image/webp"
               labels={labels}
-              onPick={(file) => setPreview(path, file)}
-              onClear={() => {
-                clearPreview(path)
-                setSetting(section.id, f.key, "")
-              }}
+              onUploaded={(url) => setSetting(section.id, f.key, url)}
+              onClear={() => setSetting(section.id, f.key, "")}
             />
           </FieldRow>
         )
@@ -359,10 +504,15 @@ export function StorefrontEditor({
   return (
     <form action={action} className="space-y-6" encType="multipart/form-data">
       <input type="hidden" name="returnTo" value={returnTo} />
+      <input
+        type="hidden"
+        name="previewPath"
+        value={previewPage === "home" ? "" : previewPage === "collection" ? "/store" : productHandle ? `/products/${productHandle}` : ""}
+      />
       <input type="hidden" name="config" value={JSON.stringify(cfg)} />
 
-      <div className="grid gap-6 xl:grid-cols-5">
-        <Tabs defaultValue="theme" className="xl:col-span-3">
+      <div className="grid gap-6 xl:grid-cols-12">
+        <Tabs defaultValue="theme" className="min-w-0 xl:col-span-5">
           <TabsList className="flex h-auto flex-wrap justify-start">
             {(["theme", "branding", "home", "layout", "texts"] as const).map((t) => (
               <TabsTrigger key={t} value={t}>
@@ -459,16 +609,11 @@ export function StorefrontEditor({
               <CardContent className="space-y-6">
                 <FieldRow label={labels.logo} hint={labels.logoHint}>
                   <ImageField
-                    path="branding.logo"
                     value={cfg.branding.logo}
-                    preview={previews["branding.logo"]}
                     accept="image/png,image/jpeg,image/webp"
                     labels={labels}
-                    onPick={(f) => setPreview("branding.logo", f)}
-                    onClear={() => {
-                      clearPreview("branding.logo")
-                      patchBranding({ logo: "" })
-                    }}
+                    onUploaded={(url) => patchBranding({ logo: url })}
+                    onClear={() => patchBranding({ logo: "" })}
                   />
                 </FieldRow>
                 <div className="grid gap-6 sm:grid-cols-2">
@@ -495,16 +640,11 @@ export function StorefrontEditor({
                 </FieldRow>
                 <FieldRow label={labels.favicon} hint={labels.faviconHint}>
                   <ImageField
-                    path="branding.favicon"
                     value={cfg.branding.favicon}
-                    preview={previews["branding.favicon"]}
                     accept="image/png,image/x-icon,image/vnd.microsoft.icon"
                     labels={labels}
-                    onPick={(f) => setPreview("branding.favicon", f)}
-                    onClear={() => {
-                      clearPreview("branding.favicon")
-                      patchBranding({ favicon: "" })
-                    }}
+                    onUploaded={(url) => patchBranding({ favicon: url })}
+                    onClear={() => patchBranding({ favicon: "" })}
                   />
                 </FieldRow>
               </CardContent>
@@ -636,44 +776,73 @@ export function StorefrontEditor({
                   <L10nInput idBase="footer-tagline" long value={cfg.footer.tagline} onChange={(v) => patch({ footer: { ...cfg.footer, tagline: v } })} />
                 </FieldRow>
                 <FieldRow label={labels.footerContact}>
-                  <div className="space-y-2">
-                    {cfg.footer.contact.map((c, i) => (
-                      <div key={i} className="flex gap-2">
-                        <Input
-                          value={c.label}
-                          placeholder={labels.contactLabel}
-                          onChange={(e) =>
-                            patch({ footer: { ...cfg.footer, contact: cfg.footer.contact.map((x, j) => (j === i ? { ...x, label: e.target.value } : x)) } })
-                          }
-                        />
-                        <Input
-                          value={c.href}
-                          placeholder="tel:0900000000"
-                          onChange={(e) =>
-                            patch({ footer: { ...cfg.footer, contact: cfg.footer.contact.map((x, j) => (j === i ? { ...x, href: e.target.value } : x)) } })
-                          }
-                        />
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          aria-label={labels.remove}
-                          onClick={() => patch({ footer: { ...cfg.footer, contact: cfg.footer.contact.filter((_, j) => j !== i) } })}
-                        >
-                          <Trash2 />
-                        </Button>
+                  <div className="space-y-3">
+                    {cfg.footer.contact.map((c, i) => {
+                      const kind = contactKind(c)
+                      const setRow = (p: Partial<typeof c>) =>
+                        patch({ footer: { ...cfg.footer, contact: cfg.footer.contact.map((x, j) => (j === i ? { ...x, ...p } : x)) } })
+                      return (
+                        <div key={i} className="grid gap-2 rounded-lg border p-3 sm:grid-cols-[9rem_1fr_auto]">
+                          <select
+                            value={kind}
+                            aria-label={labels.contactKind}
+                            onChange={(e) => setRow({ kind: e.target.value as ContactKind })}
+                            className="h-9 rounded-md border border-input bg-background px-2 text-sm shadow-sm"
+                          >
+                            {(["phone", "zalo", "email", "address", "link"] as const).map((k) => (
+                              <option key={k} value={k}>
+                                {labels.contactKinds[k]}
+                              </option>
+                            ))}
+                          </select>
+                          <Input
+                            value={c.label}
+                            placeholder={labels.contactPlaceholders[kind]}
+                            aria-label={labels.contactLabel}
+                            onChange={(e) => setRow({ label: e.target.value })}
+                          />
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            aria-label={labels.remove}
+                            onClick={() => patch({ footer: { ...cfg.footer, contact: cfg.footer.contact.filter((_, j) => j !== i) } })}
+                          >
+                            <Trash2 />
+                          </Button>
+                          <Input
+                            className="sm:col-start-2"
+                            value={c.href}
+                            placeholder={labels.contactLinkPlaceholders[kind]}
+                            aria-label={labels.contactLink}
+                            onChange={(e) => setRow({ href: e.target.value })}
+                          />
+                        </div>
+                      )
+                    })}
+                    {cfg.footer.contact.length < 10 ? (
+                      <div className="flex flex-wrap gap-2">
+                        {(
+                          [
+                            ["phone", Phone],
+                            ["zalo", MessageCircle],
+                            ["email", Mail],
+                            ["address", MapPin],
+                            ["link", Globe],
+                          ] as const
+                        ).map(([k, Icon]) => (
+                          <Button
+                            key={k}
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => patch({ footer: { ...cfg.footer, contact: [...cfg.footer.contact, { label: "", href: "", kind: k }] } })}
+                          >
+                            <Icon />
+                            {labels.contactKinds[k]}
+                          </Button>
+                        ))}
                       </div>
-                    ))}
-                    {cfg.footer.contact.length < 8 ? (
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => patch({ footer: { ...cfg.footer, contact: [...cfg.footer.contact, { label: "", href: "" }] } })}
-                      >
-                        <Plus />
-                        {labels.addContact}
-                      </Button>
                     ) : null}
                     <p className="text-xs text-muted-foreground">{labels.contactHint}</p>
                   </div>
@@ -687,6 +856,47 @@ export function StorefrontEditor({
                     <Switch id="f-col" checked={cfg.footer.show_collections} onCheckedChange={(v) => patch({ footer: { ...cfg.footer, show_collections: v } })} />
                     <Label htmlFor="f-col">{labels.showCollections}</Label>
                   </div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">{labels.widgetTitle}</CardTitle>
+                <CardDescription>{labels.widgetHint}</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <Switch id="w-on" checked={cfg.contact_widget.enabled} onCheckedChange={(v) => patchWidget({ enabled: v })} />
+                  <Label htmlFor="w-on">{labels.widgetEnabled}</Label>
+                </div>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <FieldRow label={labels.widgetPhone}>
+                    <Input id="w-phone" value={cfg.contact_widget.phone} placeholder="0900 000 000" onChange={(e) => patchWidget({ phone: e.target.value })} />
+                  </FieldRow>
+                  <FieldRow label={labels.widgetZalo}>
+                    <Input id="w-zalo" value={cfg.contact_widget.zalo} placeholder="0900000000" onChange={(e) => patchWidget({ zalo: e.target.value })} />
+                  </FieldRow>
+                </div>
+                <p className="text-xs text-muted-foreground">{labels.widgetZaloHint}</p>
+                <FieldRow label={labels.widgetPosition}>
+                  <div className="flex gap-2">
+                    {(["left", "right"] as const).map((pos) => (
+                      <Button
+                        key={pos}
+                        type="button"
+                        size="sm"
+                        variant={cfg.contact_widget.position === pos ? "default" : "outline"}
+                        aria-pressed={cfg.contact_widget.position === pos}
+                        onClick={() => patchWidget({ position: pos })}
+                      >
+                        {labels.widgetPositions[pos]}
+                      </Button>
+                    ))}
+                  </div>
+                </FieldRow>
+                <div className="flex items-center gap-3">
+                  <Switch id="w-vn" checked={cfg.contact_widget.vn_only} onCheckedChange={(v) => patchWidget({ vn_only: v })} />
+                  <Label htmlFor="w-vn">{labels.widgetVnOnly}</Label>
                 </div>
               </CardContent>
             </Card>
@@ -732,7 +942,7 @@ export function StorefrontEditor({
           </TabsContent>
         </Tabs>
 
-        <div className="xl:col-span-2">
+        <div className="min-w-0 xl:col-span-7">
           <Card className="sticky top-20">
             <CardHeader className="space-y-3">
               <CardTitle className="text-base">{labels.preview}</CardTitle>
@@ -784,22 +994,18 @@ export function StorefrontEditor({
             </CardHeader>
             <CardContent>
               {previewMode === "live" ? (
-                hasDraft && (previewPage !== "product" || productHandle) ? (
-                  <div className="overflow-hidden rounded-lg border bg-muted/30">
-                    <div className="mx-auto" style={{ width: device === "mobile" ? 390 : "100%", maxWidth: "100%" }}>
-                      <iframe
-                        key={`${previewPage}-${draftUpdatedAt}`}
-                        title={labels.previewModes.live}
-                        src={`${previewBase}${
-                          previewPage === "home" ? "" : previewPage === "collection" ? "/store" : `/products/${productHandle}`
-                        }?_preview=${encodeURIComponent(previewToken)}`}
-                        className="block h-[560px] w-full bg-background"
-                      />
-                    </div>
-                  </div>
+                previewPage !== "product" || productHandle ? (
+                  <ScaledFrame
+                    frameRef={frameRef}
+                    device={device}
+                    title={labels.previewModes.live}
+                    src={`/preview${previewBase}${
+                      previewPage === "home" ? "" : previewPage === "collection" ? "/store" : `/products/${productHandle}`
+                    }?_preview=${encodeURIComponent(previewToken)}`}
+                  />
                 ) : (
                   <p className="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">
-                    {hasDraft ? labels.noProductForPreview : labels.liveNeedsDraft}
+                    {labels.noProductForPreview}
                   </p>
                 )
               ) : (
@@ -832,10 +1038,17 @@ export function StorefrontEditor({
             {labels.discard}
           </IntentButton>
         ) : null}
-        <span className="ml-auto max-w-sm text-xs text-muted-foreground">
-          {hasDraft ? (
+        <span className="ml-auto max-w-sm text-right text-xs text-muted-foreground" aria-live="polite">
+          {autosave === "saving" ? (
+            <span className="inline-flex items-center gap-1">
+              <Loader2 className="size-3 animate-spin" />
+              {labels.autosaving}
+            </span>
+          ) : autosave === "error" ? (
+            <span className="text-destructive">{autosaveError}</span>
+          ) : hasDraft ? (
             <span className="font-medium text-amber-700">
-              {labels.statusDraft}
+              {autosave === "saved" ? labels.autosaved : labels.statusDraft}
               {draftUpdatedAt ? ` · ${new Date(draftUpdatedAt).toLocaleString(lang === "vi" ? "vi-VN" : "en-GB")}` : ""}
             </span>
           ) : (

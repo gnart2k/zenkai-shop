@@ -47,6 +47,10 @@
       "next": "Slide sau",
       "goTo": "Đến slide {number}"
     },
+    "contactWidget": {
+      "zalo": "Chat Zalo",
+      "call": "Gọi điện"
+    },
     "defaultLanguage": "Mặc định"
   },
   "ShopOrder": {

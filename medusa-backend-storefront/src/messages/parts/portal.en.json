@@ -364,7 +364,7 @@
       "saved": "Saved. Your storefront is updated.",
       "templates": "Themes",
       "templatesHint": "A theme sets the whole structure of your shop: header, home page, listing and product pages, footer, plus colors and type.",
-      "themeResets": "Switching theme resets the home sections, header and footer to that theme's defaults. Your logo, texts and accent color are kept.",
+      "themeResets": "Switching theme changes the structure (header, footer and listing layouts, home section order and styles). Everything you wrote is kept: logo, texts, accent color, footer, announcement and the text, images and links in your sections.",
       "selected": "Selected",
       "primaryColor": "Accent color",
       "primaryHint": "Used for buttons and highlights across the shop.",
@@ -405,7 +405,7 @@
       "footerContact": "Contact links",
       "contactLabel": "Label",
       "addContact": "Add contact",
-      "contactHint": "Use tel:0900000000, mailto:you@example.com or an https:// link.",
+      "contactHint": "Phone and email become tap-to-call / tap-to-write links automatically. An address is shown as text; add a Google Maps link if you want it clickable.",
       "showCategories": "Show categories",
       "showCollections": "Show collections",
       "textsTitle": "Texts",
@@ -455,10 +455,10 @@
       "publish": "Publish",
       "discard": "Discard draft",
       "statusDraft": "Unpublished draft",
-      "statusLive": "You are editing what is live. Save a draft to try changes first.",
+      "statusLive": "You are editing what is live. Changes are saved as a draft automatically.",
       "liveNeedsDraft": "Save a draft to see your real pages here.",
       "noProductForPreview": "Add a product to preview the product page.",
-      "liveNote": "Your saved draft on the real storefront. Save the draft again to refresh. Visitors still see the published version.",
+      "liveNote": "The real storefront at true device width. It updates a moment after each edit; nothing is published until you press Publish.",
       "savedDraft": "Draft saved. Visitors still see the published storefront.",
       "published": "Published. Your storefront is updated.",
       "discarded": "Draft discarded. You are editing the live version again.",
@@ -469,7 +469,48 @@
       "devices": {
         "desktop": "Desktop",
         "mobile": "Mobile"
-      }
+      },
+      "autosaving": "Saving draft…",
+      "autosaved": "Draft autosaved · unpublished",
+      "autosaveFailed": "Could not save the draft.",
+      "uploading": "Uploading…",
+      "uploadFailed": "Upload failed.",
+      "sessionExpired": "Your session expired. Reload the page and sign in again.",
+      "contactKind": "Type",
+      "contactLink": "Link (optional)",
+      "contactKinds": {
+        "phone": "Phone",
+        "email": "Email",
+        "address": "Address",
+        "link": "Link",
+        "zalo": "Zalo"
+      },
+      "contactPlaceholders": {
+        "phone": "0900 000 000",
+        "email": "hello@yourshop.com",
+        "address": "12 Nguyen Trai, District 1, Ho Chi Minh City",
+        "link": "TikTok @yourshop",
+        "zalo": "0900 000 000"
+      },
+      "contactLinkPlaceholders": {
+        "phone": "Optional: leave empty to use the number",
+        "email": "Optional: leave empty to use the email",
+        "address": "Optional: Google Maps link",
+        "link": "https://…",
+        "zalo": "Optional: leave empty to use the number"
+      },
+      "widgetTitle": "Call & Zalo buttons",
+      "widgetHint": "Floating buttons so shoppers can call or chat with you in one tap.",
+      "widgetEnabled": "Show the floating buttons",
+      "widgetPhone": "Phone number",
+      "widgetZalo": "Zalo number or link",
+      "widgetZaloHint": "Zalo: a phone number or a zalo.me link. Leave a field empty to hide that button.",
+      "widgetPosition": "Side of the screen",
+      "widgetPositions": {
+        "left": "Left",
+        "right": "Right"
+      },
+      "widgetVnOnly": "Only show to shoppers in Vietnam"
     },
     "preview": {
       "banner": "Previewing an unpublished draft",

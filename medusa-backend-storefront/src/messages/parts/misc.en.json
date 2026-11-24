@@ -47,6 +47,10 @@
       "next": "Next slide",
       "goTo": "Go to slide {number}"
     },
+    "contactWidget": {
+      "zalo": "Chat on Zalo",
+      "call": "Call us"
+    },
     "defaultLanguage": "Default"
   },
   "ShopOrder": {

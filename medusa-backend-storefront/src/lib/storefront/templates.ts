@@ -35,9 +35,27 @@ export type SectionInstance = {
 export type HeaderConfig = { announcement: { enabled: boolean; text: L10n; link: string } }
 export type FooterConfig = {
   tagline: L10n
-  contact: { label: string; href: string }[]
+  contact: { label: string; href: string; kind?: "link" | "phone" | "email" | "address" | "zalo" }[]
   show_categories: boolean
   show_collections: boolean
+}
+
+/** Floating Call / Zalo buttons. */
+export type ContactWidgetConfig = {
+  enabled: boolean
+  phone: string
+  zalo: string
+  position: "left" | "right"
+  /** Only shoppers in the Vietnam region (/vn) see it. */
+  vn_only: boolean
+}
+
+export const DEFAULT_CONTACT_WIDGET: ContactWidgetConfig = {
+  enabled: true,
+  phone: "0866 063 804",
+  zalo: "0866063804",
+  position: "right",
+  vn_only: true,
 }
 
 export type BrandingConfig = {
@@ -261,8 +279,8 @@ const NO_ANNOUNCEMENT: HeaderConfig = { announcement: { enabled: false, text: {}
 const DEFAULT_FOOTER: FooterConfig = {
   tagline: {},
   contact: [
-    { label: "0866 063 804", href: "tel:0866063804" },
-    { label: "TikTok @dengoluadecor", href: "https://www.tiktok.com/@dengoluadecor" },
+    { label: "0866 063 804", href: "tel:0866063804", kind: "phone" },
+    { label: "TikTok @dengoluadecor", href: "https://www.tiktok.com/@dengoluadecor", kind: "link" },
   ],
   show_categories: true,
   show_collections: true,
@@ -475,6 +493,7 @@ export type StorefrontChoice = {
   footer: FooterConfig | null
   branding: BrandingConfig | null
   texts: Record<string, L10n>
+  contact_widget?: ContactWidgetConfig | null
   /** True when this is the owner's unpublished draft shown through a preview link. */
   preview?: boolean
 }
@@ -579,6 +598,7 @@ export type ResolvedStorefront = {
   header: HeaderConfig
   footer: FooterConfig
   branding: BrandingConfig
+  contactWidget: ContactWidgetConfig
 }
 
 /** Theme defaults + the owner's choices -> what the storefront renders. */
@@ -605,6 +625,7 @@ export function resolveStorefront(choice: Partial<StorefrontChoice> | null | und
     header: choice?.header ?? theme.header,
     footer: choice?.footer ?? theme.footer,
     branding: choice?.branding ?? DEFAULT_BRANDING,
+    contactWidget: choice?.contact_widget ?? DEFAULT_CONTACT_WIDGET,
   }
 }
 

@@ -4,7 +4,7 @@ import { PortalError, portalFetch } from "./api"
 
 const str = (f: FormData, k: string) => String(f.get(k) ?? "").trim()
 
-async function uploadImageFile(file: File): Promise<string> {
+export async function uploadImageFile(file: File): Promise<string> {
   const { file: uploaded } = await portalFetch<{ file: { url: string } }>("/portal/admin/uploads", {
     body: {
       filename: file.name,

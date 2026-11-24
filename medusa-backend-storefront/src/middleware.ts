@@ -138,23 +138,6 @@ async function baseMiddleware(request: NextRequest) {
     return NextResponse.next()
   }
 
-  // Draft preview link from the portal: remember the signed token in a cookie, then reload
-  // the same URL without it. The backend verifies the token on every request.
-  const previewToken = request.nextUrl.searchParams.get("_preview")
-  if (previewToken && previewToken.length < 2000) {
-    const clean = request.nextUrl.clone()
-    clean.searchParams.delete("_preview")
-    const res = NextResponse.redirect(clean)
-    res.cookies.set("_sf_preview", previewToken, {
-      httpOnly: true,
-      sameSite: "lax",
-      secure: process.env.NODE_ENV === "production",
-      maxAge: 60 * 60,
-      path: "/",
-    })
-    return res
-  }
-
   let cacheIdCookie = request.cookies.get("_medusa_cache_id")
   const cacheId = cacheIdCookie?.value || crypto.randomUUID()
 
@@ -319,7 +302,51 @@ async function refreshedPortalToken(request: NextRequest): Promise<string | null
   }
 }
 
+/**
+ * Draft preview lives under its own URL prefix, /preview/{locale}/{country}/..., and its token
+ * cookie is scoped to Path=/preview. The live storefront routes therefore never receive the
+ * cookie and can never show a draft to a real customer. The request is rewritten internally to
+ * the normal page with an `x-sf-preview` header; the browser address stays on /preview/....
+ */
+function previewMiddleware(request: NextRequest): NextResponse {
+  const { pathname, searchParams } = request.nextUrl
+  const inner = pathname.replace(/^\/preview/, "") || "/"
+  const [, loc, country] = inner.split("/")
+  if (!isLocaleSegment(loc) || !/^[a-z]{2}$/.test(country ?? "")) {
+    return NextResponse.redirect(new URL(`/preview/${routing.defaultLocale}/${DEFAULT_REGION}`, request.url))
+  }
+
+  // Signed token from the portal (button or editor frame) -> cookie for /preview only.
+  const token = searchParams.get("_preview")
+  if (token && token.length < 2000) {
+    const clean = request.nextUrl.clone()
+    clean.searchParams.delete("_preview")
+    const res = NextResponse.redirect(clean)
+    res.cookies.set("_sf_preview", token, {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 60 * 60,
+      path: "/preview",
+    })
+    return res
+  }
+
+  const headers = new Headers(request.headers)
+  headers.set("x-sf-preview", "1")
+  headers.set("x-next-intl-locale", loc)
+  const url = request.nextUrl.clone()
+  url.pathname = inner
+  const res = NextResponse.rewrite(url, { request: { headers } })
+  res.headers.set("x-robots-tag", "noindex, nofollow")
+  res.headers.set("cache-control", "no-store")
+  return res
+}
+
 export async function middleware(request: NextRequest) {
+  if (request.nextUrl.pathname === "/preview" || request.nextUrl.pathname.startsWith("/preview/")) {
+    return previewMiddleware(request)
+  }
   const fresh = await refreshedPortalToken(request)
   const response = await baseMiddleware(request)
   if (fresh) {
