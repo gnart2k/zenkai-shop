@@ -3,13 +3,6 @@
 import { Headphones, Package, ShieldCheck } from "lucide-react"
 import { useTranslations } from "next-intl"
 
-import {
-  Card,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-
 import { Reveal, RevealItem, RevealStagger } from "../motion-primitives"
 
 const ITEMS = [
@@ -22,32 +15,34 @@ export default function ValueProps() {
   const t = useTranslations("Home")
 
   return (
-    <section className="border-b border-border bg-muted/30 py-20 small:py-28">
+    <section className="border-t border-border/40 bg-background py-16 small:py-20">
       <div className="content-container">
         <Reveal className="mx-auto max-w-2xl text-center">
-          <p className="text-sm font-medium uppercase tracking-widest text-muted-foreground">
+          <p className="text-sm font-medium text-muted-foreground">
             {t("valueEyebrow")}
           </p>
-          <h2 className="mt-3 font-serif text-3xl font-medium tracking-tight text-foreground small:text-4xl">
+          <h2 className="mt-3 font-serif text-3xl font-light tracking-tight text-foreground small:text-4xl">
             {t("valueTitle")}
           </h2>
-          <p className="mt-4 text-muted-foreground">{t("valueDescription")}</p>
         </Reveal>
 
-        <RevealStagger className="mt-14 grid gap-6 small:grid-cols-3" stagger={0.12}>
+        <RevealStagger
+          className="mt-12 grid gap-8 small:grid-cols-3"
+          stagger={0.12}
+        >
           {ITEMS.map(({ icon: Icon, titleKey, descKey }) => (
             <RevealItem key={titleKey}>
-              <Card className="h-full border-border/80 bg-card/80 shadow-sm backdrop-blur-sm transition-shadow hover:shadow-md">
-                <CardHeader className="flex flex-col gap-3">
-                  <div className="flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                    <Icon className="size-5" aria-hidden />
-                  </div>
-                  <CardTitle className="font-serif text-xl">{t(titleKey)}</CardTitle>
-                  <CardDescription className="text-base leading-relaxed">
-                    {t(descKey)}
-                  </CardDescription>
-                </CardHeader>
-              </Card>
+              <div className="flex flex-col items-center gap-4 text-center">
+                <div className="flex size-14 items-center justify-center rounded-full bg-neutral-100 text-foreground">
+                  <Icon className="size-6" aria-hidden />
+                </div>
+                <h3 className="font-serif text-xl font-light text-foreground">
+                  {t(titleKey)}
+                </h3>
+                <p className="max-w-xs text-sm leading-relaxed text-muted-foreground">
+                  {t(descKey)}
+                </p>
+              </div>
             </RevealItem>
           ))}
         </RevealStagger>

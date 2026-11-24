@@ -1,0 +1,121 @@
+{
+  "AccountCommon": {
+    "edit": "Edit",
+    "cancel": "Cancel",
+    "save": "Save",
+    "saveChanges": "Save changes",
+    "firstName": "First name",
+    "lastName": "Last name",
+    "email": "Email",
+    "phone": "Phone",
+    "password": "Password",
+    "company": "Company",
+    "address": "Address",
+    "apartment": "Apartment, suite, etc.",
+    "postalCode": "Postal code",
+    "city": "City",
+    "province": "Province",
+    "provinceState": "Province / State",
+    "name": "Name"
+  },
+  "AccountInfo": {
+    "updatedSuccessfully": "{label} updated successfully",
+    "genericError": "An error occurred, please try again"
+  },
+  "AccountNav": {
+    "account": "Account",
+    "hello": "Hello {name}",
+    "profile": "Profile",
+    "addresses": "Addresses",
+    "orders": "Orders",
+    "overview": "Overview",
+    "logout": "Log out"
+  },
+  "AccountAddress": {
+    "newAddress": "New address",
+    "addAddress": "Add address",
+    "editAddress": "Edit address",
+    "remove": "Remove"
+  },
+  "AccountLogin": {
+    "title": "Welcome back",
+    "subtitle": "Sign in to access an enhanced shopping experience.",
+    "emailTitle": "Enter a valid email address.",
+    "signIn": "Sign in",
+    "notMember": "Not a member?",
+    "join": "Join us"
+  },
+  "AccountRegister": {
+    "title": "Become a Lumpa member",
+    "subtitle": "Create your Lumpa member profile, and get access to an enhanced shopping experience.",
+    "terms": "By creating an account, you agree to Lumpa's <privacy>Privacy Policy</privacy> and <terms>Terms of Use</terms>.",
+    "join": "Join",
+    "alreadyMember": "Already a member?",
+    "signIn": "Sign in"
+  },
+  "AccountOrders": {
+    "itemCount": "{count, plural, one {# item} other {# items}}",
+    "more": "more",
+    "seeDetails": "See details",
+    "emptyTitle": "Nothing to see here",
+    "emptyText": "You don't have any orders yet, let us change that :)",
+    "continueShopping": "Continue shopping",
+    "pageTitle": "Orders",
+    "pageDescription": "View your previous orders and their status. You can also create returns or exchanges for your orders if needed.",
+    "metaDescription": "Overview of your previous orders.",
+    "detailMetaTitle": "Order #{id}",
+    "detailMetaDescription": "View your order"
+  },
+  "AccountOverview": {
+    "metaTitle": "Account",
+    "metaDescription": "Overview of your account activity.",
+    "hello": "Hello {name}",
+    "signedInAs": "Signed in as:",
+    "profile": "Profile",
+    "completed": "Completed",
+    "addresses": "Addresses",
+    "saved": "Saved",
+    "recentOrders": "Recent orders",
+    "datePlaced": "Date placed",
+    "orderNumber": "Order number",
+    "totalAmount": "Total amount",
+    "goToOrder": "Go to order #{id}",
+    "noRecentOrders": "No recent orders"
+  },
+  "AccountProfile": {
+    "metaTitle": "Profile",
+    "metaDescription": "View and edit your Lumpa profile.",
+    "pageTitle": "Profile",
+    "pageDescription": "View and update your profile information, including your name, email, and phone number. You can also update your billing address, or change your password.",
+    "billingAddress": "Billing address",
+    "noBillingAddress": "No billing address",
+    "passwordHidden": "The password is not shown for security reasons",
+    "oldPassword": "Old password",
+    "newPassword": "New password",
+    "confirmPassword": "Confirm password",
+    "passwordNotImplemented": "Password update is not implemented"
+  },
+  "AccountAddresses": {
+    "metaTitle": "Addresses",
+    "metaDescription": "View your addresses",
+    "pageTitle": "Shipping addresses",
+    "pageDescription": "View and update your shipping addresses, you can add as many as you like. Saving your addresses will make them available during checkout."
+  },
+  "AccountTransfer": {
+    "title": "Order transfers",
+    "description": "Can't find the order you are looking for?",
+    "descriptionLine2": "Connect an order to your account.",
+    "orderId": "Order ID",
+    "request": "Request transfer",
+    "requested": "Transfer for order {id} requested",
+    "emailSent": "Transfer request email sent to {email}"
+  },
+  "AccountLayout": {
+    "questionsTitle": "Got questions?",
+    "questionsText": "Call us or message us on TikTok and we will get back to you."
+  },
+  "AccountLoginMeta": {
+    "title": "Sign in",
+    "description": "Sign in to your Lumpa account."
+  }
+}

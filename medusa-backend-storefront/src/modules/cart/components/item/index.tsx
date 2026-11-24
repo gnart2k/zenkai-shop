@@ -1,6 +1,5 @@
 "use client"
 
-import { Table, Text, clx } from "@medusajs/ui"
 import { updateLineItem } from "@lib/data/cart"
 import { HttpTypes } from "@medusajs/types"
 import CartItemSelect from "@modules/cart/components/cart-item-select"
@@ -40,19 +39,15 @@ const Item = ({ item, type = "full", currencyCode }: ItemProps) => {
       })
   }
 
-  // TODO: Update this to grab the actual max inventory
   const maxQtyFromInventory = 10
   const maxQuantity = item.variant?.manage_inventory ? 10 : maxQtyFromInventory
 
-  return (
-    <Table.Row className="w-full" data-testid="product-row">
-      <Table.Cell className="!pl-0 p-4 w-24">
+  if (type === "full") {
+    return (
+      <div className="flex gap-4 border-b border-border/40 py-6 last:border-b-0">
         <LocalizedClientLink
           href={`/products/${item.product_handle}`}
-          className={clx("flex", {
-            "w-16": type === "preview",
-            "small:w-24 w-12": type === "full",
-          })}
+          className="w-20 shrink-0 small:w-24"
         >
           <Thumbnail
             thumbnail={item.thumbnail}
@@ -60,40 +55,46 @@ const Item = ({ item, type = "full", currencyCode }: ItemProps) => {
             size="square"
           />
         </LocalizedClientLink>
-      </Table.Cell>
 
-      <Table.Cell className="text-left">
-        <Text
-          className="txt-medium-plus text-ui-fg-base"
-          data-testid="product-title"
-        >
-          {item.product_title}
-        </Text>
-        <LineItemOptions variant={item.variant} data-testid="product-variant" />
-      </Table.Cell>
+        <div className="flex min-w-0 flex-1 flex-col gap-2">
+          <div className="flex items-start justify-between gap-4">
+            <div className="min-w-0">
+              <LocalizedClientLink
+                href={`/products/${item.product_handle}`}
+                className="text-sm font-medium text-foreground transition-colors hover:text-foreground/70"
+              >
+                {item.product_title}
+              </LocalizedClientLink>
+              <LineItemOptions
+                variant={item.variant}
+                data-testid="product-variant"
+              />
+            </div>
+            <LineItemPrice
+              item={item}
+              style="tight"
+              currencyCode={currencyCode}
+            />
+          </div>
 
-      {type === "full" && (
-        <Table.Cell>
-          <div className="flex gap-2 items-center w-28">
+          <div className="flex items-center gap-3">
             <DeleteButton id={item.id} data-testid="product-delete-button" />
             <CartItemSelect
               value={item.quantity}
-              onChange={(value) => changeQuantity(parseInt(value.target.value))}
-              className="w-14 h-10 p-4"
+              onChange={(value) =>
+                changeQuantity(parseInt(value.target.value))
+              }
+              className="h-9 w-16 rounded-none border border-border bg-transparent px-2 text-sm"
               data-testid="product-select-button"
             >
-              {/* TODO: Update this with the v2 way of managing inventory */}
               {Array.from(
-                {
-                  length: Math.min(maxQuantity, 10),
-                },
+                { length: Math.min(maxQuantity, 10) },
                 (_, i) => (
                   <option value={i + 1} key={i}>
                     {i + 1}
                   </option>
                 )
               )}
-
               <option value={1} key={1}>
                 1
               </option>
@@ -101,43 +102,40 @@ const Item = ({ item, type = "full", currencyCode }: ItemProps) => {
             {updating && <Spinner />}
           </div>
           <ErrorMessage error={error} data-testid="product-error-message" />
-        </Table.Cell>
-      )}
+        </div>
+      </div>
+    )
+  }
 
-      {type === "full" && (
-        <Table.Cell className="hidden small:table-cell">
+  return (
+    <div className="flex gap-4 py-4">
+      <LocalizedClientLink
+        href={`/products/${item.product_handle}`}
+        className="w-16 shrink-0"
+      >
+        <Thumbnail
+          thumbnail={item.thumbnail}
+          images={item.variant?.product?.images}
+          size="square"
+        />
+      </LocalizedClientLink>
+      <div className="flex min-w-0 flex-1 flex-col justify-center">
+        <span className="text-sm text-foreground">{item.product_title}</span>
+        <span className="text-xs text-muted-foreground">
+          {item.quantity}x{" "}
           <LineItemUnitPrice
             item={item}
             style="tight"
             currencyCode={currencyCode}
           />
-        </Table.Cell>
-      )}
-
-      <Table.Cell className="!pr-0">
-        <span
-          className={clx("!pr-0", {
-            "flex flex-col items-end h-full justify-center": type === "preview",
-          })}
-        >
-          {type === "preview" && (
-            <span className="flex gap-x-1 ">
-              <Text className="text-ui-fg-muted">{item.quantity}x </Text>
-              <LineItemUnitPrice
-                item={item}
-                style="tight"
-                currencyCode={currencyCode}
-              />
-            </span>
-          )}
-          <LineItemPrice
-            item={item}
-            style="tight"
-            currencyCode={currencyCode}
-          />
         </span>
-      </Table.Cell>
-    </Table.Row>
+      </div>
+      <LineItemPrice
+        item={item}
+        style="tight"
+        currencyCode={currencyCode}
+      />
+    </div>
   )
 }
 

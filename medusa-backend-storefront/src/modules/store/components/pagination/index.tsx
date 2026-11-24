@@ -1,5 +1,6 @@
 "use client"
 
+import { useTranslations } from "next-intl"
 import { clx } from "@medusajs/ui"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 
@@ -12,6 +13,7 @@ export function Pagination({
   totalPages: number
   'data-testid'?: string
 }) {
+  const t = useTranslations("ShopStore")
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
@@ -39,6 +41,7 @@ export function Pagination({
         "text-ui-fg-base hover:text-ui-fg-subtle": isCurrent,
       })}
       disabled={isCurrent}
+      aria-label={t("page", { number: p })}
       onClick={() => handlePageChange(p)}
     >
       {label}

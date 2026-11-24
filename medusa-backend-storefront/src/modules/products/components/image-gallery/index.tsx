@@ -1,39 +1,51 @@
+import { useTranslations } from "next-intl"
 import { HttpTypes } from "@medusajs/types"
-import { Container } from "@medusajs/ui"
 import Image from "next/image"
 
 type ImageGalleryProps = {
   images: HttpTypes.StoreProductImage[]
+  /** Optional product video (product.metadata.video_url), shown before the images. */
+  videoUrl?: string | null
 }
 
-const ImageGallery = ({ images }: ImageGalleryProps) => {
+const ImageGallery = ({ images, videoUrl }: ImageGalleryProps) => {
+  const t = useTranslations("ShopProduct")
   return (
-    <div className="flex items-start relative">
-      <div className="flex flex-col flex-1 small:mx-16 gap-y-4">
-        {images.map((image, index) => {
-          return (
-            <Container
-              key={image.id}
-              className="relative aspect-[29/34] w-full overflow-hidden bg-ui-bg-subtle"
-              id={image.id}
-            >
-              {!!image.url && (
-                <Image
-                  src={image.url}
-                  priority={index <= 2 ? true : false}
-                  className="absolute inset-0 rounded-rounded"
-                  alt={`Product image ${index + 1}`}
-                  fill
-                  sizes="(max-width: 576px) 280px, (max-width: 768px) 360px, (max-width: 992px) 480px, 800px"
-                  style={{
-                    objectFit: "cover",
-                  }}
-                />
-              )}
-            </Container>
-          )
-        })}
-      </div>
+    <div className="flex flex-col gap-4">
+      {videoUrl && (
+        <div className="relative aspect-[3/4] w-full overflow-hidden bg-neutral-50">
+          <video
+            className="absolute inset-0 h-full w-full object-cover"
+            src={videoUrl}
+            poster={images[0]?.url ?? undefined}
+            autoPlay
+            muted
+            loop
+            playsInline
+            controls
+            preload="metadata"
+            data-testid="product-video"
+          />
+        </div>
+      )}
+      {images.map((image, index) => (
+        <div
+          key={image.id}
+          className="relative aspect-[3/4] w-full overflow-hidden bg-neutral-50"
+        >
+          {!!image.url && (
+            <Image
+              src={image.url}
+              priority={!videoUrl && index <= 2}
+              className="absolute inset-0 object-cover"
+              alt={t("imageAlt", { number: index + 1 })}
+              fill
+              sizes="(max-width: 576px) 100vw, (max-width: 1024px) 50vw, 600px"
+              style={{ objectFit: "cover" }}
+            />
+          )}
+        </div>
+      ))}
     </div>
   )
 }

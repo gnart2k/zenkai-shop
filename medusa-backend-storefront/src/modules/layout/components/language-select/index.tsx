@@ -9,6 +9,7 @@ import {
 } from "@headlessui/react"
 import { Fragment, useEffect, useMemo, useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
+import { useTranslations } from "next-intl"
 import ReactCountryFlag from "react-country-flag"
 
 import { StateType } from "@lib/hooks/use-toggle-state"
@@ -76,6 +77,7 @@ const LanguageSelect = ({
   const [current, setCurrent] = useState<LanguageOption | undefined>(undefined)
   const [isPending, startTransition] = useTransition()
   const router = useRouter()
+  const t = useTranslations("ShopLayout")
 
   const { state, close } = toggleState
 
@@ -128,7 +130,7 @@ const LanguageSelect = ({
       >
         <ListboxButton className="py-1 w-full">
           <div className="txt-compact-small flex items-start gap-x-2">
-            <span>Language:</span>
+            <span>{t("language")}</span>
             {current && (
               <span className="txt-compact-small flex items-center gap-x-2">
                 {current.countryCode && (
@@ -142,7 +144,11 @@ const LanguageSelect = ({
                     countryCode={current.countryCode}
                   />
                 )}
-                {isPending ? "..." : current.localizedName}
+                {isPending
+                  ? "..."
+                  : current.code
+                    ? current.localizedName
+                    : t("defaultLanguage")}
               </span>
             )}
           </div>
@@ -156,7 +162,7 @@ const LanguageSelect = ({
             leaveTo="opacity-0"
           >
             <ListboxOptions
-              className="absolute -bottom-[calc(100%-36px)] left-0 xsmall:left-auto xsmall:right-0 max-h-[442px] overflow-y-scroll z-[900] bg-white drop-shadow-md text-small-regular uppercase text-black no-scrollbar rounded-rounded w-full"
+              className="absolute -bottom-[calc(100%-36px)] left-0 xsmall:left-auto xsmall:right-0 max-h-[442px] overflow-y-scroll z-[900] bg-white drop-shadow-md text-small-regular text-black no-scrollbar rounded-rounded w-full"
               static
             >
               {options.map((o) => (
@@ -178,7 +184,7 @@ const LanguageSelect = ({
                   ) : (
                     <span style={{ width: "16px", height: "16px" }} />
                   )}
-                  {o.localizedName}
+                  {o.code ? o.localizedName : t("defaultLanguage")}
                 </ListboxOption>
               ))}
             </ListboxOptions>

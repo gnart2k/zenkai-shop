@@ -1,6 +1,7 @@
 "use client"
 
 import NativeSelect from "@modules/common/components/native-select"
+import { useTranslations } from "next-intl"
 import { useEffect, useState } from "react"
 
 type GhnProvince = {
@@ -46,7 +47,7 @@ const fetchGhnData = async <T,>(path: string) => {
   const json = (await response.json()) as GhnApiResponse<T>
 
   if (!response.ok) {
-    throw new Error(json.message || "Unable to load GHN data.")
+    throw new Error(json.message || "")
   }
 
   return json.data || []
@@ -72,6 +73,7 @@ const GhnAddressPicker = ({
   onWardCodeChange,
   testIdPrefix = "shipping",
 }: GhnAddressPickerProps) => {
+  const t = useTranslations("CheckoutFlowGhn")
   const [provinces, setProvinces] = useState<GhnProvince[]>([])
   const [districts, setDistricts] = useState<GhnDistrict[]>([])
   const [wards, setWards] = useState<GhnWard[]>([])
@@ -109,9 +111,9 @@ const GhnAddressPicker = ({
         }
 
         setError(
-          fetchError instanceof Error
+          fetchError instanceof Error && fetchError.message
             ? fetchError.message
-            : "Unable to load provinces."
+            : t("loadProvincesError")
         )
       } finally {
         if (isMounted) {
@@ -198,9 +200,9 @@ const GhnAddressPicker = ({
 
         setDistricts([])
         setError(
-          fetchError instanceof Error
+          fetchError instanceof Error && fetchError.message
             ? fetchError.message
-            : "Unable to load districts."
+            : t("loadDistrictsError")
         )
       } finally {
         if (isMounted) {
@@ -287,9 +289,9 @@ const GhnAddressPicker = ({
 
         setWards([])
         setError(
-          fetchError instanceof Error
+          fetchError instanceof Error && fetchError.message
             ? fetchError.message
-            : "Unable to load wards."
+            : t("loadWardsError")
         )
       } finally {
         if (isMounted) {
@@ -403,12 +405,12 @@ const GhnAddressPicker = ({
       <div className="grid grid-cols-1 small:grid-cols-3 gap-4">
         <div className="flex flex-col gap-y-2">
           <span className="txt-compact-medium-plus text-ui-fg-base">
-            Province / City
+            {t("provinceCity")}
           </span>
           <NativeSelect
             value={selectedProvinceId}
             onChange={handleProvinceChange}
-            placeholder={isLoadingProvinces ? "Loading provinces..." : "Province"}
+            placeholder={isLoadingProvinces ? t("loadingProvinces") : t("province")}
             disabled={isLoadingProvinces}
             required
             data-testid={`${testIdPrefix}-ghn-province-select`}
@@ -423,12 +425,12 @@ const GhnAddressPicker = ({
 
         <div className="flex flex-col gap-y-2">
           <span className="txt-compact-medium-plus text-ui-fg-base">
-            District
+            {t("district")}
           </span>
           <NativeSelect
             value={selectedDistrictId}
             onChange={handleDistrictChange}
-            placeholder={isLoadingDistricts ? "Loading districts..." : "District"}
+            placeholder={isLoadingDistricts ? t("loadingDistricts") : t("district")}
             disabled={!selectedProvinceId || isLoadingDistricts}
             required
             data-testid={`${testIdPrefix}-ghn-district-select`}
@@ -442,11 +444,11 @@ const GhnAddressPicker = ({
         </div>
 
         <div className="flex flex-col gap-y-2">
-          <span className="txt-compact-medium-plus text-ui-fg-base">Ward</span>
+          <span className="txt-compact-medium-plus text-ui-fg-base">{t("ward")}</span>
           <NativeSelect
             value={selectedWardCode}
             onChange={handleWardChange}
-            placeholder={isLoadingWards ? "Loading wards..." : "Ward"}
+            placeholder={isLoadingWards ? t("loadingWards") : t("ward")}
             disabled={!selectedDistrictId || isLoadingWards}
             required
             data-testid={`${testIdPrefix}-ghn-ward-select`}

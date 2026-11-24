@@ -1,0 +1,139 @@
+{
+  "CheckoutFlowNotFound": {
+    "metaDescription": "Đã có lỗi xảy ra",
+    "title": "Không tìm thấy trang",
+    "body": "Trang bạn đang tìm không tồn tại.",
+    "home": "Về trang chủ"
+  },
+  "CheckoutFlowPage": {
+    "metaTitle": "Thanh toán"
+  },
+  "CheckoutFlowTotals": {
+    "subtotal": "Tạm tính",
+    "shipping": "Phí vận chuyển",
+    "discount": "Giảm giá",
+    "taxes": "Thuế",
+    "total": "Tổng cộng"
+  },
+  "CheckoutFlowSummary": {
+    "title": "Giỏ hàng của bạn"
+  },
+  "CheckoutFlowPaymentTest": {
+    "attention": "Lưu ý:",
+    "testOnly": "Chỉ dùng để thử nghiệm."
+  },
+  "CheckoutFlowCountry": {
+    "placeholder": "Quốc gia",
+    "vietnam": "Việt Nam"
+  },
+  "CheckoutFlowReview": {
+    "title": "Xem lại đơn hàng",
+    "consent": "Khi bấm nút đặt hàng, bạn xác nhận đã đọc, hiểu và đồng ý với Điều khoản sử dụng, Điều khoản bán hàng và Chính sách đổi trả của chúng tôi, đồng thời đã đọc Chính sách bảo mật của Lumpa."
+  },
+  "CheckoutFlowDiscount": {
+    "add": "Thêm mã giảm giá",
+    "apply": "Áp dụng",
+    "applied": "Mã giảm giá đã áp dụng:",
+    "remove": "Xóa mã giảm giá khỏi đơn hàng"
+  },
+  "CheckoutFlowAddressSelect": {
+    "choose": "Chọn một địa chỉ"
+  },
+  "CheckoutFlowPaymentContainer": {
+    "cardDetails": "Nhập thông tin thẻ của bạn:"
+  },
+  "CheckoutFlowPayment": {
+    "title": "Thanh toán",
+    "edit": "Sửa",
+    "method": "Phương thức thanh toán",
+    "details": "Chi tiết thanh toán",
+    "giftCard": "Thẻ quà tặng",
+    "anotherStep": "Sẽ có thêm một bước nữa",
+    "enterCard": "Nhập thông tin thẻ",
+    "continuePayos": "Tiếp tục với PayOS",
+    "continueReview": "Tiếp tục xem lại đơn hàng",
+    "payosError": "Không thể tạo liên kết thanh toán PayOS. Bạn vui lòng chọn lại PayOS nhé.",
+    "providers": {
+      "card": "Thẻ tín dụng",
+      "cod": "Thanh toán khi nhận hàng"
+    }
+  },
+  "CheckoutFlowAddresses": {
+    "shippingTitle": "Địa chỉ giao hàng",
+    "billingTitle": "Địa chỉ thanh toán",
+    "edit": "Sửa",
+    "continue": "Tiếp tục đến bước vận chuyển",
+    "contact": "Liên hệ",
+    "sameAsShipping": "Địa chỉ thanh toán trùng với địa chỉ giao hàng."
+  },
+  "CheckoutFlowBillingForm": {
+    "firstName": "Tên",
+    "lastName": "Họ",
+    "address": "Địa chỉ",
+    "company": "Công ty",
+    "postalCode": "Mã bưu chính",
+    "city": "Thành phố",
+    "province": "Tỉnh / thành phố",
+    "phone": "Số điện thoại"
+  },
+  "CheckoutFlowShippingForm": {
+    "firstName": "Tên",
+    "lastName": "Họ",
+    "address": "Địa chỉ",
+    "company": "Công ty",
+    "postalCode": "Mã bưu chính",
+    "city": "Thành phố",
+    "province": "Tỉnh / thành phố",
+    "phone": "Số điện thoại",
+    "email": "Email",
+    "emailTitle": "Vui lòng nhập một địa chỉ email hợp lệ.",
+    "sameAsBilling": "Địa chỉ thanh toán trùng với địa chỉ giao hàng",
+    "savedAddressPrompt": "Chào {name}, bạn có muốn dùng một trong các địa chỉ đã lưu không?"
+  },
+  "CheckoutFlowGhn": {
+    "loadProvincesError": "Không tải được danh sách tỉnh / thành phố.",
+    "loadDistrictsError": "Không tải được danh sách quận / huyện.",
+    "loadWardsError": "Không tải được danh sách phường / xã.",
+    "provinceCity": "Tỉnh / thành phố",
+    "province": "Tỉnh / thành phố",
+    "district": "Quận / huyện",
+    "ward": "Phường / xã",
+    "loadingProvinces": "Đang tải tỉnh / thành phố...",
+    "loadingDistricts": "Đang tải quận / huyện...",
+    "loadingWards": "Đang tải phường / xã..."
+  },
+  "CheckoutFlowPaymentButton": {
+    "selectMethod": "Chọn phương thức thanh toán",
+    "placeOrder": "Đặt hàng",
+    "payosUrlMissing": "Thiếu liên kết thanh toán PayOS. Bạn vui lòng chọn lại PayOS và thử lại nhé.",
+    "payosRestartError": "Không thể thanh toán lại bằng PayOS.",
+    "completeOrder": "Hoàn tất đơn hàng",
+    "payWithPayos": "Thanh toán bằng PayOS",
+    "canceled": "Thanh toán đã bị hủy. Bạn có thể thử lại hoặc chọn phương thức khác."
+  },
+  "CheckoutFlowFreeShipping": {
+    "unlocked": "Bạn được miễn phí vận chuyển!",
+    "unlock": "Mua thêm để được miễn phí vận chuyển",
+    "remaining": "Chỉ cần thêm <em>{amount}</em> nữa",
+    "viewCart": "Xem giỏ hàng",
+    "viewProducts": "Xem sản phẩm"
+  },
+  "CheckoutFlowShipping": {
+    "title": "Vận chuyển",
+    "edit": "Sửa",
+    "loading": "Đang tải các phương thức vận chuyển…",
+    "initialLoadFailed": "Tải lần đầu không thành công, đang thử lại…",
+    "loadError": "Không tải được các phương thức vận chuyển. Bạn vui lòng thử lại sau nhé.",
+    "genericError": "Đã có lỗi xảy ra",
+    "needAddress": "Hãy lưu địa chỉ giao hàng ở bước trên để xem các phương thức vận chuyển.",
+    "noMethods": "Hiện chưa có phương thức vận chuyển nào cho địa chỉ này. Bạn vui lòng kiểm tra lại địa chỉ hoặc liên hệ chúng tôi qua số {phone}.",
+    "shipTitle": "Giao hàng tận nơi",
+    "shipDesc": "Giao đến địa chỉ của bạn",
+    "pickupTitle": "Nhận tại cửa hàng",
+    "pickupDesc": "Nhận hàng tại cửa hàng gần bạn",
+    "needGhnAddress": "Với địa chỉ ở Việt Nam, bạn hãy chọn tỉnh, quận và phường ở trên để GHN báo phí cho lựa chọn này.",
+    "quoteUnavailable": "Chưa có phí vận chuyển cho lựa chọn này.",
+    "ghnStandard": "Giao hàng tiêu chuẩn (GHN)",
+    "continue": "Tiếp tục đến bước thanh toán"
+  }
+}

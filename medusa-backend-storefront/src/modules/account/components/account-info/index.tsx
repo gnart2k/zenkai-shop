@@ -1,6 +1,7 @@
 import { Disclosure } from "@headlessui/react"
 import { Badge, Button, clx } from "@medusajs/ui"
 import { useEffect } from "react"
+import { useTranslations } from "next-intl"
 
 import useToggleState from "@lib/hooks/use-toggle-state"
 import { useFormStatus } from "react-dom"
@@ -22,10 +23,12 @@ const AccountInfo = ({
   isSuccess,
   isError,
   clearState,
-  errorMessage = "An error occurred, please try again",
+  errorMessage,
   children,
   'data-testid': dataTestid
 }: AccountInfoProps) => {
+  const t = useTranslations("AccountInfo")
+  const tc = useTranslations("AccountCommon")
   const { state, close, toggle } = useToggleState()
 
   const { pending } = useFormStatus()
@@ -45,7 +48,7 @@ const AccountInfo = ({
     <div className="text-small-regular" data-testid={dataTestid}>
       <div className="flex items-end justify-between">
         <div className="flex flex-col">
-          <span className="uppercase text-ui-fg-base">{label}</span>
+          <span className="text-ui-fg-base">{label}</span>
           <div className="flex items-center flex-1 basis-0 justify-end gap-x-4">
             {typeof currentInfo === "string" ? (
               <span className="font-semibold" data-testid="current-info">{currentInfo}</span>
@@ -63,7 +66,7 @@ const AccountInfo = ({
             data-testid="edit-button"
             data-active={state}
           >
-            {state ? "Cancel" : "Edit"}
+            {state ? tc("cancel") : tc("edit")}
           </Button>
         </div>
       </div>
@@ -82,7 +85,7 @@ const AccountInfo = ({
           data-testid="success-message"
         >
           <Badge className="p-2 my-4" color="green">
-            <span>{label} updated succesfully</span>
+            <span>{t("updatedSuccessfully", { label })}</span>
           </Badge>
         </Disclosure.Panel>
       </Disclosure>
@@ -101,7 +104,7 @@ const AccountInfo = ({
           data-testid="error-message"
         >
           <Badge className="p-2 my-4" color="red">
-            <span>{errorMessage}</span>
+            <span>{errorMessage ?? t("genericError")}</span>
           </Badge>
         </Disclosure.Panel>
       </Disclosure>
@@ -126,7 +129,7 @@ const AccountInfo = ({
                 type="submit"
                 data-testid="save-button"
               >
-                Save changes
+                {tc("saveChanges")}
               </Button>
             </div>
           </div>

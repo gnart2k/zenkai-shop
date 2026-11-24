@@ -1,13 +1,15 @@
 import { declineTransferRequest } from "@lib/data/orders"
 import { Heading, Text } from "@medusajs/ui"
+import { getTranslations } from "next-intl/server"
 import TransferImage from "@modules/order/components/transfer-image"
 
 export default async function TransferPage({
   params,
 }: {
-  params: { id: string; token: string }
+  params: Promise<{ id: string; token: string }>
 }) {
-  const { id, token } = params
+  const { id, token } = await params
+  const t = await getTranslations("ShopOrder.transfer")
 
   const { success, error } = await declineTransferRequest(id, token)
 
@@ -18,20 +20,22 @@ export default async function TransferPage({
         {success && (
           <>
             <Heading level="h1" className="text-xl text-zinc-900">
-              Order transfer declined!
+              {t("declinedTitle")}
             </Heading>
             <Text className="text-zinc-600">
-              Transfer of order {id} has been successfully declined.
+              {t("declinedBody", { id })}
             </Text>
           </>
         )}
         {!success && (
           <>
             <Text className="text-zinc-600">
-              There was an error declining the transfer. Please try again.
+              {t("declineError")}
             </Text>
             {error && (
-              <Text className="text-red-500">Error message: {error}</Text>
+              <Text className="text-red-500">
+                {t("errorMessage", { error })}
+              </Text>
             )}
           </>
         )}

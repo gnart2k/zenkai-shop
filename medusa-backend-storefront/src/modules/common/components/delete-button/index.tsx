@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl"
 import { deleteLineItem } from "@lib/data/cart"
 import { Spinner, Trash } from "@medusajs/icons"
 import { clx } from "@medusajs/ui"
@@ -12,6 +13,7 @@ const DeleteButton = ({
   children?: React.ReactNode
   className?: string
 }) => {
+  const t = useTranslations("ShopCommon")
   const [isDeleting, setIsDeleting] = useState(false)
 
   const handleDelete = async (id: string) => {
@@ -31,6 +33,7 @@ const DeleteButton = ({
       <button
         className="flex gap-x-1 text-ui-fg-subtle hover:text-ui-fg-base cursor-pointer"
         onClick={() => handleDelete(id)}
+        aria-label={t("remove")}
       >
         {isDeleting ? <Spinner className="animate-spin" /> : <Trash />}
         <span>{children}</span>

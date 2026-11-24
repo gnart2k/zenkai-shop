@@ -1,9 +1,6 @@
 import { HttpTypes } from "@medusajs/types"
-import { ChevronRight } from "lucide-react"
 import { getTranslations } from "next-intl/server"
 
-import { Badge } from "@/components/ui/badge"
-import { Separator } from "@/components/ui/separator"
 import { Link } from "@/i18n/navigation"
 
 type Props = {
@@ -17,46 +14,31 @@ export default async function CollectionHighlights({
 }: Props) {
   const t = await getTranslations("Home")
 
-  if (!collections.length) {
-    return (
-      <section className="border-b border-border bg-background py-16 small:py-20">
-        <div className="content-container flex flex-col items-center gap-4 text-center">
-          <Badge variant="outline" className="rounded-full">
-            {t("collectionsBadge")}
-          </Badge>
-          <p className="max-w-md text-muted-foreground">
-            {t("collectionsEmpty")}
-          </p>
-        </div>
-      </section>
-    )
-  }
+  if (!collections.length) return null
 
   return (
-    <section className="border-b border-border bg-background py-16 small:py-20">
+    <section className="bg-background py-12 small:py-16">
       <div className="content-container">
-        <div className="flex flex-col gap-2 text-center small:text-left">
-          <p className="text-sm font-medium uppercase tracking-widest text-muted-foreground">
+        <div className="flex flex-col items-center gap-2 text-center">
+          <p className="text-sm font-medium text-muted-foreground">
             {t("collectionsEyebrow")}
           </p>
-          <h2 className="font-serif text-3xl font-medium tracking-tight text-foreground small:text-4xl">
+          <h2 className="font-serif text-3xl font-light tracking-tight text-foreground small:text-4xl">
             {t("collectionsTitle")}
           </h2>
         </div>
-        <Separator className="my-10 bg-border/80" />
-        <ul className="flex flex-wrap justify-center gap-3 small:justify-start">
+
+        <div className="mt-10 flex flex-wrap justify-center gap-3">
           {collections.map((c) => (
-            <li key={c.id}>
-              <Link
-                href={`/${countryCode}/collections/${c.handle}`}
-                className="group inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-sm font-medium text-foreground shadow-sm transition-all hover:border-primary/40 hover:bg-muted/50 hover:shadow"
-              >
-                {c.title}
-                <ChevronRight className="size-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" aria-hidden />
-              </Link>
-            </li>
+            <Link
+              key={c.id}
+              href={`/${countryCode}/collections/${c.handle}`}
+              className="group inline-flex items-center gap-2 rounded-full border border-border bg-card px-5 py-2.5 text-sm font-medium text-foreground transition-all hover:border-foreground/30 hover:bg-muted"
+            >
+              {c.title}
+            </Link>
           ))}
-        </ul>
+        </div>
       </div>
     </section>
   )

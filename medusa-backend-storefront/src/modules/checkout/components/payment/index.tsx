@@ -1,7 +1,7 @@
 "use client"
 
 import { RadioGroup } from "@headlessui/react"
-import { isPayOS, isStripeLike, paymentInfoMap } from "@lib/constants"
+import { isPayOS, isStripeLike, paymentInfoMap as basePaymentInfoMap } from "@lib/constants"
 import { initiatePaymentSession } from "@lib/data/cart"
 import { CheckCircleSolid, CreditCard } from "@medusajs/icons"
 import { Button, Container, Heading, Text, clx } from "@medusajs/ui"
@@ -12,7 +12,8 @@ import PaymentContainer, {
 import Divider from "@modules/common/components/divider"
 import { storefrontDebugLog } from "@lib/util/storefront-debug"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
+import { useTranslations } from "next-intl"
 
 const Payment = ({
   cart,
@@ -24,6 +25,19 @@ const Payment = ({
   /** When false (digital-only cart), payment does not require a shipping method. */
   requiresShipping?: boolean
 }) => {
+  const t = useTranslations("CheckoutFlowPayment")
+  const paymentInfoMap = useMemo(() => {
+    const titles: Record<string, string> = {
+      pp_stripe_stripe: t("providers.card"),
+      "pp_medusa-payments_default": t("providers.card"),
+      pp_system_default: t("providers.cod"),
+    }
+    const map: typeof basePaymentInfoMap = {}
+    for (const [id, info] of Object.entries(basePaymentInfoMap)) {
+      map[id] = { ...info, title: titles[id] ?? info.title }
+    }
+    return map
+  }, [t])
   const activeSession = cart.payment_collection?.payment_sessions?.find(
     (paymentSession: any) => paymentSession.status === "pending"
   )
@@ -103,9 +117,7 @@ const Payment = ({
             : null
 
         if (!checkoutUrl) {
-          throw new Error(
-            "Unable to create PayOS checkout URL. Please try selecting PayOS again."
-          )
+          throw new Error(t("payosError"))
         }
 
         window.location.href = checkoutUrl
@@ -165,7 +177,7 @@ const Payment = ({
             }
           )}
         >
-          Payment
+          {t("title")}
           {!isOpen && paymentReady && <CheckCircleSolid />}
         </Heading>
         {!isOpen && paymentReady && (
@@ -175,7 +187,7 @@ const Payment = ({
               className="text-ui-fg-interactive hover:text-ui-fg-interactive-hover"
               data-testid="edit-payment-button"
             >
-              Edit
+              {t("edit")}
             </button>
           </Text>
         )}
@@ -215,13 +227,13 @@ const Payment = ({
           {paidByGiftcard && (
             <div className="flex flex-col w-1/3">
               <Text className="txt-medium-plus text-ui-fg-base mb-1">
-                Payment method
+                {t("method")}
               </Text>
               <Text
                 className="txt-medium text-ui-fg-subtle"
                 data-testid="payment-method-summary"
               >
-                Gift card
+                {t("giftCard")}
               </Text>
             </div>
           )}
@@ -243,10 +255,10 @@ const Payment = ({
             data-testid="submit-payment-button"
           >
             {!activeSession && isStripeLike(selectedPaymentMethod)
-              ? " Enter card details"
+              ? t("enterCard")
               : isPayOS(selectedPaymentMethod)
-                ? "Continue to PayOS"
-                : "Continue to review"}
+                ? t("continuePayos")
+                : t("continueReview")}
           </Button>
         </div>
 
@@ -255,7 +267,7 @@ const Payment = ({
             <div className="flex items-start gap-x-1 w-full">
               <div className="flex flex-col w-1/3">
                 <Text className="txt-medium-plus text-ui-fg-base mb-1">
-                  Payment method
+                  {t("method")}
                 </Text>
                 <Text
                   className="txt-medium text-ui-fg-subtle"
@@ -267,7 +279,7 @@ const Payment = ({
               </div>
               <div className="flex flex-col w-1/3">
                 <Text className="txt-medium-plus text-ui-fg-base mb-1">
-                  Payment details
+                  {t("details")}
                 </Text>
                 <div
                   className="flex gap-2 txt-medium text-ui-fg-subtle items-center"
@@ -281,7 +293,7 @@ const Payment = ({
                   <Text>
                     {isStripeLike(selectedPaymentMethod) && cardBrand
                       ? cardBrand
-                      : "Another step will appear"}
+                      : t("anotherStep")}
                   </Text>
                 </div>
               </div>
@@ -289,13 +301,13 @@ const Payment = ({
           ) : paidByGiftcard ? (
             <div className="flex flex-col w-1/3">
               <Text className="txt-medium-plus text-ui-fg-base mb-1">
-                Payment method
+                {t("method")}
               </Text>
               <Text
                 className="txt-medium text-ui-fg-subtle"
                 data-testid="payment-method-summary"
               >
-                Gift card
+                {t("giftCard")}
               </Text>
             </div>
           ) : null}

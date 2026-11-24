@@ -5,9 +5,11 @@ import CheckoutForm from "@modules/checkout/templates/checkout-form"
 import CheckoutSummary from "@modules/checkout/templates/checkout-summary"
 import { Metadata } from "next"
 import { notFound, redirect } from "next/navigation"
+import { getTranslations } from "next-intl/server"
 
-export const metadata: Metadata = {
-  title: "Checkout",
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("CheckoutFlowPage")
+  return { title: t("metaTitle") }
 }
 
 /** Avoid stale RSC payloads so shipping quotes see up-to-date cart + GHN address metadata */

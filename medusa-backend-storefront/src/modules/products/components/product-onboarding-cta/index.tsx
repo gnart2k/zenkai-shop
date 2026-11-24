@@ -1,7 +1,9 @@
+import { getTranslations } from "next-intl/server"
 import { Button, Container, Text } from "@medusajs/ui"
 import { cookies as nextCookies } from "next/headers"
 
 async function ProductOnboardingCta() {
+  const t = await getTranslations("ShopProduct.onboarding")
   const cookies = await nextCookies()
 
   const isOnboarding = cookies.get("_medusa_onboarding")?.value === "true"
@@ -14,13 +16,13 @@ async function ProductOnboardingCta() {
     <Container className="max-w-4xl h-full bg-ui-bg-subtle w-full p-8">
       <div className="flex flex-col gap-y-4 center">
         <Text className="text-ui-fg-base text-xl">
-          Your demo product was successfully created! 🎉
+          {t("created")}
         </Text>
         <Text className="text-ui-fg-subtle text-small-regular">
-          You can now continue setting up your store in the admin.
+          {t("hint")}
         </Text>
         <a href="http://localhost:7001/a/orders?onboarding_step=create_order_nextjs">
-          <Button className="w-full">Continue setup in admin</Button>
+          <Button className="w-full">{t("continue")}</Button>
         </a>
       </div>
     </Container>

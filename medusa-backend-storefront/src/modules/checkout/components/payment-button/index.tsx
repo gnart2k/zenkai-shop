@@ -7,6 +7,7 @@ import { HttpTypes } from "@medusajs/types"
 import { Button } from "@medusajs/ui"
 import { useElements, useStripe } from "@stripe/react-stripe-js"
 import { useSearchParams } from "next/navigation"
+import { useTranslations } from "next-intl"
 import React, { useEffect, useRef, useState } from "react"
 import ErrorMessage from "../error-message"
 
@@ -19,6 +20,7 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
   cart,
   "data-testid": dataTestId,
 }) => {
+  const t = useTranslations("CheckoutFlowPaymentButton")
   const needsShipping = cart ? cartRequiresShipping(cart) : true
 
   const notReady =
@@ -52,7 +54,7 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
         />
       )
     default:
-      return <Button disabled>Select a payment method</Button>
+      return <Button disabled>{t("selectMethod")}</Button>
   }
 }
 
@@ -65,6 +67,7 @@ const StripePaymentButton = ({
   notReady: boolean
   "data-testid"?: string
 }) => {
+  const t = useTranslations("CheckoutFlowPaymentButton")
   const [submitting, setSubmitting] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
@@ -153,7 +156,7 @@ const StripePaymentButton = ({
         isLoading={submitting}
         data-testid={dataTestId}
       >
-        Place order
+        {t("placeOrder")}
       </Button>
       <ErrorMessage
         error={errorMessage}
@@ -164,6 +167,7 @@ const StripePaymentButton = ({
 }
 
 const ManualTestPaymentButton = ({ notReady }: { notReady: boolean }) => {
+  const t = useTranslations("CheckoutFlowPaymentButton")
   const [submitting, setSubmitting] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
@@ -192,7 +196,7 @@ const ManualTestPaymentButton = ({ notReady }: { notReady: boolean }) => {
         size="large"
         data-testid="submit-order-button"
       >
-        Place order
+        {t("placeOrder")}
       </Button>
       <ErrorMessage
         error={errorMessage}
@@ -211,6 +215,7 @@ const PayOSPaymentButton = ({
   notReady: boolean
   "data-testid"?: string
 }) => {
+  const t = useTranslations("CheckoutFlowPaymentButton")
   const [submitting, setSubmitting] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const hasAutoCompletedRef = useRef(false)
@@ -281,26 +286,24 @@ const PayOSPaymentButton = ({
       }
 
       if (!nextCheckoutUrl) {
-        throw new Error(
-          "PayOS payment URL is missing. Please re-select PayOS and try again."
-        )
+        throw new Error(t("payosUrlMissing"))
       }
 
       window.location.href = nextCheckoutUrl
       return
     } catch (err: any) {
-      setErrorMessage(err?.message || "Unable to restart PayOS payment.")
+      setErrorMessage(err?.message || t("payosRestartError"))
       setSubmitting(false)
     }
   }
 
   const buttonLabel = isReturnedFromPayOS
-    ? "Complete order"
-    : "Pay with PayOS"
+    ? t("completeOrder")
+    : t("payWithPayos")
 
   const cancelHint =
     isCanceledFromPayOS && !isReturnedFromPayOS
-      ? "Payment was canceled. You can try again or choose another method."
+      ? t("canceled")
       : null
 
   return (

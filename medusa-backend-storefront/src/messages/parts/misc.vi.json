@@ -1,0 +1,187 @@
+{
+  "ShopNotFound": {
+    "metaTitle": "404",
+    "metaDescription": "Đã có lỗi xảy ra",
+    "title": "Không tìm thấy trang",
+    "description": "Trang bạn đang tìm không tồn tại.",
+    "cartDescription": "Không tìm thấy giỏ hàng bạn đang mở. Hãy xóa cookie của trình duyệt rồi thử lại nhé.",
+    "backHome": "Về trang chủ"
+  },
+  "ShopCart": {
+    "metaTitle": "Giỏ hàng",
+    "metaDescription": "Xem giỏ hàng của bạn",
+    "title": "Giỏ hàng",
+    "emptyDescription": "Giỏ hàng của bạn đang trống. Hãy bắt đầu chọn cho mình một chiếc đèn ưng ý nhé.",
+    "explore": "Xem sản phẩm",
+    "signInTitle": "Bạn đã có tài khoản?",
+    "signInSubtitle": "Đăng nhập để mua sắm tiện hơn.",
+    "signIn": "Đăng nhập",
+    "colItem": "Sản phẩm",
+    "colQuantity": "Số lượng",
+    "colPrice": "Đơn giá",
+    "colTotal": "Thành tiền",
+    "summary": "Tóm tắt đơn hàng",
+    "goToCheckout": "Tiến hành thanh toán",
+    "remove": "Xóa",
+    "dropdown": {
+      "quantity": "Số lượng: {count}",
+      "subtotal": "Tạm tính",
+      "exclTaxes": "(chưa gồm thuế)",
+      "goToCart": "Xem giỏ hàng",
+      "empty": "Giỏ hàng của bạn đang trống.",
+      "allProducts": "Đến trang tất cả sản phẩm",
+      "explore": "Xem sản phẩm"
+    }
+  },
+  "ShopLayout": {
+    "closeMenu": "Đóng menu",
+    "copyright": "© {year} {name}. Bảo lưu mọi quyền.",
+    "language": "Ngôn ngữ:",
+    "mismatch": {
+      "error": "Chưa chuyển được giỏ hàng của bạn sang tài khoản",
+      "retry": "Thử chuyển lại",
+      "transferring": "Đang chuyển..."
+    },
+    "hero": {
+      "prev": "Slide trước",
+      "next": "Slide sau",
+      "goTo": "Đến slide {number}"
+    },
+    "defaultLanguage": "Mặc định"
+  },
+  "ShopOrder": {
+    "confirmedMetaTitle": "Đặt hàng thành công",
+    "confirmedMetaDescription": "Đơn hàng của bạn đã được ghi nhận",
+    "thankYou": "Cảm ơn bạn!",
+    "placed": "Đơn hàng của bạn đã được đặt thành công.",
+    "summary": "Tóm tắt",
+    "sentTo": "Chúng tôi đã gửi thông tin xác nhận đơn hàng tới {email}.",
+    "orderDate": "Ngày đặt hàng:",
+    "orderNumber": "Mã đơn hàng:",
+    "orderStatus": "Trạng thái đơn hàng:",
+    "paymentStatus": "Trạng thái thanh toán:",
+    "fulfillment": {
+      "not_fulfilled": "Chưa xử lý",
+      "partially_fulfilled": "Đã xử lý một phần",
+      "fulfilled": "Đã xử lý",
+      "partially_shipped": "Đã giao một phần",
+      "shipped": "Đang giao hàng",
+      "partially_delivered": "Đã nhận một phần",
+      "delivered": "Đã giao hàng",
+      "canceled": "Đã hủy",
+      "requires_action": "Cần xử lý"
+    },
+    "payment": {
+      "not_paid": "Chưa thanh toán",
+      "awaiting": "Đang chờ thanh toán",
+      "authorized": "Đã xác thực",
+      "partially_authorized": "Đã xác thực một phần",
+      "captured": "Đã thanh toán",
+      "partially_captured": "Đã thanh toán một phần",
+      "partially_refunded": "Đã hoàn tiền một phần",
+      "refunded": "Đã hoàn tiền",
+      "canceled": "Đã hủy",
+      "requires_action": "Cần xử lý"
+    },
+    "orderSummary": "Tóm tắt đơn hàng",
+    "subtotal": "Tạm tính",
+    "discount": "Giảm giá",
+    "shipping": "Phí vận chuyển",
+    "taxes": "Thuế",
+    "total": "Tổng cộng",
+    "paymentHeading": "Thanh toán",
+    "paymentMethod": "Phương thức thanh toán",
+    "paymentDetails": "Chi tiết thanh toán",
+    "paidAt": "Đã thanh toán {amount} lúc {date}",
+    "providers": {
+      "card": "Thẻ tín dụng",
+      "manual": "Thanh toán thủ công"
+    },
+    "delivery": "Giao hàng",
+    "shippingAddress": "Địa chỉ nhận hàng",
+    "contact": "Liên hệ",
+    "method": "Phương thức",
+    "help": {
+      "title": "Cần hỗ trợ?",
+      "contact": "Liên hệ",
+      "returns": "Đổi trả"
+    },
+    "details": {
+      "title": "Chi tiết đơn hàng",
+      "back": "Quay lại danh sách"
+    },
+    "onboarding": {
+      "created": "Đơn hàng thử của bạn đã được tạo thành công! 🎉",
+      "hint": "Bây giờ bạn có thể hoàn tất thiết lập cửa hàng trong trang quản trị.",
+      "complete": "Hoàn tất thiết lập trong trang quản trị"
+    },
+    "transfer": {
+      "title": "Yêu cầu chuyển quyền sở hữu đơn hàng {id}",
+      "intro": "Bạn nhận được yêu cầu chuyển quyền sở hữu đơn hàng ({id}). Nếu đồng ý, bạn có thể xác nhận chuyển bằng nút bên dưới.",
+      "accept": "Nếu bạn chấp nhận, chủ sở hữu mới sẽ tiếp nhận toàn bộ trách nhiệm và quyền liên quan đến đơn hàng này.",
+      "ignore": "Nếu bạn không nhận ra yêu cầu này hoặc muốn giữ quyền sở hữu, bạn không cần làm gì thêm.",
+      "acceptButton": "Chấp nhận chuyển",
+      "declineButton": "Từ chối chuyển",
+      "acceptedInline": "Đã chuyển đơn hàng thành công!",
+      "declinedInline": "Đã từ chối yêu cầu chuyển đơn hàng.",
+      "acceptedTitle": "Đã chuyển đơn hàng!",
+      "acceptedBody": "Đơn hàng {id} đã được chuyển cho chủ sở hữu mới.",
+      "acceptError": "Không thể chấp nhận yêu cầu chuyển. Vui lòng thử lại.",
+      "declinedTitle": "Đã từ chối yêu cầu chuyển!",
+      "declinedBody": "Yêu cầu chuyển đơn hàng {id} đã được từ chối.",
+      "declineError": "Không thể từ chối yêu cầu chuyển. Vui lòng thử lại.",
+      "errorMessage": "Chi tiết lỗi: {error}"
+    }
+  },
+  "ShopProduct": {
+    "tabInfo": "Thông tin sản phẩm",
+    "tabShipping": "Giao hàng và đổi trả",
+    "material": "Chất liệu",
+    "origin": "Xuất xứ",
+    "type": "Loại",
+    "weight": "Trọng lượng",
+    "dimensions": "Kích thước",
+    "weightValue": "{weight} g",
+    "dimensionsValue": "Dài {length} × rộng {width} × cao {height}",
+    "shipDeliveryTitle": "Giao hàng toàn quốc",
+    "shipDeliveryBody": "Chúng tôi giao hàng khắp Việt Nam qua Giao Hàng Nhanh (GHN). Thời gian nhận hàng tùy theo khu vực của bạn, phí vận chuyển sẽ hiển thị khi thanh toán.",
+    "shipPackTitle": "Đóng gói cẩn thận",
+    "shipPackBody": "Mỗi chiếc đèn đều được làm thủ công từ gỗ và đóng gói kỹ để đến tay bạn nguyên vẹn.",
+    "shipExchangeTitle": "Đổi hàng và hỗ trợ",
+    "shipExchangeBody": "Cần đổi sản phẩm hoặc đơn hàng có vấn đề? Hãy liên hệ với chúng tôi, Lumpa sẽ cùng bạn tìm cách xử lý nhanh nhất.",
+    "adding": "Đang thêm...",
+    "selectVariant": "Chọn phân loại",
+    "outOfStock": "Hết hàng",
+    "addToCart": "Thêm vào giỏ hàng",
+    "selectOptions": "Chọn tùy chọn",
+    "from": "Từ",
+    "imageAlt": "Ảnh sản phẩm {number}",
+    "thumbnailAlt": "Ảnh sản phẩm",
+    "relatedLabel": "Sản phẩm liên quan",
+    "relatedHeading": "Có thể bạn cũng thích",
+    "onboarding": {
+      "created": "Sản phẩm mẫu của bạn đã được tạo thành công! 🎉",
+      "hint": "Bây giờ bạn có thể tiếp tục thiết lập cửa hàng trong trang quản trị.",
+      "continue": "Tiếp tục thiết lập trong trang quản trị"
+    }
+  },
+  "ShopStore": {
+    "metaTitle": "Cửa hàng",
+    "metaDescription": "Khám phá toàn bộ sản phẩm của chúng tôi.",
+    "heading": "Tất cả sản phẩm",
+    "subheading": "Khám phá toàn bộ các mẫu đèn của chúng tôi.",
+    "sortBy": "Sắp xếp theo",
+    "sortLatest": "Mới nhất",
+    "sortPriceAsc": "Giá: thấp đến cao",
+    "sortPriceDesc": "Giá: cao đến thấp",
+    "categoryDescription": "Danh mục {title}",
+    "collectionDescription": "Bộ sưu tập {title}",
+    "page": "Trang {number}"
+  },
+  "ShopCommon": {
+    "original": "Giá gốc:",
+    "variant": "Phân loại: {title}",
+    "select": "Chọn...",
+    "remove": "Xóa"
+  }
+}

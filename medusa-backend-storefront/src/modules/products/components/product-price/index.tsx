@@ -1,5 +1,4 @@
-import { clx } from "@medusajs/ui"
-
+import { useTranslations } from "next-intl"
 import { getProductPrice } from "@lib/util/get-product-price"
 import { HttpTypes } from "@medusajs/types"
 
@@ -10,6 +9,7 @@ export default function ProductPrice({
   product: HttpTypes.StoreProduct
   variant?: HttpTypes.StoreProductVariant
 }) {
+  const t = useTranslations("ShopProduct")
   const { cheapestPrice, variantPrice } = getProductPrice({
     product,
     variantId: variant?.id,
@@ -18,17 +18,13 @@ export default function ProductPrice({
   const selectedPrice = variant ? variantPrice : cheapestPrice
 
   if (!selectedPrice) {
-    return <div className="block w-32 h-9 bg-gray-100 animate-pulse" />
+    return <div className="h-9 w-32 animate-pulse bg-neutral-100" />
   }
 
   return (
-    <div className="flex flex-col text-ui-fg-base">
-      <span
-        className={clx("text-xl-semi", {
-          "text-ui-fg-interactive": selectedPrice.price_type === "sale",
-        })}
-      >
-        {!variant && "From "}
+    <div className="flex flex-col">
+      <span className="text-xl font-light text-foreground">
+        {!variant && `${t("from")} `}
         <span
           data-testid="product-price"
           data-value={selectedPrice.calculated_price_number}
@@ -37,21 +33,14 @@ export default function ProductPrice({
         </span>
       </span>
       {selectedPrice.price_type === "sale" && (
-        <>
-          <p>
-            <span className="text-ui-fg-subtle">Original: </span>
-            <span
-              className="line-through"
-              data-testid="original-product-price"
-              data-value={selectedPrice.original_price_number}
-            >
-              {selectedPrice.original_price}
-            </span>
-          </p>
-          <span className="text-ui-fg-interactive">
+        <div className="mt-1 flex items-center gap-2">
+          <span className="text-sm text-muted-foreground line-through">
+            {selectedPrice.original_price}
+          </span>
+          <span className="text-sm font-medium text-red-500">
             -{selectedPrice.percentage_diff}%
           </span>
-        </>
+        </div>
       )}
     </div>
   )

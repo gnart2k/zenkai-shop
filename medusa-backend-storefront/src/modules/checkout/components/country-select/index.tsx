@@ -4,18 +4,22 @@ import NativeSelect, {
   NativeSelectProps,
 } from "@modules/common/components/native-select"
 import { HttpTypes } from "@medusajs/types"
+import { useTranslations } from "next-intl"
 
 const VIETNAM_COUNTRY_OPTION = {
   value: "vn",
   label: "Vietnam",
 }
 
+
 const CountrySelect = forwardRef<
   HTMLSelectElement,
   NativeSelectProps & {
     region?: HttpTypes.StoreRegion
   }
->(({ placeholder = "Country", region, defaultValue, ...props }, ref) => {
+>(({ placeholder, region, defaultValue, ...props }, ref) => {
+  const t = useTranslations("CheckoutFlowCountry")
+  const resolvedPlaceholder = placeholder ?? t("placeholder")
   const innerRef = useRef<HTMLSelectElement>(null)
 
   useImperativeHandle<HTMLSelectElement | null, HTMLSelectElement | null>(
@@ -33,16 +37,16 @@ const CountrySelect = forwardRef<
     const hasVietnam = regionOptions.some((option) => option.value === "vn")
 
     if (!hasVietnam) {
-      regionOptions.push(VIETNAM_COUNTRY_OPTION)
+      regionOptions.push({ ...VIETNAM_COUNTRY_OPTION, label: t("vietnam") })
     }
 
     return regionOptions
-  }, [region])
+  }, [region, t])
 
   return (
     <NativeSelect
       ref={innerRef}
-      placeholder={placeholder}
+      placeholder={resolvedPlaceholder}
       defaultValue={defaultValue}
       {...props}
     >

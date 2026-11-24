@@ -1,10 +1,10 @@
 {
   "Metadata": {
     "defaultTitle": "Storefront",
-    "defaultDescription": "A performant ecommerce storefront with Next.js and Medusa."
+    "defaultDescription": "Handcrafted driftwood lamps — one-of-a-kind pieces, made to order."
   },
   "Nav": {
-    "storeName": "Medusa Store",
+    "storeName": "Lumpa",
     "account": "Account",
     "cart": "Cart",
     "menu": "Menu",
@@ -17,20 +17,29 @@
   "Footer": {
     "categories": "Categories",
     "collections": "Collections",
-    "medusa": "Medusa"
+    "contact": "Contact"
   },
   "Home": {
+    "slide1Title": "Illuminate Your Space",
+    "slide1Subtitle": "New Collection",
+    "slide2Title": "Handcrafted with Purpose",
+    "slide2Subtitle": "Artisan Edition",
     "heroBadge": "New season · curated drops",
     "heroCtaShop": "Shop the store",
+    "heroCtaProduct": "View this lamp",
     "heroCtaCollection": "Open a featured collection",
     "heroCtaCatalog": "Browse the catalog",
     "heroHintWithImage": "Hero imagery from your brand settings.",
     "heroHintNoImage": "Add a hero image and logo in admin to replace these placeholders.",
     "subtitleFallback": "Thoughtfully selected pieces, seamless checkout, and delivery you can count on.",
     "collectionsBadge": "Collections",
-    "collectionsEmpty": "No collections yet. Create collections in Medusa Admin to surface them here—this block is a placeholder until data is available.",
     "collectionsEyebrow": "Shop by collection",
     "collectionsTitle": "Find your lane",
+    "reelEyebrow": "From our workshop",
+    "reelTitle": "Driftwood lamps in real spaces",
+    "reelSubtitle": "Every lamp is handcrafted and one of a kind. See our newest pieces on TikTok.",
+    "reelFollow": "Follow on TikTok",
+    "reelWatch": "Watch video",
     "valueEyebrow": "Why shop with us",
     "valueTitle": "Crafted experience, from first click to unboxing",
     "valueDescription": "Placeholder copy—replace with your brand voice, policies, and differentiators.",
@@ -41,27 +50,16 @@
     "valueCard3Title": "Here when you need us",
     "valueCard3Desc": "Questions about sizing, returns, or an order? Our team is ready to help—placeholder until live support hours are set.",
     "categoryEyebrowLive": "Shop by category",
-    "categoryEyebrowMock": "Example categories",
     "categoryTitle": "Browse by category",
     "categoryDescriptionLive": "Jump straight into the part of the catalog you care about.",
-    "categoryDescriptionMock": "Your catalog has no categories yet. Showing placeholder categories—create product categories in Medusa Admin to replace this section.",
     "categoryItemFallback": "Browse products in this category.",
     "viewFullCatalog": "View full catalog",
     "exploreLink": "Explore",
     "featuredBadgeLive": "Featured",
-    "featuredBadgeMock": "Example products",
     "featuredTitle": "Featured products",
     "featuredDescriptionLive": "A curated snapshot of what is live in your catalog right now.",
-    "featuredDescriptionMock": "No products returned for this region yet. Showing demo items—add products and publish to Medusa to populate this block.",
     "viewAllProducts": "View all products",
-    "newsletterTitle": "Stay in the loop",
-    "newsletterDescription": "Newsletter signup is a visual placeholder—wire this to your marketing tool or Medusa subscriber flow when ready.",
-    "newsletterPlaceholder": "you@example.com",
-    "newsletterCta": "Notify me",
-    "newsletterNote": "No emails are collected until you connect this form.",
     "demoProduct": "Demo product",
-    "productsComingSoon": "Products coming soon",
-    "collectionRailEmpty": "No products in this collection for your region yet. Add inventory in Medusa Admin—these cards are placeholders until listings appear.",
     "viewAll": "View all"
   },
   "Checkout": {
@@ -69,6 +67,7 @@
     "backShort": "Back"
   },
   "SideMenu": {
+    "categories": "Categories",
     "home": "Home",
     "store": "Store",
     "account": "Account",

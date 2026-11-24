@@ -1,0 +1,139 @@
+{
+  "CheckoutFlowNotFound": {
+    "metaDescription": "Something went wrong",
+    "title": "Page not found",
+    "body": "The page you tried to access does not exist.",
+    "home": "Go to the homepage"
+  },
+  "CheckoutFlowPage": {
+    "metaTitle": "Checkout"
+  },
+  "CheckoutFlowTotals": {
+    "subtotal": "Subtotal",
+    "shipping": "Shipping",
+    "discount": "Discount",
+    "taxes": "Taxes",
+    "total": "Total"
+  },
+  "CheckoutFlowSummary": {
+    "title": "In your cart"
+  },
+  "CheckoutFlowPaymentTest": {
+    "attention": "Attention:",
+    "testOnly": "For testing purposes only."
+  },
+  "CheckoutFlowCountry": {
+    "placeholder": "Country",
+    "vietnam": "Vietnam"
+  },
+  "CheckoutFlowReview": {
+    "title": "Review",
+    "consent": "By clicking the Place order button, you confirm that you have read, understand and accept our Terms of Use, Terms of Sale and Returns Policy and acknowledge that you have read Lumpa's Privacy Policy."
+  },
+  "CheckoutFlowDiscount": {
+    "add": "Add promotion code(s)",
+    "apply": "Apply",
+    "applied": "Promotion(s) applied:",
+    "remove": "Remove discount code from order"
+  },
+  "CheckoutFlowAddressSelect": {
+    "choose": "Choose an address"
+  },
+  "CheckoutFlowPaymentContainer": {
+    "cardDetails": "Enter your card details:"
+  },
+  "CheckoutFlowPayment": {
+    "title": "Payment",
+    "edit": "Edit",
+    "method": "Payment method",
+    "details": "Payment details",
+    "giftCard": "Gift card",
+    "anotherStep": "Another step will appear",
+    "enterCard": "Enter card details",
+    "continuePayos": "Continue to PayOS",
+    "continueReview": "Continue to review",
+    "payosError": "Unable to create PayOS checkout URL. Please try selecting PayOS again.",
+    "providers": {
+      "card": "Credit card",
+      "cod": "Cash on delivery"
+    }
+  },
+  "CheckoutFlowAddresses": {
+    "shippingTitle": "Shipping address",
+    "billingTitle": "Billing address",
+    "edit": "Edit",
+    "continue": "Continue to delivery",
+    "contact": "Contact",
+    "sameAsShipping": "Billing and delivery address are the same."
+  },
+  "CheckoutFlowBillingForm": {
+    "firstName": "First name",
+    "lastName": "Last name",
+    "address": "Address",
+    "company": "Company",
+    "postalCode": "Postal code",
+    "city": "City",
+    "province": "State / province",
+    "phone": "Phone"
+  },
+  "CheckoutFlowShippingForm": {
+    "firstName": "First name",
+    "lastName": "Last name",
+    "address": "Address",
+    "company": "Company",
+    "postalCode": "Postal code",
+    "city": "City",
+    "province": "State / province",
+    "phone": "Phone",
+    "email": "Email",
+    "emailTitle": "Enter a valid email address.",
+    "sameAsBilling": "Billing address same as shipping address",
+    "savedAddressPrompt": "Hi {name}, do you want to use one of your saved addresses?"
+  },
+  "CheckoutFlowGhn": {
+    "loadProvincesError": "Unable to load provinces.",
+    "loadDistrictsError": "Unable to load districts.",
+    "loadWardsError": "Unable to load wards.",
+    "provinceCity": "Province / city",
+    "province": "Province",
+    "district": "District",
+    "ward": "Ward",
+    "loadingProvinces": "Loading provinces...",
+    "loadingDistricts": "Loading districts...",
+    "loadingWards": "Loading wards..."
+  },
+  "CheckoutFlowPaymentButton": {
+    "selectMethod": "Select a payment method",
+    "placeOrder": "Place order",
+    "payosUrlMissing": "PayOS payment URL is missing. Please re-select PayOS and try again.",
+    "payosRestartError": "Unable to restart PayOS payment.",
+    "completeOrder": "Complete order",
+    "payWithPayos": "Pay with PayOS",
+    "canceled": "Payment was canceled. You can try again or choose another method."
+  },
+  "CheckoutFlowFreeShipping": {
+    "unlocked": "Free shipping unlocked!",
+    "unlock": "Unlock free shipping",
+    "remaining": "Only <em>{amount}</em> away",
+    "viewCart": "View cart",
+    "viewProducts": "View products"
+  },
+  "CheckoutFlowShipping": {
+    "title": "Delivery",
+    "edit": "Edit",
+    "loading": "Loading delivery options…",
+    "initialLoadFailed": "Initial load failed; retrying…",
+    "loadError": "Could not load shipping options. Check the browser Network tab for GET /store/shipping-options and verify x-publishable-api-key.",
+    "genericError": "An error occurred",
+    "needAddress": "Save a shipping address in the step above to see the available shipping methods.",
+    "noMethods": "No shipping methods are available for this address yet. Please check the address or contact us on {phone}.",
+    "shipTitle": "Ship",
+    "shipDesc": "Ship to an address",
+    "pickupTitle": "Pick up in store",
+    "pickupDesc": "Pick up from a nearby store",
+    "needGhnAddress": "For Vietnam, choose province, district, and ward above so GHN can quote this option.",
+    "quoteUnavailable": "Shipping quote unavailable for this option.",
+    "ghnStandard": "GHN Standard",
+    "continue": "Continue to payment"
+  }
+}

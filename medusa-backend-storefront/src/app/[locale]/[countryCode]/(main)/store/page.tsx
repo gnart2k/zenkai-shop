@@ -1,11 +1,15 @@
 import { Metadata } from "next"
+import { getLocale, getTranslations } from "next-intl/server"
 
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
 import StoreTemplate from "@modules/store/templates"
 
-export const metadata: Metadata = {
-  title: "Store",
-  description: "Explore all of our products.",
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations({
+    locale: await getLocale(),
+    namespace: "ShopStore",
+  })
+  return { title: t("metaTitle"), description: t("metaDescription") }
 }
 
 type Params = {

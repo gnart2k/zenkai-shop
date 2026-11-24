@@ -22,28 +22,28 @@ const ItemsPreviewTemplate = ({ cart }: ItemsTemplateProps) => {
           hasOverflow,
       })}
     >
-      <Table>
-        <Table.Body data-testid="items-table">
-          {items
-            ? items
-                .sort((a, b) => {
-                  return (a.created_at ?? "") > (b.created_at ?? "") ? -1 : 1
-                })
-                .map((item) => {
-                  return (
-                    <Item
-                      key={item.id}
-                      item={item}
-                      type="preview"
-                      currencyCode={cart.currency_code}
-                    />
-                  )
-                })
-            : repeat(5).map((i) => {
-                return <SkeletonLineItem key={i} />
-              })}
-        </Table.Body>
-      </Table>
+      {items ? (
+        <div data-testid="items-table">
+          {[...items]
+            .sort((a, b) => ((a.created_at ?? "") > (b.created_at ?? "") ? -1 : 1))
+            .map((item) => (
+              <Item
+                key={item.id}
+                item={item}
+                type="preview"
+                currencyCode={cart.currency_code}
+              />
+            ))}
+        </div>
+      ) : (
+        <Table>
+          <Table.Body data-testid="items-table">
+            {repeat(5).map((i) => (
+              <SkeletonLineItem key={i} />
+            ))}
+          </Table.Body>
+        </Table>
+      )}
     </div>
   )
 }

@@ -11,6 +11,7 @@ import ErrorMessage from "@modules/checkout/components/error-message"
 import Divider from "@modules/common/components/divider"
 import MedusaRadio from "@modules/common/components/radio"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
+import { useTranslations } from "next-intl"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import {
   buildShippingMethodData,
@@ -72,6 +73,7 @@ const Shipping: React.FC<ShippingProps> = ({
   availableShippingMethods,
   serverShippingOptionsFailed = false,
 }) => {
+  const t = useTranslations("CheckoutFlowShipping")
   /** Client refetch: options depend on shipping address / geo zones; SSR often runs before address exists. */
   const [clientShippingOptions, setClientShippingOptions] = useState<
     HttpTypes.StoreCartShippingOption[] | null
@@ -81,7 +83,7 @@ const Shipping: React.FC<ShippingProps> = ({
   )
   const [shippingOptionsFetchError, setShippingOptionsFetchError] = useState<
     string | null
-  >(serverShippingOptionsFailed ? "Initial load failed; retrying…" : null)
+  >(serverShippingOptionsFailed ? t("initialLoadFailed") : null)
 
   const addressFingerprint = useMemo(() => {
     const a = cart.shipping_address
@@ -111,9 +113,7 @@ const Shipping: React.FC<ShippingProps> = ({
 
       if (opts === null) {
         setClientShippingOptions([])
-        setShippingOptionsFetchError(
-          "Could not load shipping options. Check the browser Network tab for GET /store/shipping-options and verify x-publishable-api-key."
-        )
+        setShippingOptionsFetchError(t("loadError"))
       } else {
         setClientShippingOptions(opts)
         console.info(`${SHIPPING_TRACE_PREFIX} client refetch shipping options`, {
@@ -131,7 +131,7 @@ const Shipping: React.FC<ShippingProps> = ({
     return () => {
       cancelled = true
     }
-  }, [cart.id, addressFingerprint])
+  }, [cart.id, addressFingerprint]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const [isLoading, setIsLoading] = useState(false)
   const [showPickupOptions, setShowPickupOptions] =
@@ -248,7 +248,7 @@ const Shipping: React.FC<ShippingProps> = ({
           error: err instanceof Error ? err.message : String(err),
         })
         setShippingMethodId(previousMethodId)
-        setError(err instanceof Error ? err.message : "An error occurred")
+        setError(err instanceof Error ? err.message : t("genericError"))
       }
 
       setIsLoading(false)
@@ -265,6 +265,12 @@ const Shipping: React.FC<ShippingProps> = ({
   /** Vietnam + ship: select GHN Standard once quotes allow (replaces other tiers left on the cart). */
   useEffect(() => {
     if (!isVnShipToAddress) {
+      return
+    }
+
+    // GHN rejects a calculated method without the destination district + ward, so
+    // wait until the address form has saved them (a fresh cart only has country=vn).
+    if (!shouldUseGhnQuotes) {
       return
     }
 
@@ -302,6 +308,7 @@ const Shipping: React.FC<ShippingProps> = ({
     void handleSetShippingMethod(standard.id, "shipping")
   }, [
     isVnShipToAddress,
+    shouldUseGhnQuotes,
     isLoadingShippingOptions,
     shippingOptionsFetchError,
     isLoading,
@@ -311,6 +318,12 @@ const Shipping: React.FC<ShippingProps> = ({
     shippingMethodId,
     handleSetShippingMethod,
   ])
+
+  const optionLabel = (option: { name?: string | null; type?: { code?: string | null } | null }) =>
+    option.type?.code === VN_DEFAULT_GHN_SHIPPING_TYPE_CODE ||
+    option.name === "GHN Standard"
+      ? t("ghnStandard")
+      : option.name
 
   const selectedShippingOption =
     shippingOptions.length
@@ -331,7 +344,7 @@ const Shipping: React.FC<ShippingProps> = ({
     <div className="border-b border-gray-200 py-6">
       <div className="mb-6 flex items-center justify-between">
         <Heading level="h2" className="flex items-baseline gap-x-2 text-3xl-regular">
-          Delivery
+          {t("title")}
           {!isOpen && selectedShippingOption && <CheckCircleSolid />}
         </Heading>
         {!isOpen && selectedShippingOption && (
@@ -341,7 +354,7 @@ const Shipping: React.FC<ShippingProps> = ({
               className="text-ui-fg-interactive hover:text-ui-fg-interactive-hover"
               data-testid="edit-delivery-button"
             >
-              Edit
+              {t("edit")}
             </button>
           </Text>
         )}
@@ -351,7 +364,7 @@ const Shipping: React.FC<ShippingProps> = ({
         <div className="text-small-regular">
           <div className="flex items-center gap-x-8">
             <Text className="txt-medium-plus text-ui-fg-base">
-              {selectedShippingOption.name}
+              {optionLabel(selectedShippingOption)}
             </Text>
             <Text className="txt-medium-plus text-ui-fg-base">
               {convertToLocale({
@@ -367,7 +380,7 @@ const Shipping: React.FC<ShippingProps> = ({
             {isLoadingShippingOptions && (
               <div className="flex items-center gap-2 text-ui-fg-subtle">
                 <Loader />
-                <Text size="small">Loading delivery options…</Text>
+                <Text size="small">{t("loading")}</Text>
               </div>
             )}
             {shippingOptionsFetchError && (
@@ -378,24 +391,9 @@ const Shipping: React.FC<ShippingProps> = ({
               shippingMethods.length === 0 &&
               pickupMethods.length === 0 && (
                 <Text size="small" className="text-ui-fg-subtle">
-                  {!cart.shipping_address ? (
-                    <>
-                      Save a shipping address in the step above. Medusa only
-                      returns options after the cart has a shipping address and
-                      it matches a fulfillment geo zone.
-                    </>
-                  ) : (
-                    <>
-                      No shipping methods match this cart yet. Confirm the
-                      address, then check Admin: stock location ↔ sales channel,
-                      shipping profile on products, and fulfillment sets / zones
-                      for region{" "}
-                      <span className="font-mono">
-                        {cart.region?.name ?? cart.region_id}
-                      </span>
-                      .
-                    </>
-                  )}
+                  {!cart.shipping_address
+                    ? t("needAddress")
+                    : t("noMethods", { phone: "0866 063 804" })}
                 </Text>
               )}
             <RadioGroup value={shippingMethodId} data-testid="delivery-options-radio-group">
@@ -433,10 +431,10 @@ const Shipping: React.FC<ShippingProps> = ({
                             />
                             <span className="flex flex-col">
                               <span className="text-base-regular text-ui-fg-base">
-                                Ship
+                                {t("shipTitle")}
                               </span>
                               <span className="text-ui-fg-subtle text-small-regular">
-                                Ship to an address
+                                {t("shipDesc")}
                               </span>
                             </span>
                           </label>
@@ -452,10 +450,10 @@ const Shipping: React.FC<ShippingProps> = ({
                             />
                             <span className="flex flex-col">
                               <span className="text-base-regular text-ui-fg-base">
-                                Pick up in store
+                                {t("pickupTitle")}
                               </span>
                               <span className="text-ui-fg-subtle text-small-regular">
-                                Pick up from a nearby store
+                                {t("pickupDesc")}
                               </span>
                             </span>
                           </label>
@@ -491,9 +489,9 @@ const Shipping: React.FC<ShippingProps> = ({
                       displayAmount === null
 
                     const quoteFailureMessage = vnNeedsGhnAddressMetadata
-                      ? "For Vietnam, choose province, district, and ward above so GHN can quote this option."
+                      ? t("needGhnAddress")
                       : calculatePriceErrorsByOptionId[option.id] ||
-                        "Shipping quote unavailable for this option."
+                        t("quoteUnavailable")
 
                     return (
                       <div key={option.id} className="flex flex-col gap-y-2">
@@ -535,7 +533,7 @@ const Shipping: React.FC<ShippingProps> = ({
                                   )}
                                 </div>
                                 <span className="text-base-regular text-ui-fg-base">
-                                  {option.name}
+                                  {optionLabel(option)}
                                 </span>
                               </div>
                               <span className="justify-self-end text-ui-fg-base">
@@ -642,7 +640,7 @@ const Shipping: React.FC<ShippingProps> = ({
               isLoading={isLoading}
               data-testid="submit-delivery-option-button"
             >
-              Continue to payment
+              {t("continue")}
             </Button>
           </div>
         </div>

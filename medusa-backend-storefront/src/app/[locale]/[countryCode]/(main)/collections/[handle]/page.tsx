@@ -1,4 +1,5 @@
 import { Metadata } from "next"
+import { getTranslations } from "next-intl/server"
 import { notFound } from "next/navigation"
 
 import { getCollectionByHandle, listCollections } from "@lib/data/collections"
@@ -61,9 +62,14 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     notFound()
   }
 
+  const t = await getTranslations({
+    locale: params.locale,
+    namespace: "ShopStore",
+  })
+
   const metadata = {
-    title: `${collection.title} | Medusa Store`,
-    description: `${collection.title} collection`,
+    title: `${collection.title} | Lumpa`,
+    description: t("collectionDescription", { title: collection.title }),
   } as Metadata
 
   return metadata

@@ -1,6 +1,6 @@
+import { useTranslations } from "next-intl"
 import repeat from "@lib/util/repeat"
 import { HttpTypes } from "@medusajs/types"
-import { Heading, Table } from "@medusajs/ui"
 
 import Item from "@modules/cart/components/item"
 import SkeletonLineItem from "@modules/skeletons/components/skeleton-line-item"
@@ -10,46 +10,47 @@ type ItemsTemplateProps = {
 }
 
 const ItemsTemplate = ({ cart }: ItemsTemplateProps) => {
+  const t = useTranslations("ShopCart")
   const items = cart?.items
   return (
     <div>
-      <div className="pb-3 flex items-center">
-        <Heading className="text-[2rem] leading-[2.75rem]">Cart</Heading>
-      </div>
-      <Table>
-        <Table.Header className="border-t-0">
-          <Table.Row className="text-ui-fg-subtle txt-medium-plus">
-            <Table.HeaderCell className="!pl-0">Item</Table.HeaderCell>
-            <Table.HeaderCell></Table.HeaderCell>
-            <Table.HeaderCell>Quantity</Table.HeaderCell>
-            <Table.HeaderCell className="hidden small:table-cell">
-              Price
-            </Table.HeaderCell>
-            <Table.HeaderCell className="!pr-0 text-right">
-              Total
-            </Table.HeaderCell>
-          </Table.Row>
-        </Table.Header>
-        <Table.Body>
+      <h1 className="font-serif text-3xl font-light tracking-tight text-foreground small:text-4xl">
+        {t("title")}
+      </h1>
+
+      <div className="mt-8">
+        <div className="hidden border-b border-border/40 pb-3 small:grid small:grid-cols-[80px_1fr_120px_100px_100px] small:gap-4">
+          <span className="text-xs font-medium text-muted-foreground" />
+          <span className="text-xs font-medium text-muted-foreground">
+            {t("colItem")}
+          </span>
+          <span className="text-xs font-medium text-muted-foreground">
+            {t("colQuantity")}
+          </span>
+          <span className="text-right text-xs font-medium text-muted-foreground">
+            {t("colPrice")}
+          </span>
+          <span className="text-right text-xs font-medium text-muted-foreground">
+            {t("colTotal")}
+          </span>
+        </div>
+
+        <div>
           {items
             ? items
-                .sort((a, b) => {
-                  return (a.created_at ?? "") > (b.created_at ?? "") ? -1 : 1
-                })
-                .map((item) => {
-                  return (
-                    <Item
-                      key={item.id}
-                      item={item}
-                      currencyCode={cart?.currency_code}
-                    />
-                  )
-                })
-            : repeat(5).map((i) => {
-                return <SkeletonLineItem key={i} />
-              })}
-        </Table.Body>
-      </Table>
+                .sort((a, b) =>
+                  (a.created_at ?? "") > (b.created_at ?? "") ? -1 : 1
+                )
+                .map((item) => (
+                  <Item
+                    key={item.id}
+                    item={item}
+                    currencyCode={cart?.currency_code}
+                  />
+                ))
+            : repeat(5).map((i) => <SkeletonLineItem key={i} />)}
+        </div>
+      </div>
     </div>
   )
 }

@@ -1,6 +1,7 @@
 import { HttpTypes } from "@medusajs/types"
-import { clx } from "@medusajs/ui"
 import React from "react"
+
+import { cn } from "@/lib/utils"
 
 type OptionSelectProps = {
   option: HttpTypes.StoreProductOption
@@ -23,31 +24,29 @@ const OptionSelect: React.FC<OptionSelectProps> = ({
 
   return (
     <div className="flex flex-col gap-y-3">
-      <span className="text-sm">Select {title}</span>
+      <span className="text-xs font-medium text-muted-foreground">
+        {title}
+      </span>
       <div
-        className="flex flex-wrap justify-between gap-2"
+        className="flex flex-wrap gap-2"
         data-testid={dataTestId}
       >
-        {filteredOptions.map((v) => {
-          return (
-            <button
-              onClick={() => updateOption(option.id, v)}
-              key={v}
-              className={clx(
-                "border-ui-border-base bg-ui-bg-subtle border text-small-regular h-10 rounded-rounded p-2 flex-1 ",
-                {
-                  "border-ui-border-interactive": v === current,
-                  "hover:shadow-elevation-card-rest transition-shadow ease-in-out duration-150":
-                    v !== current,
-                }
-              )}
-              disabled={disabled}
-              data-testid="option-button"
-            >
-              {v}
-            </button>
-          )
-        })}
+        {filteredOptions.map((v) => (
+          <button
+            onClick={() => updateOption(option.id, v)}
+            key={v}
+            className={cn(
+              "h-9 rounded-full border px-4 text-sm transition-all",
+              v === current
+                ? "border-foreground bg-foreground text-white"
+                : "border-border bg-transparent text-muted-foreground hover:border-foreground/30 hover:text-foreground"
+            )}
+            disabled={disabled}
+            data-testid="option-button"
+          >
+            {v}
+          </button>
+        ))}
       </div>
     </div>
   )

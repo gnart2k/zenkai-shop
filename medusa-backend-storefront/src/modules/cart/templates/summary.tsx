@@ -1,7 +1,6 @@
 "use client"
 
-import { Button, Heading } from "@medusajs/ui"
-
+import { useTranslations } from "next-intl"
 import CartTotals from "@modules/common/components/cart-totals"
 import Divider from "@modules/common/components/divider"
 import DiscountCode from "@modules/checkout/components/discount-code"
@@ -25,13 +24,14 @@ function getCheckoutStep(cart: HttpTypes.StoreCart) {
 }
 
 const Summary = ({ cart }: SummaryProps) => {
+  const t = useTranslations("ShopCart")
   const step = getCheckoutStep(cart)
 
   return (
-    <div className="flex flex-col gap-y-4">
-      <Heading level="h2" className="text-[2rem] leading-[2.75rem]">
-        Summary
-      </Heading>
+    <div className="flex flex-col gap-y-6 rounded-lg border border-border/40 bg-white p-6">
+      <h2 className="font-serif text-2xl font-light text-foreground">
+        {t("summary")}
+      </h2>
       <DiscountCode cart={cart} />
       <Divider />
       <CartTotals totals={cart} />
@@ -39,7 +39,9 @@ const Summary = ({ cart }: SummaryProps) => {
         href={"/checkout?step=" + step}
         data-testid="checkout-button"
       >
-        <Button className="w-full h-10">Go to checkout</Button>
+        <button className="flex h-12 w-full items-center justify-center border border-foreground bg-foreground px-8 text-sm font-medium text-white transition-all hover:bg-foreground/90">
+          {t("goToCheckout")}
+        </button>
       </LocalizedClientLink>
     </div>
   )
