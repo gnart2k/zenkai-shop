@@ -167,10 +167,11 @@ export default async function setupLampCatalog({ container }: ExecArgs) {
     await updateProductsWorkflow(container).run({
       input: {
         selector: { id: lamp.id },
+        // `categories` works at runtime (the DTO only types category_ids).
         update: {
           status: ProductStatus.PUBLISHED,
           categories: categoriesByProduct.get(lamp.handle)!.map((id) => ({ id })),
-        },
+        } as any,
       },
     });
   }
