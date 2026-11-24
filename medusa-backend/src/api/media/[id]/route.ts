@@ -14,6 +14,8 @@ import { Modules } from '@medusajs/framework/utils';
  * can't be used to read arbitrary (private) objects from the bucket.
  */
 const MEDIA_KEY_PREFIX = 'lumpa-media-';
+// The local file provider prepends `private-<timestamp>-` to private uploads.
+const LOCAL_PRIVATE_PREFIX = /^private-\d+-/;
 
 const KEY_RE = /^[A-Za-z0-9._-]+$/;
 const PASSTHROUGH_HEADERS = [
@@ -42,7 +44,7 @@ async function signedUrl(req: MedusaRequest, key: string): Promise<string> {
 
 export async function GET(req: MedusaRequest, res: MedusaResponse) {
   const key = req.params.id;
-  if (!key || !KEY_RE.test(key) || !key.startsWith(MEDIA_KEY_PREFIX)) {
+  if (!key || !KEY_RE.test(key) || !key.replace(LOCAL_PRIVATE_PREFIX, '').startsWith(MEDIA_KEY_PREFIX)) {
     res.status(404).json({ message: 'Not found' });
     return;
   }
