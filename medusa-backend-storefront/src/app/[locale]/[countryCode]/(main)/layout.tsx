@@ -1,9 +1,7 @@
-import { Metadata } from "next"
 
 import { listCartOptions, retrieveCart } from "@lib/data/cart"
 import { retrieveCustomer } from "@lib/data/customer"
 import { getStorefront } from "@lib/data/storefront-config"
-import { getBaseURL } from "@lib/util/env"
 import { StoreCartShippingOption } from "@medusajs/types"
 import CartMismatchBanner from "@modules/layout/components/cart-mismatch-banner"
 import Footer from "@modules/layout/templates/footer"
@@ -13,10 +11,6 @@ import ContactWidget from "@modules/storefront/contact-widget"
 import AnnouncementBar from "@modules/storefront/announcement-bar"
 import PreviewBanner from "@modules/storefront/preview-banner"
 import ThemeStyle from "@modules/storefront/theme-style"
-
-export const metadata: Metadata = {
-  metadataBase: new URL(getBaseURL()),
-}
 
 export default async function PageLayout(props: {
   children: React.ReactNode
