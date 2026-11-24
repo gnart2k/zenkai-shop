@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button"
 import { logout } from "@lib/portal/actions"
-import { currentActor, portalBase } from "@lib/portal/api"
-import { LangSwitch, MobileNav, SidebarNav, type NavItem } from "@modules/portal/portal-nav"
+import { currentActor, portalBase, portalFetch } from "@lib/portal/api"
+import { LangSwitch, MobileNav, SidebarNav, StoreSwitcher, type NavItem } from "@modules/portal/portal-nav"
 import { Hidden } from "@modules/portal/ui"
 import { LogOut, Store } from "lucide-react"
 import { getTranslations } from "next-intl/server"
@@ -19,6 +19,13 @@ export default async function PortalLayout({
   const base = portalBase(p)
   const t = await getTranslations({ locale: p.locale, namespace: "Portal" })
   const actor = await currentActor()
+  // Collaborators pick the store in the header (they can work for several).
+  const stores =
+    actor === "collaborator"
+      ? await portalFetch<{ stores: { id: string; name: string }[] }>("/portal-api/collaborator/stores")
+          .then((r) => r.stores)
+          .catch(() => [])
+      : []
 
   // The admin gets a sidebar. Collaborators get tabs inside their store pages instead.
   const adminNav: NavItem[] =
@@ -57,6 +64,7 @@ export default async function PortalLayout({
               {actor === "portal_admin" ? t("nav.storeAdmin") : t("nav.collaborator")}
             </span>
           ) : null}
+          {stores.length ? <StoreSwitcher stores={stores} label={t("stores.switch")} /> : null}
           <div className="flex-1" />
           <LangSwitch current={p.locale} label={t("common.language")} />
           {actor ? (

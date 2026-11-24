@@ -36,11 +36,8 @@ export default async function seedDemoData({ container }: ExecArgs) {
   const ghnProviderId = 'ghn_ghn';
   const ghnToken = process.env.GHN_API_TOKEN || process.env.GHN_API_KEY;
   const ghnShopId = process.env.GHN_SHOP_ID || process.env.GHN_SHOPID;
-  const ghnFromDistrictId =
-    process.env.GHN_FROM_DISTRICT_ID || process.env.GHN_FROM_DISTRICT;
-  const isGhnReadyForRateCalculation = Boolean(
-    ghnToken && ghnShopId && ghnFromDistrictId
-  );
+  const ghnFromDistrictId = process.env.GHN_FROM_DISTRICT_ID || process.env.GHN_FROM_DISTRICT;
+  const isGhnReadyForRateCalculation = Boolean(ghnToken && ghnShopId && ghnFromDistrictId);
   const manualShippingCountries = isGhnReadyForRateCalculation
     ? [...europeCountries]
     : [...shippingCountries];
@@ -218,10 +215,7 @@ export default async function seedDemoData({ container }: ExecArgs) {
     },
   });
 
-  const allStockLocations = await stockLocationModuleService.listStockLocations(
-    {},
-    { take: 200 }
-  );
+  const allStockLocations = await stockLocationModuleService.listStockLocations({}, { take: 200 });
 
   for (const location of allStockLocations) {
     try {
@@ -342,9 +336,9 @@ export default async function seedDemoData({ container }: ExecArgs) {
     }
   }
 
-  let ghnFulfillmentSet:
-    | Awaited<ReturnType<typeof fulfillmentModuleService.createFulfillmentSets>>
-    | null = null;
+  let ghnFulfillmentSet: Awaited<
+    ReturnType<typeof fulfillmentModuleService.createFulfillmentSets>
+  > | null = null;
 
   const ghnFulfillmentSetName = 'Vietnam GHN delivery';
   const ghnFulfillmentSetList = await fulfillmentModuleService.listFulfillmentSets(

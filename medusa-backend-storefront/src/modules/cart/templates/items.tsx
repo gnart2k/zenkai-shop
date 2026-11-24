@@ -19,22 +19,6 @@ const ItemsTemplate = ({ cart }: ItemsTemplateProps) => {
       </h1>
 
       <div className="mt-8">
-        <div className="hidden border-b border-border/40 pb-3 small:grid small:grid-cols-[80px_1fr_120px_100px_100px] small:gap-4">
-          <span className="text-xs font-medium text-muted-foreground" />
-          <span className="text-xs font-medium text-muted-foreground">
-            {t("colItem")}
-          </span>
-          <span className="text-xs font-medium text-muted-foreground">
-            {t("colQuantity")}
-          </span>
-          <span className="text-right text-xs font-medium text-muted-foreground">
-            {t("colPrice")}
-          </span>
-          <span className="text-right text-xs font-medium text-muted-foreground">
-            {t("colTotal")}
-          </span>
-        </div>
-
         <div>
           {items
             ? items

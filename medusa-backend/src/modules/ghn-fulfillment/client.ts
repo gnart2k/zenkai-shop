@@ -1,11 +1,6 @@
 import { Logger } from '@medusajs/framework/types';
 import { MedusaError } from '@medusajs/framework/utils';
-import {
-  GhnApiResponse,
-  GhnCalculateFeePayload,
-  GhnFee,
-  GhnService,
-} from './types';
+import { GhnApiResponse, GhnCalculateFeePayload, GhnFee, GhnService } from './types';
 
 type GhnClientOptions = {
   apiBaseUrl: string;
@@ -138,17 +133,11 @@ class GhnClient {
     );
 
     if (!response.ok || json?.code !== 200) {
-      throw new MedusaError(
-        MedusaError.Types.INVALID_DATA,
-        json?.message || 'GHN request failed.'
-      );
+      throw new MedusaError(MedusaError.Types.INVALID_DATA, json?.message || 'GHN request failed.');
     }
 
     if (!json?.data) {
-      throw new MedusaError(
-        MedusaError.Types.INVALID_DATA,
-        'GHN response is missing data.'
-      );
+      throw new MedusaError(MedusaError.Types.INVALID_DATA, 'GHN response is missing data.');
     }
 
     return json.data;

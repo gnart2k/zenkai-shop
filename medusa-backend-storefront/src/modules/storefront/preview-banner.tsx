@@ -14,7 +14,7 @@ export default async function PreviewBanner({ countryCode }: { countryCode: stri
     <PreviewBannerView
       message={t("banner")}
       backLabel={t("backToEditor")}
-      backHref={`/${locale}/${countryCode}/portal/admin/appearance`}
+      backHref="/portal/admin/appearance"
       exitLabel={t("exit")}
       exitHref={`/api/preview-exit?to=${encodeURIComponent(`/${locale}/${countryCode}`)}`}
     />

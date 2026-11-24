@@ -1,5 +1,6 @@
 import { MedusaRequest, MedusaResponse } from '@medusajs/framework/http';
 import { ContainerRegistrationKeys, Modules } from '@medusajs/framework/utils';
+import { resolveStoreForRequest } from '../../../lib/portal/store-context';
 import { StoreBrandingMetadata } from '../../../types/store-branding';
 
 async function resolveFileUrl(
@@ -21,13 +22,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
   const query = req.scope.resolve(ContainerRegistrationKeys.QUERY);
   const fileModule = req.scope.resolve(Modules.FILE);
 
-  const { data: stores } = await query.graph({
-    entity: 'store',
-    fields: ['id', 'name', 'metadata'],
-    pagination: { take: 1, skip: 0 },
-  });
-
-  const store = stores[0];
+  const store = await resolveStoreForRequest(req, ['id', 'name', 'metadata']);
   if (!store) {
     res.status(200).json({
       store_name: '',

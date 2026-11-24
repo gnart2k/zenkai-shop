@@ -6,28 +6,28 @@ import { COLLABORATOR_ACTOR, PORTAL_ADMIN_ACTOR } from '../modules/portal/lib/co
 export default defineMiddlewares({
   routes: [
     // --- Portal: collaborators and single-store portal admins -----------------
-    { matcher: '/portal*', middlewares: [portalCors] },
+    { matcher: '/portal-api*', middlewares: [portalCors] },
     {
       // Base64 proof files exceed Medusa's default 100kb JSON limit.
-      matcher: '/portal/collaborator/uploads',
+      matcher: '/portal-api/collaborator/uploads',
       method: ['POST'],
       bodyParser: { sizeLimit: '8mb' },
     },
     {
-      matcher: '/portal/admin/uploads',
+      matcher: '/portal-api/admin/uploads',
       method: ['POST'],
       bodyParser: { sizeLimit: '8mb' },
     },
     {
-      matcher: '/portal/collaborator*',
+      matcher: '/portal-api/collaborator*',
       middlewares: [authenticate(COLLABORATOR_ACTOR, ['session', 'bearer'])],
     },
     {
-      matcher: '/portal/collaborator/stores/:store_id*',
+      matcher: '/portal-api/collaborator/stores/:store_id*',
       middlewares: [requireStoreMembership],
     },
     {
-      matcher: '/portal/admin*',
+      matcher: '/portal-api/admin*',
       middlewares: [authenticate(PORTAL_ADMIN_ACTOR, ['session', 'bearer']), requirePortalAdmin],
     },
     {

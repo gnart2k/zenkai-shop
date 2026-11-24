@@ -24,7 +24,7 @@ export default async function AdminProducts({
   const sp = await searchParams
   const page = Math.max(Number(sp.page) || 1, 1)
   const limit = 15
-  const c = await portalFetch<List>(`/portal/admin/products?limit=${limit}&offset=${(page - 1) * limit}`)
+  const c = await portalFetch<List>(`/portal-api/admin/products?limit=${limit}&offset=${(page - 1) * limit}`)
   const pages = Math.max(Math.ceil(c.count / limit), 1)
   const returnTo = `${base}/admin/products`
   const m = (n: number | null) => money(n, c.currency_code, p.locale)

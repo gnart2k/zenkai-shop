@@ -33,7 +33,7 @@ export default async function RequestsPage({
   const t = await getTranslations({ locale: p.locale, namespace: "Portal" })
   const sp = await searchParams
   const { requests } = await portalFetch<{ requests: Req[] }>(
-    `/portal/collaborator/stores/${p.storeId}/requests`
+    `/portal-api/collaborator/stores/${p.storeId}/requests`
   )
 
   return (

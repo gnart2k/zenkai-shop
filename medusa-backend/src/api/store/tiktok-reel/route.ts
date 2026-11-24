@@ -1,5 +1,5 @@
 import { MedusaRequest, MedusaResponse } from '@medusajs/framework/http';
-import { ContainerRegistrationKeys } from '@medusajs/framework/utils';
+import { resolveStoreForRequest } from '../../../lib/portal/store-context';
 
 export type TiktokReelItem = {
   tiktok_id: string;
@@ -18,15 +18,9 @@ export type TiktokReel = {
 
 /** Homepage video reel, configured in store.metadata.tiktok_reel (see scripts/import-tiktok.ts). */
 export async function GET(req: MedusaRequest, res: MedusaResponse) {
-  const query = req.scope.resolve(ContainerRegistrationKeys.QUERY);
+  const store = await resolveStoreForRequest(req, ['id', 'metadata']);
 
-  const { data: stores } = await query.graph({
-    entity: 'store',
-    fields: ['id', 'metadata'],
-    pagination: { take: 1, skip: 0 },
-  });
-
-  const reel = stores[0]?.metadata?.tiktok_reel as Partial<TiktokReel> | undefined;
+  const reel = store?.metadata?.tiktok_reel as Partial<TiktokReel> | undefined;
 
   res.status(200).json({
     profile_url: reel?.profile_url ?? null,

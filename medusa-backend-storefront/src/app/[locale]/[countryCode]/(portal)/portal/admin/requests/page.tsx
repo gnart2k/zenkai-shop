@@ -21,7 +21,7 @@ export default async function AdminRequests({
   const sp = await searchParams
   const status = STATUSES.includes(sp.status ?? "") ? sp.status : undefined
   const { requests } = await portalFetch<{ requests: any[] }>(
-    `/portal/admin/requests${status ? `?status=${status}` : ""}`
+    `/portal-api/admin/requests${status ? `?status=${status}` : ""}`
   )
 
   return (

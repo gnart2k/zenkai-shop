@@ -29,7 +29,7 @@ export default async function PayPage({
   const t = await getTranslations({ locale: p.locale, namespace: "Portal.pay" })
   let pay: Pay | null = null
   try {
-    pay = await portalFetch<Pay>(`/portal/pay/${encodeURIComponent(p.token)}`, { auth: false })
+    pay = await portalFetch<Pay>(`/portal-api/pay/${encodeURIComponent(p.token)}`, { auth: false })
   } catch (e) {
     if (!(e instanceof PortalError)) {
       throw e

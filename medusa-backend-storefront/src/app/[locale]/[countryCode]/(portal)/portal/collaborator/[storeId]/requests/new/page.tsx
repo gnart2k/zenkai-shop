@@ -33,7 +33,7 @@ export default async function NewRequestPage({
   const sp = await searchParams
   const t = await getTranslations({ locale: p.locale, namespace: "Portal.newRequest" })
   const catalog = await portalFetch<Catalog>(
-    `/portal/collaborator/stores/${p.storeId}/products?limit=100`
+    `/portal-api/collaborator/stores/${p.storeId}/products?limit=100`
   )
   const variants = catalog.products.flatMap((prod) =>
     prod.variants

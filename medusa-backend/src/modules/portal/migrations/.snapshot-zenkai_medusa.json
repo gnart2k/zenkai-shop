@@ -21911,6 +21911,38 @@
           "comment": null,
           "enumItems": [],
           "mappedType": "datetime"
+        },
+        "domains": {
+          "name": "domains",
+          "type": "jsonb",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "json"
+        },
+        "slug": {
+          "name": "slug",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": true,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "text"
         }
       },
       "name": "portal_setting",
@@ -21926,6 +21958,17 @@
           "unique": false,
           "primary": false,
           "expression": "CREATE INDEX \"IDX_portal_setting_deleted_at\" ON public.portal_setting USING btree (deleted_at) WHERE (deleted_at IS NULL)"
+        },
+        {
+          "columnNames": [
+            "slug"
+          ],
+          "composite": false,
+          "constraint": false,
+          "keyName": "IDX_portal_setting_slug_unique",
+          "unique": true,
+          "primary": false,
+          "expression": "CREATE UNIQUE INDEX \"IDX_portal_setting_slug_unique\" ON public.portal_setting USING btree (slug) WHERE ((slug IS NOT NULL) AND (deleted_at IS NULL))"
         },
         {
           "columnNames": [

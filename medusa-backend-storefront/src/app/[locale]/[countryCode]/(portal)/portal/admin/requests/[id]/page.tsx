@@ -35,7 +35,7 @@ export default async function ReviewPage({
   const base = portalBase(p)
   const sp = await searchParams
   const t = await getTranslations({ locale: p.locale, namespace: "Portal" })
-  const d = await portalFetch<Detail>(`/portal/admin/requests/${p.id}`)
+  const d = await portalFetch<Detail>(`/portal-api/admin/requests/${p.id}`)
   const r = d.request
   const m = (n: number | null) => money(n, r.currency_code, p.locale)
   const returnTo = `${base}/admin/requests/${p.id}`

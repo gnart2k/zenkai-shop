@@ -28,7 +28,7 @@ export default async function CategoriesPage({
   const base = portalBase(p)
   const t = await getTranslations({ locale: p.locale, namespace: "Portal" })
   const sp = await searchParams
-  const { categories } = await portalFetch<{ categories: Cat[] }>("/portal/admin/categories")
+  const { categories } = await portalFetch<{ categories: Cat[] }>("/portal-api/admin/categories")
   const returnTo = `${base}/admin/categories`
   const okMsg =
     sp.ok === "created" ? t("categories.created") : sp.ok === "deleted" ? t("categories.deleted") : sp.ok === "saved" ? t("common.saved") : undefined

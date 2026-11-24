@@ -504,6 +504,7 @@ export function StorefrontEditor({
   return (
     <form action={action} className="space-y-6" encType="multipart/form-data">
       <input type="hidden" name="returnTo" value={returnTo} />
+      <input type="hidden" name="site" value={previewBase} />
       <input
         type="hidden"
         name="previewPath"

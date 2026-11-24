@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 })
   }
   try {
-    const { updated_at } = await portalFetch<{ updated_at: string }>("/portal/admin/storefront/draft", {
+    const { updated_at } = await portalFetch<{ updated_at: string }>("/portal-api/admin/storefront/draft", {
       method: "PUT",
       body,
     })

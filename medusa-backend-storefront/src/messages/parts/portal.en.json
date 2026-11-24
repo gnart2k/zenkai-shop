@@ -81,7 +81,8 @@
     },
     "stores": {
       "title": "Choose a store",
-      "empty": "You are not a collaborator of any store yet. Ask a store admin for an invite."
+      "empty": "You are not a collaborator of any store yet. Ask a store admin for an invite.",
+      "switch": "Switch store"
     },
     "products": {
       "title": "Products",

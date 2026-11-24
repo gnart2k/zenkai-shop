@@ -34,6 +34,8 @@
     }
   },
   "ShopLayout": {
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
     "closeMenu": "Close menu",
     "copyright": "© {year} {name}. All rights reserved.",
     "language": "Language:",
@@ -138,6 +140,8 @@
     }
   },
   "ShopProduct": {
+    "gallery": "Product images",
+    "video": "Product video",
     "tabInfo": "Product information",
     "tabShipping": "Shipping and returns",
     "material": "Material",

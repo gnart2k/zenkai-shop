@@ -27,7 +27,7 @@ export default async function EarningsPage({
 }) {
   const { locale, storeId } = await params
   const t = await getTranslations({ locale, namespace: "Portal" })
-  const e = await portalFetch<Earnings>(`/portal/collaborator/stores/${storeId}/earnings`)
+  const e = await portalFetch<Earnings>(`/portal-api/collaborator/stores/${storeId}/earnings`)
   const cur = e.entries[0]?.currency_code ?? e.payouts[0]?.currency_code ?? "vnd"
 
   return (

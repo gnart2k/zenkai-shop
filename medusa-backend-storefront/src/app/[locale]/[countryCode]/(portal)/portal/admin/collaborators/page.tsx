@@ -23,7 +23,7 @@ export default async function CollaboratorsPage({
   const returnTo = `${base}/admin/collaborators`
   const { collaborators } = await portalFetch<{
     collaborators: { id: string; email: string; name: string | null; status: string }[]
-  }>("/portal/admin/collaborators")
+  }>("/portal-api/admin/collaborators")
 
   return (
     <>

@@ -52,15 +52,15 @@ const SortProducts = ({
       <h3 className="mb-3 text-xs font-medium text-muted-foreground">
         {t("sortBy")}
       </h3>
-      <div className="space-y-1">
+      <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 small:mx-0 small:block small:space-y-1 small:overflow-visible small:px-0 small:pb-0">
         {sortOptions.map((option) => (
           <button
             key={option.value}
             onClick={() => setQueryParams("sortBy", option.value)}
             className={cn(
-              "block w-full rounded px-3 py-2 text-left text-sm transition-colors",
+              "shrink-0 whitespace-nowrap rounded-full border px-4 py-2 text-left text-sm transition-colors small:block small:w-full small:rounded small:border-transparent small:px-3",
               sortBy === option.value
-                ? "bg-muted font-medium text-foreground"
+                ? "border-foreground bg-muted font-medium text-foreground small:border-transparent"
                 : "text-muted-foreground hover:text-foreground"
             )}
           >

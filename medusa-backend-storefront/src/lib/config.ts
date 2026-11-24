@@ -1,3 +1,4 @@
+import { getTenantKey } from "@lib/data/tenant-key"
 import { getLocaleHeader } from "@lib/util/get-locale-header"
 import { isStorefrontDebugEnabled } from "@lib/util/storefront-debug"
 import Medusa, { FetchArgs, FetchInput } from "@medusajs/js-sdk"
@@ -26,6 +27,12 @@ sdk.client.fetch = async <T>(
   try {
     localeHeader = await getLocaleHeader()
     headers["x-medusa-locale"] ??= localeHeader["x-medusa-locale"]
+  } catch {}
+
+  // Multi-store: each request carries the publishable key of the store it belongs to.
+  try {
+    const key = await getTenantKey()
+    if (key) headers["x-publishable-api-key"] ??= key
   } catch {}
 
   const newHeaders = {

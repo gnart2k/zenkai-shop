@@ -93,6 +93,21 @@
     scrollbar-width: none; /* Firefox */
   }
 
+  :root {
+    /* Medusa UI links follow the store theme instead of a fixed blue */
+    --fg-interactive: hsl(var(--foreground));
+    --fg-interactive-hover: hsl(var(--foreground) / 0.7);
+  }
+
+  .tap-area {
+    position: relative;
+  }
+  .tap-area::after {
+    content: "";
+    position: absolute;
+    inset: -10px;
+  }
+
   input:focus ~ label,
   input:not(:placeholder-shown) ~ label {
     @apply -translate-y-2 text-xsmall-regular;

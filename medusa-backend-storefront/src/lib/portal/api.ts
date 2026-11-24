@@ -34,9 +34,24 @@ export class PortalError extends Error {
   }
 }
 
-/** Path prefix for the current locale/country, e.g. /vi/vn/portal */
-export const portalBase = (p: { locale: string; countryCode: string }) =>
-  `/${p.locale}/${p.countryCode}/portal`
+/**
+ * The portal lives on ONE fixed route, /portal/..., independent of any storefront, region or
+ * country: a collaborator can work for several stores, and there will be several storefronts.
+ * The UI language is a cookie (see PORTAL_LOCALE_COOKIE), not part of the URL.
+ * (The middleware serves /portal/... from the internal [locale]/[countryCode]/(portal) pages.)
+ */
+export const PORTAL_BASE = "/portal"
+/** The storefront region the portal links to (preview, "open store"). One today; per store later. */
+export const STOREFRONT_REGION = process.env.PORTAL_STOREFRONT_REGION || "vn"
+export const PORTAL_LOCALE_COOKIE = "portal_locale"
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export const portalBase = (_p?: unknown) => PORTAL_BASE
+
+/** The signed-in user's chosen UI language (default vi). */
+export async function portalLocale(): Promise<"vi" | "en"> {
+  const v = (await cookies()).get(PORTAL_LOCALE_COOKIE)?.value
+  return v === "en" ? "en" : "vi"
+}
 
 /**
  * Calls the Medusa backend as the signed-in portal user (server-side only, so no
@@ -90,7 +105,7 @@ export async function requireActor(actor: Actor, base: string) {
   const current = jar.get(ACTOR_COOKIE)?.value
   if (!tokenValid(token) || current !== actor) {
     // Expired session: clear the stale cookies first, then land on this user's own
-    // /{locale}/{country}/portal/login with the expired notice.
+    // /portal/login with the expired notice.
     redirect(
       token && !tokenValid(token)
         ? `${SESSION_EXPIRED_PATH}?to=${encodeURIComponent(`${base}/login?expired=1`)}`

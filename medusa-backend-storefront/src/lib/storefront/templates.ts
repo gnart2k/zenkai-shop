@@ -51,9 +51,9 @@ export type ContactWidgetConfig = {
 }
 
 export const DEFAULT_CONTACT_WIDGET: ContactWidgetConfig = {
-  enabled: true,
-  phone: "0866 063 804",
-  zalo: "0866063804",
+  enabled: false,
+  phone: "",
+  zalo: "",
   position: "right",
   vn_only: true,
 }
@@ -278,10 +278,9 @@ const NO_ANNOUNCEMENT: HeaderConfig = { announcement: { enabled: false, text: {}
 /** What the footer showed before it became editable. */
 const DEFAULT_FOOTER: FooterConfig = {
   tagline: {},
-  contact: [
-    { label: "0866 063 804", href: "tel:0866063804", kind: "phone" },
-    { label: "TikTok @dengoluadecor", href: "https://www.tiktok.com/@dengoluadecor", kind: "link" },
-  ],
+  // No store-specific contact details here: every store (tenant) starts neutral and fills this
+  // in the editor. The first store's contacts are stored in its own config.
+  contact: [],
   show_categories: true,
   show_collections: true,
 }

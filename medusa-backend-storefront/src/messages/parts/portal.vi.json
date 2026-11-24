@@ -81,7 +81,8 @@
     },
     "stores": {
       "title": "Chọn cửa hàng",
-      "empty": "Bạn chưa là cộng tác viên của cửa hàng nào. Hãy nhờ quản trị cửa hàng gửi lời mời."
+      "empty": "Bạn chưa là cộng tác viên của cửa hàng nào. Hãy nhờ quản trị cửa hàng gửi lời mời.",
+      "switch": "Chuyển cửa hàng"
     },
     "products": {
       "title": "Sản phẩm",

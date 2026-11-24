@@ -37,13 +37,13 @@ const ProductTemplate = async ({
   const details = (
     <>
       <ProductInfo product={product} />
-      <ProductTabs product={product} />
-      <ProductOnboardingCta />
       <Suspense
         fallback={<ProductActions disabled={true} product={product} region={region} />}
       >
         <ProductActionsWrapper id={product.id} region={region} />
       </Suspense>
+      <ProductTabs product={product} />
+      <ProductOnboardingCta />
     </>
   )
 

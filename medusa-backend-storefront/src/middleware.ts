@@ -343,7 +343,97 @@ function previewMiddleware(request: NextRequest): NextResponse {
   return res
 }
 
+const PORTAL_LOCALE_COOKIE = "portal_locale"
+const PORTAL_REGION = process.env.PORTAL_STOREFRONT_REGION || "vn"
+
+/**
+ * The portal has ONE fixed URL space, /portal/..., independent of storefront, region and
+ * language (a collaborator can work for several stores; there will be several storefronts).
+ * It is served from the internal pages under /[locale]/[countryCode]/(portal)/portal, with the
+ * language taken from a cookie. The old /{locale}/{country}/portal/... URLs redirect here.
+ */
+// Host of the portal (the same host as the Medusa admin), e.g. admin.example.com. When set, the
+// portal is served ONLY there and store domains (any number, added dynamically later) never
+// serve /portal. Unset in development: every host serves both.
+const PORTAL_HOST = (process.env.PORTAL_HOST || "").toLowerCase()
+
+function portalMiddleware(request: NextRequest): NextResponse | null {
+  const { pathname, search } = request.nextUrl
+  if (PORTAL_HOST) {
+    const host = (request.headers.get("x-forwarded-host") || request.headers.get("host") || "").toLowerCase()
+    const onPortalHost = host === PORTAL_HOST
+    const isPortalPath = pathname === "/portal" || pathname.startsWith("/portal/")
+    if (isPortalPath && !onPortalHost) return new NextResponse("Not found", { status: 404 })
+    if (onPortalHost && !isPortalPath && !/^\/(preview|api|_next)(\/|$)/.test(pathname)) {
+      return NextResponse.redirect(new URL("/portal/login", request.url))
+    }
+  }
+  const old = /^\/(en|vi)\/[a-z]{2}(\/portal(?:\/.*)?)$/.exec(pathname)
+  if (old) {
+    const res = NextResponse.redirect(new URL(`${old[2]}${search}`, request.url), 308)
+    res.cookies.set(PORTAL_LOCALE_COOKIE, old[1], { path: "/", maxAge: 60 * 60 * 24 * 365, sameSite: "lax" })
+    return res
+  }
+  if (pathname === "/portal" || pathname.startsWith("/portal/")) {
+    const c = request.cookies.get(PORTAL_LOCALE_COOKIE)?.value
+    const locale = c === "en" ? "en" : routing.defaultLocale
+    const headers = new Headers(request.headers)
+    headers.set("x-next-intl-locale", locale)
+    const url = request.nextUrl.clone()
+    url.pathname = `/${locale}/${PORTAL_REGION}${pathname}`
+    const res = NextResponse.rewrite(url, { request: { headers } })
+    res.headers.set("x-robots-tag", "noindex, nofollow")
+    return res
+  }
+  return null
+}
+
+// Hosts that serve the default store without a lookup (development, or the primary domain).
+// Every other host must be a store's own address (<slug>.<base domain>) or a verified custom
+// domain; anything else gets a 404 instead of some other store's pages.
+const DEFAULT_HOSTS = new Set(
+  (process.env.DEFAULT_STOREFRONT_HOSTS || "localhost,127.0.0.1")
+    .split(",")
+    .map((h) => h.trim().toLowerCase())
+    .filter(Boolean)
+)
+const tenantCache = new Map<string, { ok: boolean; at: number }>()
+
+async function hostIsKnownStore(host: string): Promise<boolean> {
+  const hit = tenantCache.get(host)
+  if (hit && Date.now() - hit.at < 30_000) return hit.ok
+  let ok = false
+  try {
+    const res = await fetch(`${BACKEND_URL}/portal-api/tenant?host=${encodeURIComponent(host)}`, {
+      cache: "no-store",
+    })
+    ok = res.ok
+  } catch {
+    // Backend unreachable: fail open for hosts we already knew, closed otherwise.
+    ok = hit?.ok ?? false
+  }
+  tenantCache.set(host, { ok, at: Date.now() })
+  return ok
+}
+
 export async function middleware(request: NextRequest) {
+  const portal = portalMiddleware(request)
+  if (portal) return portal
+
+  const { pathname } = request.nextUrl
+  const host = (request.headers.get("x-forwarded-host") || request.headers.get("host") || "")
+    .toLowerCase()
+    .replace(/:\d+$/, "")
+  if (
+    host &&
+    host !== PORTAL_HOST.replace(/:\d+$/, "") &&
+    !DEFAULT_HOSTS.has(host) &&
+    !/^\/(preview|api|_next)(\/|$)/.test(pathname) &&
+    !(await hostIsKnownStore(host))
+  ) {
+    return new NextResponse("Store not found", { status: 404 })
+  }
+
   if (request.nextUrl.pathname === "/preview" || request.nextUrl.pathname.startsWith("/preview/")) {
     return previewMiddleware(request)
   }

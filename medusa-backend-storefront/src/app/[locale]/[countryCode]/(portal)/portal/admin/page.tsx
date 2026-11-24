@@ -14,9 +14,9 @@ export default async function AdminHome({
   const base = portalBase(p)
   const t = await getTranslations({ locale: p.locale, namespace: "Portal" })
   const [{ settings }, { requests }, { owed }] = await Promise.all([
-    portalFetch<{ settings: { deposit_percent: number; default_contact_email: string | null } }>("/portal/admin/me"),
-    portalFetch<{ requests: { id: string }[] }>("/portal/admin/requests?status=pending"),
-    portalFetch<{ owed: { net: number }[] }>("/portal/admin/earnings"),
+    portalFetch<{ settings: { deposit_percent: number; default_contact_email: string | null } }>("/portal-api/admin/me"),
+    portalFetch<{ requests: { id: string }[] }>("/portal-api/admin/requests?status=pending"),
+    portalFetch<{ owed: { net: number }[] }>("/portal-api/admin/earnings"),
   ])
   const owing = owed.filter((o) => o.net > 0).length
 

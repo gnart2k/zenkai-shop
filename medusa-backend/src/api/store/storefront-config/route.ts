@@ -1,5 +1,6 @@
 import type { MedusaRequest, MedusaResponse } from '@medusajs/framework/http';
 import { ContainerRegistrationKeys } from '@medusajs/framework/utils';
+import { resolveStoreForRequest } from '../../../lib/portal/store-context';
 import {
   DEFAULT_STOREFRONT_CONFIG,
   readStorefrontConfig,
@@ -9,8 +10,8 @@ import { verifyToken } from '../../../modules/portal/lib/token';
 
 /**
  * Public: the storefront theme of the store this storefront belongs to. The store is found
- * through the publishable key's sales channels; with a single store it falls back to the
- * first one (same rule as /store/branding).
+ * through the publishable key's sales channels; with a single store it falls back to that
+ * store; with several stores an unknown key gets the defaults (never another store's config).
  *
  * With ?preview=<signed token> (issued to a portal admin) it returns that store's draft
  * instead, flagged `preview: true`. The token is HMAC-signed, scoped to one store and
@@ -41,10 +42,6 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
     }
   }
 
-  const channelIds: string[] = (req as any).publishable_key_context?.sales_channel_ids ?? [];
-  const store =
-    (stores as any[]).find(
-      (s) => s.default_sales_channel_id && channelIds.includes(s.default_sales_channel_id)
-    ) ?? (stores as any[])[0];
+  const store = await resolveStoreForRequest(req);
   res.json(store ? readStorefrontConfig(store.metadata) : DEFAULT_STOREFRONT_CONFIG);
 }

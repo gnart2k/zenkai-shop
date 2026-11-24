@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button"
 import { saveAppearance } from "@lib/portal/actions"
-import { portalBase, portalFetch } from "@lib/portal/api"
+import { portalBase, portalFetch, STOREFRONT_REGION } from "@lib/portal/api"
 import { loadRawMessages } from "@lib/storefront/messages"
 import { DEFAULT_CHOICE, type L10n, type StorefrontChoice } from "@lib/storefront/templates"
 import { EDITABLE_TEXTS, TEXT_GROUPS } from "@lib/storefront/texts"
@@ -35,14 +35,14 @@ export default async function AppearancePage({
     config: StorefrontChoice
     draft: StorefrontChoice | null
     draft_updated_at: string | null
-  }>("/portal/admin/storefront")
+  }>("/portal-api/admin/storefront")
   // The editor opens the unpublished draft when there is one, otherwise the live config.
   const initial = state.draft ?? state.config
 
   // Short-lived signed link so the editor can show the real draft pages in an iframe.
-  const { token } = await portalFetch<{ token: string }>("/portal/admin/storefront/preview", { body: {} })
+  const { token } = await portalFetch<{ token: string }>("/portal-api/admin/storefront/preview", { body: {} })
   const { products } = await portalFetch<{ products: { handle: string; status: string }[] }>(
-    "/portal/admin/products?limit=10"
+    "/portal-api/admin/products?limit=10"
   )
   const productHandle = products.find((x) => x.status === "published")?.handle ?? products[0]?.handle ?? null
 
@@ -56,7 +56,7 @@ export default async function AppearancePage({
     <>
       <PageHeader title={t("title")} description={t("subtitle")}>
         <Button asChild variant="outline">
-          <a href={`/api/preview-exit?to=${encodeURIComponent(`/${p.locale}/${p.countryCode}`)}`} target="_blank" rel="noreferrer">
+          <a href={`/api/preview-exit?to=${encodeURIComponent(`/${p.locale}/${STOREFRONT_REGION}`)}`} target="_blank" rel="noreferrer">
             <ExternalLink />
             {t("openStore")}
           </a>
@@ -85,7 +85,7 @@ export default async function AppearancePage({
         textDefaults={textDefaults}
         hasDraft={!!state.draft}
         draftUpdatedAt={state.draft_updated_at}
-        previewBase={`/${p.locale}/${p.countryCode}`}
+        previewBase={`/${p.locale}/${STOREFRONT_REGION}`}
         previewToken={token}
         productHandle={productHandle}
       />

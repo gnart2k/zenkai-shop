@@ -15,8 +15,8 @@ export default async function NewProductPage({
   const sp = await searchParams
   const t = await getTranslations({ locale: p.locale, namespace: "Portal.productForm" })
   const [{ categories }, list] = await Promise.all([
-    portalFetch<{ categories: { id: string; name: string }[] }>("/portal/admin/categories"),
-    portalFetch<{ currency_code: string }>("/portal/admin/products?limit=1"),
+    portalFetch<{ categories: { id: string; name: string }[] }>("/portal-api/admin/categories"),
+    portalFetch<{ currency_code: string }>("/portal-api/admin/products?limit=1"),
   ])
   return (
     <>

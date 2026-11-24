@@ -28,7 +28,8 @@ export default async function ContactWidget({
     <div
       data-contact-widget
       data-position={config.position}
-      className={`fixed bottom-4 ${side} z-40 flex flex-col gap-3 print:hidden`}
+      // Sits above the mobile add-to-cart bar when that bar is showing.
+      className={`fixed bottom-4 ${side} z-40 flex flex-col gap-3 print:hidden [body:has([data-sticky-cta])_&]:bottom-28 lg:[body:has([data-sticky-cta])_&]:bottom-4`}
     >
       {zalo && (
         <a

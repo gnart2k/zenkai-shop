@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useTranslations } from "next-intl"
+import { usePathname } from "next/navigation"
 
 import { HttpTypes, StoreRegion } from "@medusajs/types"
 import type { HeaderVariant } from "@lib/storefront/templates"
@@ -31,7 +32,7 @@ function AccountIcon({ className, label }: { className: string; label: string })
   return (
     <LocalizedClientLink
       href="/account"
-      className={`hidden transition-colors duration-300 small:inline ${className}`}
+      className={`tap-area hidden transition-colors duration-300 small:inline ${className}`}
       data-testid="nav-account-link"
       aria-label={label}
     >
@@ -65,6 +66,10 @@ export default function NavClient({
 }: NavClientProps) {
   const [scrolled, setScrolled] = useState(false)
   const t = useTranslations("Nav")
+  const pathname = usePathname()
+  // The transparent overlay header only makes sense over the home hero; other pages have
+  // light backgrounds where white-on-transparent would be invisible.
+  const onHome = /^(\/preview)?\/[a-z]{2}\/[a-z]{2}\/?$/.test(pathname ?? "")
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10)
@@ -74,7 +79,7 @@ export default function NavClient({
   }, [])
 
   // Only the overlay header is transparent; the others are always solid.
-  const light = variant !== "overlay" || scrolled
+  const light = variant !== "overlay" || !onHome || scrolled
 
   const linkClass = light
     ? "text-muted-foreground hover:text-foreground"

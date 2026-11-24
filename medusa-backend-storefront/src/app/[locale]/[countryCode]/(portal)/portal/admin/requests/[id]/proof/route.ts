@@ -11,10 +11,10 @@ export async function GET(
   const token = (await cookies()).get(JWT_COOKIE)?.value
   if (!token) {
     return NextResponse.redirect(
-      new URL(`/${locale}/${countryCode}/portal/login`, _req.url)
+      new URL("/portal/login", _req.url)
     )
   }
-  const upstream = await fetch(`${BACKEND_URL}/portal/admin/requests/${id}/proof`, {
+  const upstream = await fetch(`${BACKEND_URL}/portal-api/admin/requests/${id}/proof`, {
     headers: { authorization: `Bearer ${token}` },
     cache: "no-store",
   })

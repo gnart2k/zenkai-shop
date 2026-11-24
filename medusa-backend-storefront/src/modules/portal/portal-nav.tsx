@@ -18,7 +18,7 @@ import {
   type LucideIcon,
 } from "lucide-react"
 import { usePathname } from "next/navigation"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 const ICONS: Record<string, LucideIcon> = {
   dashboard: LayoutDashboard,
@@ -85,10 +85,10 @@ export function MobileNav({ items, title, menuLabel }: { items: NavItem[]; title
   )
 }
 
-/** Swaps the locale segment of the current URL: /vi/vn/portal/x <-> /en/vn/portal/x */
+/** Switches the portal language (stored in a cookie) and returns to the same page. */
 export function LangSwitch({ current, label }: { current: string; label: string }) {
   const path = usePathname()
-  const swap = (to: string) => path.replace(/^\/(en|vi)(?=\/|$)/, `/${to}`)
+  const swap = (to: string) => `/api/portal/locale?to=${to}&next=${encodeURIComponent(path)}`
   return (
     <div className="flex items-center gap-1 text-sm" aria-label={label}>
       <Globe className="size-4 text-muted-foreground" />
@@ -106,5 +106,47 @@ export function LangSwitch({ current, label }: { current: string; label: string 
         </a>
       ))}
     </div>
+  )
+}
+
+/**
+ * Collaborators work for several stores: the store is chosen here, in the header, and the page
+ * keeps its section (products / requests / profit) when switching. The choice is remembered.
+ */
+export function StoreSwitcher({
+  stores,
+  label,
+}: {
+  stores: { id: string; name: string }[]
+  label: string
+}) {
+  const path = usePathname()
+  const m = /^\/portal\/collaborator\/([^/]+)(\/.*)?$/.exec(path ?? "")
+  const current = m?.[1] ?? ""
+  useEffect(() => {
+    if (current) document.cookie = `portal_store=${current}; path=/; max-age=31536000; samesite=lax`
+  }, [current])
+  if (stores.length === 0) return null
+  const go = (id: string) => {
+    document.cookie = `portal_store=${id}; path=/; max-age=31536000; samesite=lax`
+    window.location.assign(`/portal/collaborator/${id}${m?.[2] ?? ""}`)
+  }
+  return (
+    <label className="flex items-center gap-2 text-sm">
+      <Store className="size-4 text-muted-foreground" aria-hidden />
+      <span className="sr-only">{label}</span>
+      <select
+        value={current}
+        onChange={(e) => go(e.target.value)}
+        className="h-9 max-w-[14rem] rounded-md border border-input bg-background px-2 text-sm font-medium shadow-sm"
+      >
+        {!current ? <option value="">{label}</option> : null}
+        {stores.map((s) => (
+          <option key={s.id} value={s.id}>
+            {s.name}
+          </option>
+        ))}
+      </select>
+    </label>
   )
 }

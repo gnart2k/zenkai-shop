@@ -9,10 +9,7 @@ import {
   Logger,
   ValidateFulfillmentDataContext,
 } from '@medusajs/framework/types';
-import {
-  AbstractFulfillmentProviderService,
-  MedusaError,
-} from '@medusajs/framework/utils';
+import { AbstractFulfillmentProviderService, MedusaError } from '@medusajs/framework/utils';
 import GhnClient from './client';
 import {
   DEFAULT_GHN_API_BASE_URL,
@@ -69,10 +66,7 @@ type FulfillmentFromLocation = {
   };
 };
 
-const getStringValue = (
-  source: Record<string, unknown> | null | undefined,
-  key: string
-) => {
+const getStringValue = (source: Record<string, unknown> | null | undefined, key: string) => {
   if (!source) {
     return undefined;
   }
@@ -91,10 +85,7 @@ const getStringValue = (
   return undefined;
 };
 
-const getNumberValue = (
-  source: Record<string, unknown> | null | undefined,
-  key: string
-) => {
+const getNumberValue = (source: Record<string, unknown> | null | undefined, key: string) => {
   const value = getStringValue(source, key);
 
   if (!value) {
@@ -119,10 +110,7 @@ const parseOptionalNumber = (value: string | number | undefined) => {
   return Number.isNaN(parsed) ? undefined : parsed;
 };
 
-const parsePositiveNumber = (
-  value: string | number | undefined,
-  fallback: number
-) => {
+const parsePositiveNumber = (value: string | number | undefined, fallback: number) => {
   const parsed = parseOptionalNumber(value);
 
   if (!parsed || parsed <= 0) {
@@ -143,10 +131,7 @@ class GhnFulfillmentProviderService extends AbstractFulfillmentProviderService {
   protected readonly options_: ResolvedGhnFulfillmentOptions;
   protected readonly client_: GhnClient;
 
-  constructor(
-    { logger }: InjectedDependencies,
-    options: GhnFulfillmentOptions = {}
-  ) {
+  constructor({ logger }: InjectedDependencies, options: GhnFulfillmentOptions = {}) {
     super();
 
     this.logger_ = logger;
@@ -162,8 +147,7 @@ class GhnFulfillmentProviderService extends AbstractFulfillmentProviderService {
 
   async getFulfillmentOptions(): Promise<FulfillmentOption[]> {
     const fromDistrictId = this.options_.fromDistrictId;
-    const discoveryToDistrictId =
-      this.options_.serviceDiscoveryDistrictId || fromDistrictId;
+    const discoveryToDistrictId = this.options_.serviceDiscoveryDistrictId || fromDistrictId;
 
     if (fromDistrictId && discoveryToDistrictId) {
       try {
@@ -180,16 +164,14 @@ class GhnFulfillmentProviderService extends AbstractFulfillmentProviderService {
         }
 
         if (uniqueByType.size) {
-          const options = [...uniqueByType.entries()].map(
-            ([serviceTypeId, shortName]) => {
-              return {
-                id: `ghn-service-type-${serviceTypeId}`,
-                name: `GHN ${shortName}`,
-                service_type_id: serviceTypeId,
-                short_name: shortName,
-              };
-            }
-          );
+          const options = [...uniqueByType.entries()].map(([serviceTypeId, shortName]) => {
+            return {
+              id: `ghn-service-type-${serviceTypeId}`,
+              name: `GHN ${shortName}`,
+              service_type_id: serviceTypeId,
+              short_name: shortName,
+            };
+          });
 
           this.logger_.info(
             `[GHN][provider] fulfillment options resolved from API ${JSON.stringify({
@@ -222,15 +204,11 @@ class GhnFulfillmentProviderService extends AbstractFulfillmentProviderService {
     data: Record<string, unknown>,
     context: ValidateFulfillmentDataContext
   ): Promise<Record<string, unknown>> {
-    const metadata = context.shipping_address?.metadata as
-      | Record<string, unknown>
-      | undefined;
+    const metadata = context.shipping_address?.metadata as Record<string, unknown> | undefined;
     const toDistrictId =
-      getNumberValue(data, 'to_district_id') ||
-      getNumberValue(metadata, 'ghn_district_id');
+      getNumberValue(data, 'to_district_id') || getNumberValue(metadata, 'ghn_district_id');
     const toWardCode =
-      getStringValue(data, 'to_ward_code') ||
-      getStringValue(metadata, 'ghn_ward_code');
+      getStringValue(data, 'to_ward_code') || getStringValue(metadata, 'ghn_ward_code');
 
     if (!toDistrictId || !toWardCode) {
       throw new MedusaError(
@@ -248,9 +226,7 @@ class GhnFulfillmentProviderService extends AbstractFulfillmentProviderService {
         getNumberValue(optionData, 'service_type_id') ||
         undefined,
       service_id:
-        getNumberValue(data, 'service_id') ||
-        getNumberValue(optionData, 'service_id') ||
-        undefined,
+        getNumberValue(data, 'service_id') || getNumberValue(optionData, 'service_id') || undefined,
     };
   }
 
@@ -280,8 +256,7 @@ class GhnFulfillmentProviderService extends AbstractFulfillmentProviderService {
         getNumberValue(data, 'to_district_id') ||
         getNumberValue(shippingMetadata, 'ghn_district_id');
       const toWardCode =
-        getStringValue(data, 'to_ward_code') ||
-        getStringValue(shippingMetadata, 'ghn_ward_code');
+        getStringValue(data, 'to_ward_code') || getStringValue(shippingMetadata, 'ghn_ward_code');
 
       this.logger_.info(
         `[GHN][provider][calculate:start] ${JSON.stringify({
@@ -428,11 +403,11 @@ class GhnFulfillmentProviderService extends AbstractFulfillmentProviderService {
    * Reads GHN "from" (warehouse) district/ward saved on the stock location in Admin
    * (Settings → Shipping → warehouse address). Address metadata wins over location metadata.
    */
-  protected resolveOriginFromWarehouse_(
-    context: CalculateShippingOptionPriceDTO['context']
-  ): { fromDistrictId?: number; fromWardCode?: string } {
-    const fromLocation = (context as { from_location?: FulfillmentFromLocation })
-      .from_location;
+  protected resolveOriginFromWarehouse_(context: CalculateShippingOptionPriceDTO['context']): {
+    fromDistrictId?: number;
+    fromWardCode?: string;
+  } {
+    const fromLocation = (context as { from_location?: FulfillmentFromLocation }).from_location;
 
     if (!fromLocation) {
       this.logger_.info(
@@ -467,24 +442,17 @@ class GhnFulfillmentProviderService extends AbstractFulfillmentProviderService {
 
   protected resolveOptions_(options: GhnFulfillmentOptions): ResolvedGhnFulfillmentOptions {
     const apiBaseUrl =
-      options.api_base_url ||
-      process.env.GHN_API_BASE_URL ||
-      DEFAULT_GHN_API_BASE_URL;
-    const token =
-      options.api_token || process.env.GHN_API_TOKEN || process.env.GHN_API_KEY;
+      options.api_base_url || process.env.GHN_API_BASE_URL || DEFAULT_GHN_API_BASE_URL;
+    const token = options.api_token || process.env.GHN_API_TOKEN || process.env.GHN_API_KEY;
     const shopId = parseOptionalNumber(
       options.shop_id || process.env.GHN_SHOP_ID || process.env.GHN_SHOPID
     );
     const fromDistrictId = parseOptionalNumber(
-      options.from_district_id ||
-        process.env.GHN_FROM_DISTRICT_ID ||
-        process.env.GHN_FROM_DISTRICT
+      options.from_district_id || process.env.GHN_FROM_DISTRICT_ID || process.env.GHN_FROM_DISTRICT
     );
-    const fromWardCode =
-      options.from_ward_code || process.env.GHN_FROM_WARD_CODE || undefined;
+    const fromWardCode = options.from_ward_code || process.env.GHN_FROM_WARD_CODE || undefined;
     const serviceDiscoveryDistrictId = parseOptionalNumber(
-      options.service_discovery_district_id ||
-        process.env.GHN_SERVICE_DISCOVERY_DISTRICT_ID
+      options.service_discovery_district_id || process.env.GHN_SERVICE_DISCOVERY_DISTRICT_ID
     );
 
     return {
@@ -494,22 +462,10 @@ class GhnFulfillmentProviderService extends AbstractFulfillmentProviderService {
       fromDistrictId,
       fromWardCode,
       serviceDiscoveryDistrictId,
-      defaultWeight: parsePositiveNumber(
-        options.default_weight,
-        DEFAULT_PACKAGE_WEIGHT
-      ),
-      defaultLength: parsePositiveNumber(
-        options.default_length,
-        DEFAULT_PACKAGE_DIMENSION
-      ),
-      defaultWidth: parsePositiveNumber(
-        options.default_width,
-        DEFAULT_PACKAGE_DIMENSION
-      ),
-      defaultHeight: parsePositiveNumber(
-        options.default_height,
-        DEFAULT_PACKAGE_DIMENSION
-      ),
+      defaultWeight: parsePositiveNumber(options.default_weight, DEFAULT_PACKAGE_WEIGHT),
+      defaultLength: parsePositiveNumber(options.default_length, DEFAULT_PACKAGE_DIMENSION),
+      defaultWidth: parsePositiveNumber(options.default_width, DEFAULT_PACKAGE_DIMENSION),
+      defaultHeight: parsePositiveNumber(options.default_height, DEFAULT_PACKAGE_DIMENSION),
       requestTimeoutMs: parsePositiveNumber(options.request_timeout_ms, 10000),
     };
   }
@@ -518,14 +474,10 @@ class GhnFulfillmentProviderService extends AbstractFulfillmentProviderService {
     context: CalculateShippingOptionPriceDTO['context'],
     data: CalculateShippingOptionPriceDTO['data']
   ): PackageMetrics {
-    const packageWeight =
-      getNumberValue(data, 'package_weight') || getNumberValue(data, 'weight');
-    const packageLength =
-      getNumberValue(data, 'package_length') || getNumberValue(data, 'length');
-    const packageWidth =
-      getNumberValue(data, 'package_width') || getNumberValue(data, 'width');
-    const packageHeight =
-      getNumberValue(data, 'package_height') || getNumberValue(data, 'height');
+    const packageWeight = getNumberValue(data, 'package_weight') || getNumberValue(data, 'weight');
+    const packageLength = getNumberValue(data, 'package_length') || getNumberValue(data, 'length');
+    const packageWidth = getNumberValue(data, 'package_width') || getNumberValue(data, 'width');
+    const packageHeight = getNumberValue(data, 'package_height') || getNumberValue(data, 'height');
 
     if (packageWeight && packageLength && packageWidth && packageHeight) {
       return {
@@ -546,13 +498,10 @@ class GhnFulfillmentProviderService extends AbstractFulfillmentProviderService {
     const itemMetrics = (context.items || []).reduce((acc, item) => {
       const variant = item.variant as Record<string, unknown> | undefined;
       const quantity = Number(item.quantity) > 0 ? Number(item.quantity) : 1;
-      const weight =
-        getNumberValue(variant, 'weight') || this.options_.defaultWeight;
-      const length =
-        getNumberValue(variant, 'length') || this.options_.defaultLength;
+      const weight = getNumberValue(variant, 'weight') || this.options_.defaultWeight;
+      const length = getNumberValue(variant, 'length') || this.options_.defaultLength;
       const width = getNumberValue(variant, 'width') || this.options_.defaultWidth;
-      const height =
-        getNumberValue(variant, 'height') || this.options_.defaultHeight;
+      const height = getNumberValue(variant, 'height') || this.options_.defaultHeight;
 
       acc.weight += weight * quantity;
       acc.length = Math.max(acc.length, length);
@@ -585,14 +534,12 @@ class GhnFulfillmentProviderService extends AbstractFulfillmentProviderService {
       return {
         serviceId: explicitServiceId,
         serviceTypeId:
-          getNumberValue(data, 'service_type_id') ||
-          getNumberValue(optionData, 'service_type_id'),
+          getNumberValue(data, 'service_type_id') || getNumberValue(optionData, 'service_type_id'),
       };
     }
 
     const serviceTypeId =
-      getNumberValue(data, 'service_type_id') ||
-      getNumberValue(optionData, 'service_type_id');
+      getNumberValue(data, 'service_type_id') || getNumberValue(optionData, 'service_type_id');
 
     if (!input.fromDistrictId) {
       throw new MedusaError(
@@ -620,9 +567,7 @@ class GhnFulfillmentProviderService extends AbstractFulfillmentProviderService {
       };
     }
 
-    const matchedService = services.find(
-      (service) => service.service_type_id === serviceTypeId
-    );
+    const matchedService = services.find((service) => service.service_type_id === serviceTypeId);
 
     if (!matchedService) {
       return {

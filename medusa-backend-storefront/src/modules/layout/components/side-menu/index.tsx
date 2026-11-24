@@ -43,7 +43,7 @@ const SideMenu = ({ regions, scrolled, storeName, categories = [] }: SideMenuPro
         <>
           <Popover.Button
             data-testid="nav-menu-button"
-            className={`transition-colors duration-300 ${iconClass}`}
+            className={`tap-area transition-colors duration-300 ${iconClass}`}
             aria-label={tn("menu")}
           >
             <svg

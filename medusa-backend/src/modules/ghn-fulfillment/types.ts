@@ -1,5 +1,4 @@
-export const DEFAULT_GHN_API_BASE_URL =
-  'https://online-gateway.ghn.vn/shiip/public-api';
+export const DEFAULT_GHN_API_BASE_URL = 'https://online-gateway.ghn.vn/shiip/public-api';
 
 export const DEFAULT_PACKAGE_WEIGHT = 200;
 export const DEFAULT_PACKAGE_DIMENSION = 20;

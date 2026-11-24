@@ -1,5 +1,5 @@
-import ProductMediaModuleService from './service';
 import { Module } from '@medusajs/framework/utils';
+import ProductMediaModuleService from './service';
 
 export const PRODUCT_MEDIA_MODULE = 'productMedia';
 

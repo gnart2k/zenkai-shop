@@ -9,11 +9,10 @@ import { NextRequest, NextResponse } from "next/server"
  */
 export async function POST(request: NextRequest) {
   const f = await request.formData()
-  const returnTo = String(f.get("returnTo") ?? "")
-  // /{locale}/{country}/portal/admin/appearance -> /{locale}/{country}
-  const site = /^\/(en|vi)\/[a-z]{2}\/portal\//.test(returnTo)
-    ? returnTo.replace(/\/portal\/.*$/, "")
-    : "/"
+  // The storefront being previewed (/{locale}/{country}), sent by the editor. The portal URL
+  // itself no longer says which storefront it is about.
+  const rawSite = String(f.get("site") ?? "")
+  const site = /^\/(en|vi)\/[a-z]{2}$/.test(rawSite) ? rawSite : "/"
 
   // Open the page the owner was looking at in the editor, not always the home page.
   const rawPath = String(f.get("previewPath") ?? "")
@@ -21,8 +20,8 @@ export async function POST(request: NextRequest) {
 
   try {
     const cfg = await buildStorefrontConfig(f)
-    await portalFetch("/portal/admin/storefront/draft", { method: "PUT", body: cfg })
-    const { token } = await portalFetch<{ token: string }>("/portal/admin/storefront/preview", { body: {} })
+    await portalFetch("/portal-api/admin/storefront/draft", { method: "PUT", body: cfg })
+    const { token } = await portalFetch<{ token: string }>("/portal-api/admin/storefront/preview", { body: {} })
     return NextResponse.redirect(new URL(`/preview${site}${path}?_preview=${encodeURIComponent(token)}`, request.url), 303)
   } catch (e) {
     if (e instanceof PortalError) {

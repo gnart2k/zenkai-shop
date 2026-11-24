@@ -21,9 +21,9 @@ export default async function PayoutsPage({
   const sp = await searchParams
   const returnTo = `${base}/admin/payouts`
   const [{ owed }, { payouts }, { collaborators }] = await Promise.all([
-    portalFetch<{ owed: { collaborator_id: string; currency_code: string; net: number; entries: number }[] }>("/portal/admin/earnings"),
-    portalFetch<{ payouts: any[] }>("/portal/admin/payouts"),
-    portalFetch<{ collaborators: { id: string; email: string }[] }>("/portal/admin/collaborators"),
+    portalFetch<{ owed: { collaborator_id: string; currency_code: string; net: number; entries: number }[] }>("/portal-api/admin/earnings"),
+    portalFetch<{ payouts: any[] }>("/portal-api/admin/payouts"),
+    portalFetch<{ collaborators: { id: string; email: string }[] }>("/portal-api/admin/collaborators"),
   ])
   const email = (id: string) => collaborators.find((c) => c.id === id)?.email ?? id
   const month = new Date().toISOString().slice(0, 7)

@@ -1,7 +1,5 @@
 {
-  "namespaces": [
-    "public"
-  ],
+  "namespaces": ["public"],
   "name": "public",
   "tables": [
     {
@@ -158,9 +156,7 @@
         },
         {
           "keyName": "collaborator_pkey",
-          "columnNames": [
-            "id"
-          ],
+          "columnNames": ["id"],
           "composite": false,
           "constraint": true,
           "primary": true,
@@ -458,13 +454,7 @@
           "scale": null,
           "default": "'pending'",
           "comment": null,
-          "enumItems": [
-            "pending",
-            "approved",
-            "rejected",
-            "paid",
-            "cancelled"
-          ],
+          "enumItems": ["pending", "approved", "rejected", "paid", "cancelled"],
           "mappedType": "enum"
         },
         "reject_reason": {
@@ -710,9 +700,7 @@
         },
         {
           "keyName": "collab_request_pkey",
-          "columnNames": [
-            "id"
-          ],
+          "columnNames": ["id"],
           "composite": false,
           "constraint": true,
           "primary": true,
@@ -818,10 +806,7 @@
           "scale": null,
           "default": null,
           "comment": null,
-          "enumItems": [
-            "earning",
-            "reversal"
-          ],
+          "enumItems": ["earning", "reversal"],
           "mappedType": "enum"
         },
         "amount": {
@@ -994,9 +979,7 @@
         },
         {
           "keyName": "earning_ledger_entry_pkey",
-          "columnNames": [
-            "id"
-          ],
+          "columnNames": ["id"],
           "composite": false,
           "constraint": true,
           "primary": true,
@@ -1118,10 +1101,7 @@
           "scale": null,
           "default": "'pending'",
           "comment": null,
-          "enumItems": [
-            "pending",
-            "paid"
-          ],
+          "enumItems": ["pending", "paid"],
           "mappedType": "enum"
         },
         "paid_at": {
@@ -1235,9 +1215,7 @@
         },
         {
           "keyName": "payout_pkey",
-          "columnNames": [
-            "id"
-          ],
+          "columnNames": ["id"],
           "composite": false,
           "constraint": true,
           "primary": true,
@@ -1402,9 +1380,7 @@
         },
         {
           "keyName": "portal_admin_pkey",
-          "columnNames": [
-            "id"
-          ],
+          "columnNames": ["id"],
           "composite": false,
           "constraint": true,
           "primary": true,
@@ -1481,6 +1457,38 @@
           "enumItems": [],
           "mappedType": "text"
         },
+        "slug": {
+          "name": "slug",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "text"
+        },
+        "domains": {
+          "name": "domains",
+          "type": "jsonb",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "json"
+        },
         "created_at": {
           "name": "created_at",
           "type": "timestamptz",
@@ -1552,10 +1560,17 @@
           "expression": "CREATE UNIQUE INDEX IF NOT EXISTS \"IDX_portal_setting_store_id_unique\" ON \"portal_setting\" (\"store_id\") WHERE deleted_at IS NULL"
         },
         {
+          "keyName": "IDX_portal_setting_slug_unique",
+          "columnNames": [],
+          "composite": false,
+          "constraint": false,
+          "primary": false,
+          "unique": false,
+          "expression": "CREATE UNIQUE INDEX IF NOT EXISTS \"IDX_portal_setting_slug_unique\" ON \"portal_setting\" (\"slug\") WHERE slug is not null AND deleted_at IS NULL"
+        },
+        {
           "keyName": "portal_setting_pkey",
-          "columnNames": [
-            "id"
-          ],
+          "columnNames": ["id"],
           "composite": false,
           "constraint": true,
           "primary": true,
@@ -1629,11 +1644,7 @@
           "scale": null,
           "default": "'invited'",
           "comment": null,
-          "enumItems": [
-            "invited",
-            "active",
-            "revoked"
-          ],
+          "enumItems": ["invited", "active", "revoked"],
           "mappedType": "enum"
         },
         "created_at": {
@@ -1708,9 +1719,7 @@
         },
         {
           "keyName": "store_collaborator_pkey",
-          "columnNames": [
-            "id"
-          ],
+          "columnNames": ["id"],
           "composite": false,
           "constraint": true,
           "primary": true,
@@ -1891,9 +1900,7 @@
         },
         {
           "keyName": "variant_cost_pkey",
-          "columnNames": [
-            "id"
-          ],
+          "columnNames": ["id"],
           "composite": false,
           "constraint": true,
           "primary": true,

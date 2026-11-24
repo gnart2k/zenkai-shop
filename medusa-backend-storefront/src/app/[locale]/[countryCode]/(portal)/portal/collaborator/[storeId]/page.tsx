@@ -35,7 +35,7 @@ export default async function ProductsPage({
   const page = Math.max(Number((await searchParams).page) || 1, 1)
   const limit = 12
   const catalog = await portalFetch<Catalog>(
-    `/portal/collaborator/stores/${p.storeId}/products?limit=${limit}&offset=${(page - 1) * limit}`
+    `/portal-api/collaborator/stores/${p.storeId}/products?limit=${limit}&offset=${(page - 1) * limit}`
   )
   const pages = Math.max(Math.ceil(catalog.count / limit), 1)
   const m = (n: number | null) => money(n, catalog.currency_code, p.locale)

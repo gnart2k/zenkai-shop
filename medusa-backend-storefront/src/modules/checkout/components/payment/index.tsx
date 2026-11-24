@@ -184,7 +184,7 @@ const Payment = ({
           <Text>
             <button
               onClick={handleEdit}
-              className="text-ui-fg-interactive hover:text-ui-fg-interactive-hover"
+              className="tap-area text-ui-fg-interactive hover:text-ui-fg-interactive-hover"
               data-testid="edit-payment-button"
             >
               {t("edit")}
@@ -225,7 +225,7 @@ const Payment = ({
           )}
 
           {paidByGiftcard && (
-            <div className="flex flex-col w-1/3">
+            <div className="flex flex-col w-full small:w-1/3">
               <Text className="txt-medium-plus text-ui-fg-base mb-1">
                 {t("method")}
               </Text>
@@ -264,8 +264,8 @@ const Payment = ({
 
         <div className={isOpen ? "hidden" : "block"}>
           {cart && paymentReady && activeSession ? (
-            <div className="flex items-start gap-x-1 w-full">
-              <div className="flex flex-col w-1/3">
+            <div className="flex flex-col small:flex-row items-start gap-4 small:gap-x-1 w-full">
+              <div className="flex flex-col w-full small:w-1/3">
                 <Text className="txt-medium-plus text-ui-fg-base mb-1">
                   {t("method")}
                 </Text>
@@ -277,7 +277,7 @@ const Payment = ({
                     activeSession?.provider_id}
                 </Text>
               </div>
-              <div className="flex flex-col w-1/3">
+              <div className="flex flex-col w-full small:w-1/3">
                 <Text className="txt-medium-plus text-ui-fg-base mb-1">
                   {t("details")}
                 </Text>
@@ -299,7 +299,7 @@ const Payment = ({
               </div>
             </div>
           ) : paidByGiftcard ? (
-            <div className="flex flex-col w-1/3">
+            <div className="flex flex-col w-full small:w-1/3">
               <Text className="txt-medium-plus text-ui-fg-base mb-1">
                 {t("method")}
               </Text>

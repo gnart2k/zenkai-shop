@@ -351,7 +351,7 @@ const Shipping: React.FC<ShippingProps> = ({
           <Text>
             <button
               onClick={handleEdit}
-              className="text-ui-fg-interactive hover:text-ui-fg-interactive-hover"
+              className="tap-area text-ui-fg-interactive hover:text-ui-fg-interactive-hover"
               data-testid="edit-delivery-button"
             >
               {t("edit")}

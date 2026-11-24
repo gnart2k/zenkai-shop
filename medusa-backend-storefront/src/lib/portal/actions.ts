@@ -11,14 +11,13 @@ import {
   PortalError,
   loginDetectRole,
   portalFetch,
+  portalLocale,
 } from "./api"
 import { buildStorefrontConfig } from "./storefront-save"
 
 const str = (f: FormData, k: string) => String(f.get(k) ?? "").trim()
 const num = (f: FormData, k: string) => Number(str(f, k).replace(/[, ]/g, ""))
 
-/** The locale is the first path segment of every portal URL (/vi/vn/portal/...). */
-const localeOf = (path: string) => (/^\/(en|vi)(\/|$)/.exec(path)?.[1] ?? "vi") as string
 
 /** Backend messages are English; map the ones users can hit to translated copy. */
 const BACKEND_ERRORS: [RegExp, string][] = [
@@ -77,7 +76,7 @@ async function run(
     }
   } catch (e) {
     if (e instanceof PortalError) {
-      redirect(withParam(returnTo, "error", await messageFor(localeOf(returnTo), e)))
+      redirect(withParam(returnTo, "error", await messageFor(await portalLocale(), e)))
     }
     throw e
   }
@@ -94,7 +93,7 @@ export async function login(f: FormData) {
     result = await loginDetectRole(str(f, "email").toLowerCase(), str(f, "password"))
   } catch (e) {
     if (e instanceof PortalError) {
-      redirect(withParam(loginUrl, "error", await messageFor(localeOf(base), e)))
+      redirect(withParam(loginUrl, "error", await messageFor(await portalLocale(), e)))
     }
     throw e
   }
@@ -122,7 +121,7 @@ export async function acceptInvite(f: FormData) {
   const base = str(f, "base")
   return run(f, async () => {
     const res = await portalFetch<{ actor: Actor; linked_existing_login: boolean }>(
-      "/portal/invites/accept",
+      "/portal-api/invites/accept",
       { auth: false, body: { token: str(f, "token"), password: str(f, "password") } }
     )
     return `${base}/login?accepted=${res.linked_existing_login ? "linked" : "new"}`
@@ -142,7 +141,7 @@ export async function createRequest(f: FormData) {
         throw new PortalError("Proof of deposit is required", 400, "newRequest.proofRequired")
       }
       const { file: uploaded } = await portalFetch<{ file: { id: string; url: string } }>(
-        "/portal/collaborator/uploads",
+        "/portal-api/collaborator/uploads",
         {
           body: {
             filename: file.name,
@@ -151,7 +150,7 @@ export async function createRequest(f: FormData) {
           },
         }
       )
-      await portalFetch(`/portal/collaborator/stores/${store}/requests`, {
+      await portalFetch(`/portal-api/collaborator/stores/${store}/requests`, {
         body: {
           variant_id: str(f, "variant_id"),
           quantity: num(f, "quantity"),
@@ -173,14 +172,14 @@ export async function createRequest(f: FormData) {
 export async function approveRequest(f: FormData) {
   const id = str(f, "id")
   return run(f, async () => {
-    await portalFetch(`/portal/admin/requests/${id}/approve`, { method: "POST", body: {} })
+    await portalFetch(`/portal-api/admin/requests/${id}/approve`, { method: "POST", body: {} })
   })
 }
 
 export async function rejectRequest(f: FormData) {
   const id = str(f, "id")
   return run(f, async () => {
-    await portalFetch(`/portal/admin/requests/${id}/reject`, {
+    await portalFetch(`/portal-api/admin/requests/${id}/reject`, {
       body: { reason: str(f, "reason") },
     })
   })
@@ -189,7 +188,7 @@ export async function rejectRequest(f: FormData) {
 export async function reverseRequest(f: FormData) {
   const id = str(f, "id")
   return run(f, async () => {
-    await portalFetch(`/portal/admin/requests/${id}/reverse`, {
+    await portalFetch(`/portal-api/admin/requests/${id}/reverse`, {
       body: { reason: str(f, "reason") || undefined },
     })
   })
@@ -198,7 +197,7 @@ export async function reverseRequest(f: FormData) {
 export async function inviteCollaborator(f: FormData) {
   return run(f, async () => {
     const res = await portalFetch<{ invite_link: string | null }>(
-      "/portal/admin/collaborators",
+      "/portal-api/admin/collaborators",
       { body: { email: str(f, "email"), name: str(f, "name") || null } }
     )
     return res.invite_link
@@ -210,13 +209,13 @@ export async function inviteCollaborator(f: FormData) {
 export async function revokeCollaborator(f: FormData) {
   const id = str(f, "id")
   return run(f, async () => {
-    await portalFetch(`/portal/admin/collaborators/${id}`, { method: "DELETE" })
+    await portalFetch(`/portal-api/admin/collaborators/${id}`, { method: "DELETE" })
   })
 }
 
 export async function createPayouts(f: FormData) {
   return run(f, async () => {
-    await portalFetch("/portal/admin/payouts", {
+    await portalFetch("/portal-api/admin/payouts", {
       body: str(f, "period") ? { period: str(f, "period") } : {},
     })
   })
@@ -225,7 +224,7 @@ export async function createPayouts(f: FormData) {
 export async function markPayoutPaid(f: FormData) {
   const id = str(f, "id")
   return run(f, async () => {
-    await portalFetch(`/portal/admin/payouts/${id}/paid`, {
+    await portalFetch(`/portal-api/admin/payouts/${id}/paid`, {
       body: { note: str(f, "note") || undefined },
     })
   })
@@ -246,7 +245,7 @@ async function uploadProductImage(f: FormData): Promise<string | undefined> {
     return undefined
   }
   const { file: uploaded } = await portalFetch<{ file: { url: string } }>(
-    "/portal/admin/uploads",
+    "/portal-api/admin/uploads",
     {
       body: {
         filename: file.name,
@@ -264,7 +263,7 @@ export async function createProduct(f: FormData) {
     f,
     async () => {
       const thumbnail = await uploadProductImage(f)
-      await portalFetch("/portal/admin/products", {
+      await portalFetch("/portal-api/admin/products", {
         body: {
           title: str(f, "title"),
           description: str(f, "description") || null,
@@ -307,7 +306,7 @@ export async function updateProduct(f: FormData) {
           // Blank means "leave stock as it is".
           quantity: optNum(f, `quantity_${vid}`) ?? undefined,
         }))
-      await portalFetch(`/portal/admin/products/${id}`, {
+      await portalFetch(`/portal-api/admin/products/${id}`, {
         method: "PUT",
         body: {
           title: str(f, "title"),
@@ -330,7 +329,7 @@ export async function deleteProduct(f: FormData) {
   return run(
     f,
     async () => {
-      await portalFetch(`/portal/admin/products/${id}`, { method: "DELETE" })
+      await portalFetch(`/portal-api/admin/products/${id}`, { method: "DELETE" })
     },
     `${base}/admin/products?ok=deleted`
   )
@@ -348,9 +347,9 @@ export async function saveCategory(f: FormData) {
         is_active: !!f.get("is_active"),
       }
       if (id) {
-        await portalFetch(`/portal/admin/categories/${id}`, { method: "PUT", body })
+        await portalFetch(`/portal-api/admin/categories/${id}`, { method: "PUT", body })
       } else {
-        await portalFetch("/portal/admin/categories", { body })
+        await portalFetch("/portal-api/admin/categories", { body })
       }
     },
     `${base}/admin/categories?ok=${id ? "saved" : "created"}`
@@ -363,7 +362,7 @@ export async function deleteCategory(f: FormData) {
   return run(
     f,
     async () => {
-      await portalFetch(`/portal/admin/categories/${id}`, { method: "DELETE" })
+      await portalFetch(`/portal-api/admin/categories/${id}`, { method: "DELETE" })
     },
     `${base}/admin/categories?ok=deleted`
   )
@@ -387,18 +386,18 @@ export async function saveAppearance(f: FormData) {
 
   return run(f, async () => {
     if (intent === "discard") {
-      await portalFetch("/portal/admin/storefront/draft", { method: "DELETE" })
+      await portalFetch("/portal-api/admin/storefront/draft", { method: "DELETE" })
       return `${returnTo}?ok=discarded`
     }
 
     const cfg = await buildStorefrontConfig(f)
 
     if (intent === "publish") {
-      await portalFetch("/portal/admin/storefront/publish", { body: cfg })
+      await portalFetch("/portal-api/admin/storefront/publish", { body: cfg })
       return `${returnTo}?ok=published`
     }
 
-    await portalFetch("/portal/admin/storefront/draft", { method: "PUT", body: cfg })
+    await portalFetch("/portal-api/admin/storefront/draft", { method: "PUT", body: cfg })
     return `${returnTo}?ok=draft`
   })
 }

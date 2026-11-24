@@ -34,6 +34,8 @@
     }
   },
   "ShopLayout": {
+    "showPassword": "Hiện mật khẩu",
+    "hidePassword": "Ẩn mật khẩu",
     "closeMenu": "Đóng menu",
     "copyright": "© {year} {name}. Bảo lưu mọi quyền.",
     "language": "Ngôn ngữ:",
@@ -138,6 +140,8 @@
     }
   },
   "ShopProduct": {
+    "gallery": "Ảnh sản phẩm",
+    "video": "Video sản phẩm",
     "tabInfo": "Thông tin sản phẩm",
     "tabShipping": "Giao hàng và đổi trả",
     "material": "Chất liệu",

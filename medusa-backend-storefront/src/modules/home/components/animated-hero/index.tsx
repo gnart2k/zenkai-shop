@@ -196,14 +196,14 @@ export default function AnimatedHero({ countryCode, slides }: AnimatedHeroProps)
         <>
           <button
             onClick={prev}
-            className="absolute left-4 top-1/2 z-20 -translate-y-1/2 rounded-full bg-white/10 p-2 text-white backdrop-blur-sm transition-all hover:bg-white/20"
+            className="absolute left-4 top-1/2 z-20 hidden small:block -translate-y-1/2 rounded-full bg-white/10 p-2 text-white backdrop-blur-sm transition-all hover:bg-white/20"
             aria-label={th("prev")}
           >
             <ChevronLeft className="size-5" />
           </button>
           <button
             onClick={next}
-            className="absolute right-4 top-1/2 z-20 -translate-y-1/2 rounded-full bg-white/10 p-2 text-white backdrop-blur-sm transition-all hover:bg-white/20"
+            className="absolute right-4 top-1/2 z-20 hidden small:block -translate-y-1/2 rounded-full bg-white/10 p-2 text-white backdrop-blur-sm transition-all hover:bg-white/20"
             aria-label={th("next")}
           >
             <ChevronRight className="size-5" />
@@ -215,7 +215,7 @@ export default function AnimatedHero({ countryCode, slides }: AnimatedHeroProps)
                 key={slide.id}
                 onClick={() => goTo(i)}
                 className={cn(
-                  "size-2 rounded-full transition-all duration-300",
+                  "tap-area size-2 rounded-full transition-all duration-300",
                   i === current ? "w-8 bg-white" : "bg-white/40 hover:bg-white/60"
                 )}
                 aria-label={th("goTo", { number: i + 1 })}

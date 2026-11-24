@@ -15,8 +15,8 @@ export default async function EditProductPage({
   const sp = await searchParams
   const t = await getTranslations({ locale: p.locale, namespace: "Portal" })
   const [detail, { categories }] = await Promise.all([
-    portalFetch<{ product: AdminProduct; currency_code: string }>(`/portal/admin/products/${p.id}`),
-    portalFetch<{ categories: { id: string; name: string }[] }>("/portal/admin/categories"),
+    portalFetch<{ product: AdminProduct; currency_code: string }>(`/portal-api/admin/products/${p.id}`),
+    portalFetch<{ categories: { id: string; name: string }[] }>("/portal-api/admin/categories"),
   ])
   return (
     <>
