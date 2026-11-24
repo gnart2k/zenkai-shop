@@ -108,22 +108,33 @@ module.exports = defineConfig({
           allowedHosts: 'auto',
           webSocketURL: undefined,
         },
+        // S3-compatible storage when S3_ENDPOINT is set; otherwise files live on local disk
+        // (single-server deployments, served from /static).
         providers: [
-          {
-            resolve: '@medusajs/medusa/file-s3',
-            id: 's3',
-            options: {
-              file_url: process.env.S3_FILE_URL || defaultS3FileUrl,
-              access_key_id: process.env.S3_ACCESS_KEY_ID || process.env.MINIO_ACCESS_KEY,
-              secret_access_key: process.env.S3_SECRET_ACCESS_KEY || process.env.MINIO_SECRET_KEY,
-              region: process.env.S3_REGION || 'us-east-1',
-              bucket: s3Bucket,
-              endpoint: normalizedS3Endpoint,
-              additional_client_config: {
-                forcePathStyle: true,
+          normalizedS3Endpoint
+            ? {
+                resolve: '@medusajs/medusa/file-s3',
+                id: 's3',
+                options: {
+                  file_url: process.env.S3_FILE_URL || defaultS3FileUrl,
+                  access_key_id: process.env.S3_ACCESS_KEY_ID || process.env.MINIO_ACCESS_KEY,
+                  secret_access_key: process.env.S3_SECRET_ACCESS_KEY || process.env.MINIO_SECRET_KEY,
+                  region: process.env.S3_REGION || 'us-east-1',
+                  bucket: s3Bucket,
+                  endpoint: normalizedS3Endpoint,
+                  additional_client_config: {
+                    forcePathStyle: true,
+                  },
+                },
+              }
+            : {
+                resolve: '@medusajs/medusa/file-local',
+                id: 'local',
+                options: {
+                  upload_dir: process.env.FILE_UPLOAD_DIR || 'static',
+                  backend_url: `${process.env.BACKEND_PUBLIC_URL || 'http://localhost:4300'}/static`,
+                },
               },
-            },
-          },
         ],
       },
     },
