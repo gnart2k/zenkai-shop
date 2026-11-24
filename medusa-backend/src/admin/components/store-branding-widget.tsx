@@ -1,96 +1,96 @@
-import { Photo, Trash } from '@medusajs/icons';
-import type { AdminStore, DetailWidgetProps } from '@medusajs/types';
-import { Button, Container, Input, Label, Text, toast } from '@medusajs/ui';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { type RefObject, useEffect, useRef, useState } from 'react';
-import type { StoreBrandingMetadata } from '../../types/store-branding';
-import { sdk } from '../lib/client';
-import { StoreBrandingFilePreview } from './store-branding-file-preview';
+import { Photo, Trash } from "@medusajs/icons"
+import type { AdminStore, DetailWidgetProps } from "@medusajs/types"
+import { Button, Container, Input, Label, Text, toast } from "@medusajs/ui"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { type RefObject, useEffect, useRef, useState } from "react"
+import type { StoreBrandingMetadata } from "../../types/store-branding"
+import { StoreBrandingFilePreview } from "./store-branding-file-preview"
+import { sdk } from "../lib/client"
 
-type AssetKey = 'logo' | 'hero' | 'favicon';
+type AssetKey = "logo" | "hero" | "favicon"
 
 const StoreBrandingWidget = ({ data }: DetailWidgetProps<AdminStore>) => {
-  const queryClient = useQueryClient();
-  const logoInputRef = useRef<HTMLInputElement>(null);
-  const heroInputRef = useRef<HTMLInputElement>(null);
-  const faviconInputRef = useRef<HTMLInputElement>(null);
+  const queryClient = useQueryClient()
+  const logoInputRef = useRef<HTMLInputElement>(null)
+  const heroInputRef = useRef<HTMLInputElement>(null)
+  const faviconInputRef = useRef<HTMLInputElement>(null)
 
-  const [tagline, setTagline] = useState('');
-  const [primaryColor, setPrimaryColor] = useState('');
-  const [logoId, setLogoId] = useState<string | null>(null);
-  const [heroId, setHeroId] = useState<string | null>(null);
-  const [faviconId, setFaviconId] = useState<string | null>(null);
+  const [tagline, setTagline] = useState("")
+  const [primaryColor, setPrimaryColor] = useState("")
+  const [logoId, setLogoId] = useState<string | null>(null)
+  const [heroId, setHeroId] = useState<string | null>(null)
+  const [faviconId, setFaviconId] = useState<string | null>(null)
 
   useEffect(() => {
-    const b = (data.metadata?.branding ?? {}) as StoreBrandingMetadata;
-    setTagline(b.tagline ?? '');
-    setPrimaryColor(b.primary_color ?? '');
-    setLogoId(b.logo_file_id?.trim() || null);
-    setHeroId(b.hero_file_id?.trim() || null);
-    setFaviconId(b.favicon_file_id?.trim() || null);
-  }, [data.id, data.metadata]);
+    const b = (data.metadata?.branding ?? {}) as StoreBrandingMetadata
+    setTagline(b.tagline ?? "")
+    setPrimaryColor(b.primary_color ?? "")
+    setLogoId(b.logo_file_id?.trim() || null)
+    setHeroId(b.hero_file_id?.trim() || null)
+    setFaviconId(b.favicon_file_id?.trim() || null)
+  }, [data.id, data.metadata])
 
   const mutation = useMutation({
     mutationFn: async () => {
       const branding: StoreBrandingMetadata = {
         tagline: tagline.trim(),
         primary_color: primaryColor.trim(),
-        logo_file_id: logoId ?? '',
-        hero_file_id: heroId ?? '',
-        favicon_file_id: faviconId ?? '',
-      };
+        logo_file_id: logoId ?? "",
+        hero_file_id: heroId ?? "",
+        favicon_file_id: faviconId ?? "",
+      }
       await sdk.admin.store.update(data.id, {
         metadata: {
           ...(data.metadata ?? {}),
           branding,
         },
-      });
+      })
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['store'] });
-      toast.success('Storefront branding saved');
+      queryClient.invalidateQueries({ queryKey: ["store"] })
+      toast.success("Storefront branding saved")
     },
     onError: (e: Error) => {
-      toast.error(e.message || 'Could not save branding');
+      toast.error(e.message || "Could not save branding")
     },
-  });
+  })
 
   const uploadFile = async (file: File) => {
-    const res = await sdk.admin.upload.create({ files: [file] });
-    const id = res.files?.[0]?.id;
+    const res = await sdk.admin.upload.create({ files: [file] })
+    const id = res.files?.[0]?.id
     if (!id) {
-      throw new Error('Upload did not return a file id');
+      throw new Error("Upload did not return a file id")
     }
-    return id;
-  };
+    return id
+  }
 
   const onPickFile = async (file: File | undefined, key: AssetKey) => {
     if (!file) {
-      return;
+      return
     }
     try {
-      const id = await uploadFile(file);
-      if (key === 'logo') {
-        setLogoId(id);
-      } else if (key === 'hero') {
-        setHeroId(id);
+      const id = await uploadFile(file)
+      if (key === "logo") {
+        setLogoId(id)
+      } else if (key === "hero") {
+        setHeroId(id)
       } else {
-        setFaviconId(id);
+        setFaviconId(id)
       }
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : 'Upload failed');
+      toast.error(e instanceof Error ? e.message : "Upload failed")
     }
-  };
+  }
 
   const clearAsset = (key: AssetKey) => {
-    if (key === 'logo') {
-      setLogoId(null);
-    } else if (key === 'hero') {
-      setHeroId(null);
+    if (key === "logo") {
+      setLogoId(null)
+    } else if (key === "hero") {
+      setHeroId(null)
     } else {
-      setFaviconId(null);
+      setFaviconId(null)
     }
-  };
+  }
 
   const renderAsset = (
     key: AssetKey,
@@ -116,8 +116,8 @@ const StoreBrandingWidget = ({ data }: DetailWidgetProps<AdminStore>) => {
           accept="image/*"
           className="hidden"
           onChange={(e) => {
-            void onPickFile(e.target.files?.[0], key);
-            e.target.value = '';
+            void onPickFile(e.target.files?.[0], key)
+            e.target.value = ""
           }}
         />
         <Button
@@ -128,7 +128,7 @@ const StoreBrandingWidget = ({ data }: DetailWidgetProps<AdminStore>) => {
           disabled={mutation.isPending}
         >
           <Photo />
-          {fileId ? 'Replace' : 'Upload'}
+          {fileId ? "Replace" : "Upload"}
         </Button>
         {fileId ? (
           <Button
@@ -144,7 +144,7 @@ const StoreBrandingWidget = ({ data }: DetailWidgetProps<AdminStore>) => {
         ) : null}
       </div>
     </div>
-  );
+  )
 
   return (
     <Container className="divide-y p-0">
@@ -154,8 +154,8 @@ const StoreBrandingWidget = ({ data }: DetailWidgetProps<AdminStore>) => {
             Storefront branding
           </Text>
           <Text size="small" leading="compact" className="text-ui-fg-subtle">
-            Shown on your storefront home page. Store name is managed in the fields above (
-            {data.name}).
+            Shown on your storefront home page. Store name is managed in the
+            fields above ({data.name}).
           </Text>
         </div>
 
@@ -183,23 +183,23 @@ const StoreBrandingWidget = ({ data }: DetailWidgetProps<AdminStore>) => {
         </div>
 
         {renderAsset(
-          'hero',
-          'Hero image',
-          'Large background for the home hero section.',
+          "hero",
+          "Hero image",
+          "Large background for the home hero section.",
           heroId,
           heroInputRef
         )}
         {renderAsset(
-          'logo',
-          'Logo',
-          'Displayed in the hero and navigation when the storefront uses it.',
+          "logo",
+          "Logo",
+          "Displayed in the hero and navigation when the storefront uses it.",
           logoId,
           logoInputRef
         )}
         {renderAsset(
-          'favicon',
-          'Favicon',
-          'Small icon for browser tabs (square image recommended).',
+          "favicon",
+          "Favicon",
+          "Small icon for browser tabs (square image recommended).",
           faviconId,
           faviconInputRef
         )}
@@ -217,7 +217,7 @@ const StoreBrandingWidget = ({ data }: DetailWidgetProps<AdminStore>) => {
         </div>
       </div>
     </Container>
-  );
-};
+  )
+}
 
-export default StoreBrandingWidget;
+export default StoreBrandingWidget

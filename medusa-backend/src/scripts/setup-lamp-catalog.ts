@@ -28,8 +28,7 @@ const LAMP_CATEGORIES = [
   {
     handle: 'den-cay-go-lua',
     name: 'Đèn cây gỗ lũa',
-    description:
-      'Đèn cây đứng chế tác từ gỗ lũa tự nhiên — điểm nhấn ấm áp cho phòng khách và phòng ngủ.',
+    description: 'Đèn cây đứng chế tác từ gỗ lũa tự nhiên — điểm nhấn ấm áp cho phòng khách và phòng ngủ.',
     cover: '7708825306957729044-cover.jpg',
     products: [
       'den-cay-go-lua-vom-cong',
@@ -57,8 +56,7 @@ const LAMP_CATEGORIES = [
   {
     handle: 'den-ngu-trang-tri',
     name: 'Đèn ngủ & trang trí',
-    description:
-      'Ánh sáng vàng dịu từ gỗ lũa — đèn ngủ, đèn mây và đèn lồng tạo không gian thư giãn.',
+    description: 'Ánh sáng vàng dịu từ gỗ lũa — đèn ngủ, đèn mây và đèn lồng tạo không gian thư giãn.',
     cover: '7709973442786938132-cover.jpg',
     products: [
       'den-ngu-go-lua-nguyen-khoi',

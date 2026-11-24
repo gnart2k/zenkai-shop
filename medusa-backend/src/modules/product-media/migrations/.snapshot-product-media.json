@@ -1,5 +1,7 @@
 {
-  "namespaces": ["public"],
+  "namespaces": [
+    "public"
+  ],
   "name": "public",
   "tables": [
     {
@@ -65,7 +67,10 @@
           "scale": null,
           "default": null,
           "comment": null,
-          "enumItems": ["thumbnail", "image"],
+          "enumItems": [
+            "thumbnail",
+            "image"
+          ],
           "mappedType": "enum"
         },
         "category_id": {
@@ -147,7 +152,9 @@
         },
         {
           "keyName": "product_category_image_pkey",
-          "columnNames": ["id"],
+          "columnNames": [
+            "id"
+          ],
           "composite": false,
           "constraint": true,
           "primary": true,
