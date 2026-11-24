@@ -56,19 +56,23 @@ module.exports = defineConfig({
     {
       resolve: "@medusajs/medusa/payment",
       options: {
-        providers: [
-          {
-            resolve: "./src/modules/payos",
-            id: "payos",
-            options: {
-              client_id: process.env.PAYOS_CLIENT_ID,
-              api_key: process.env.PAYOS_API_KEY,
-              checksum_key: process.env.PAYOS_CHECKSUM_KEY,
-              return_url: process.env.PAYOS_RETURN_URL,
-              cancel_url: process.env.PAYOS_CANCEL_URL,
-            },
-          },
-        ],
+        // PayOS only when its credentials are configured (the module refuses to load without them).
+        providers:
+          process.env.PAYOS_CLIENT_ID && process.env.PAYOS_API_KEY && process.env.PAYOS_CHECKSUM_KEY
+            ? [
+                {
+                  resolve: "./src/modules/payos",
+                  id: "payos",
+                  options: {
+                    client_id: process.env.PAYOS_CLIENT_ID,
+                    api_key: process.env.PAYOS_API_KEY,
+                    checksum_key: process.env.PAYOS_CHECKSUM_KEY,
+                    return_url: process.env.PAYOS_RETURN_URL,
+                    cancel_url: process.env.PAYOS_CANCEL_URL,
+                  },
+                },
+              ]
+            : [],
       },
     },
     {
