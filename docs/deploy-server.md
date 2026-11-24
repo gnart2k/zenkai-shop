@@ -15,3 +15,9 @@ Caddy sends `/app /admin /store /auth /portal-api /hooks /media /static` to the 
 Env (not in git): `medusa-backend/.env`, `medusa-backend-storefront/.env.local`, `deploy/secrets.env`. IP-only HTTP needs `COOKIE_SECURE=false` on both apps. `PORTAL_HOST` is unset and `DEFAULT_STOREFRONT_HOSTS` includes the IP, so the IP serves both the storefront and the portal; once real domains exist set `PORTAL_HOST=<admin host>`, `STORE_BASE_DOMAIN=<wildcard base>`, `STORE_CNAME_TARGET` and turn TLS on in Caddy.
 
 Update: `git archive HEAD | ssh ubuntu@100.97.169.107 'tar -x -C /opt/zenkai-shop'`, then on the server `pnpm install --frozen-lockfile`, `pnpm build` in `medusa-backend` (+ `npx medusa db:migrate`), `pnpm exec next build` in the storefront, `pm2 restart zenkai-shop-api zenkai-shop-web`. `medusa-backend/public` must be a symlink to `.medusa/server/public`.
+
+## Domain: shop.zenkai.com.vn
+
+zenkai.com.vn is on Cloudflare and the box is reached through the existing `services-tunnel` (cloudflared, shared with `zenkai-app`). `/etc/cloudflared/config.yml` got one ingress rule, `shop.zenkai.com.vn -> http://127.0.0.1:80` (Caddy); the previous file is kept as `config.yml.bak-<timestamp>`. DNS: `cloudflared tunnel route dns services-tunnel shop.zenkai.com.vn` created the proxied CNAME. Cloudflare terminates HTTPS; the origin stays plain HTTP, so `COOKIE_SECURE=false` is still set.
+
+One domain serves everything for now: storefront `/`, portal `/portal`, Medusa admin `/app`. Env: `STORE_CORS/ADMIN_CORS/AUTH_CORS` include `https://shop.zenkai.com.vn`, `BACKEND_PUBLIC_URL=https://shop.zenkai.com.vn`, `PORTAL_URL=https://shop.zenkai.com.vn/portal`, and the storefront's `DEFAULT_STOREFRONT_HOSTS` includes the domain (rebuild the storefront after changing it, middleware env is baked in at build).
