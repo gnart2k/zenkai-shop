@@ -17,6 +17,9 @@ const defaultS3FileUrl =
 module.exports = defineConfig({
   projectConfig: {
     databaseUrl: process.env.DATABASE_URL,
+    // Plain-HTTP deployments (e.g. an IP address before TLS is set up) must set COOKIE_SECURE=false,
+    // otherwise browsers drop the session and auth cookies.
+    ...(process.env.COOKIE_SECURE === 'false' ? { cookieOptions: { secure: false, sameSite: 'lax' as const } } : {}),
     http: {
       storeCors: process.env.STORE_CORS!,
       adminCors: process.env.ADMIN_CORS!,
@@ -27,16 +30,6 @@ module.exports = defineConfig({
       // of Medusa's 1-day default. The portal refreshes them while in use (see the storefront
       // middleware), so the real limit is 7 days of inactivity. Override with JWT_EXPIRES_IN.
       jwtExpiresIn: process.env.JWT_EXPIRES_IN || '7d',
-      // Plain-HTTP deployments (e.g. an IP address before TLS is set up) must set COOKIE_SECURE=false,
-      // otherwise browsers drop the session and auth cookies.
-      ...(process.env.COOKIE_SECURE === 'false'
-        ? {
-            sessionOptions: {
-              cookie: { secure: false, httpOnly: true, sameSite: 'lax', maxAge: 10 * 60 * 60 * 1000 },
-            },
-            cookieOptions: { secure: false, sameSite: 'lax' },
-          }
-        : {}),
       // Portal actors sign in at /auth/{actor}/emailpass, separate from Medusa admins.
       authMethodsPerActor: {
         user: ['emailpass'],
