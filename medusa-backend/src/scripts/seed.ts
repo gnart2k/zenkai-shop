@@ -119,7 +119,10 @@ export default async function seedDemoData({ container }: ExecArgs) {
       name: 'Vietnam',
       currency_code: 'vnd',
       countries: vietnamCountries,
-      payment_providers: ['pp_system_default', 'pp_payos_payos'],
+      // PayOS is only registered when its credentials are configured (see medusa-config.ts).
+      payment_providers: process.env.PAYOS_CLIENT_ID
+        ? ['pp_system_default', 'pp_payos_payos']
+        : ['pp_system_default'],
     });
   }
 
