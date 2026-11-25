@@ -34,4 +34,4 @@ Customer-owned domains that CNAME to `cname.zenkai.com.vn` need Cloudflare for S
 
 ## Email
 
-Portal emails (invites, request approvals, ...) use `RESEND_API_KEY` or `SMTP_URL`, with `EMAIL_FROM` (`medusa-backend/.env`). With neither set nothing is sent and a warning is logged. Templates: `medusa-backend/src/lib/portal/email-templates.ts`.
+Portal emails (invites, request approvals, ...) go through the existing Zenkai Mail service (`ZENKAI_MAIL_BASE_URL=http://192.168.1.41:8081`, `ZENKAI_MAIL_API_KEY`, copied from `/opt/zenkai-app/.env` into `medusa-backend/.env`; sender name `EMAIL_FROM_NAME`, sender address is the service's default unless `EMAIL_FROM_ADDRESS` is set). Alternatives: `RESEND_API_KEY` or `SMTP_URL` with `EMAIL_FROM`. DNS for the domain: SPF `include:zohomail.com`, Zoho MX, DMARC `p=none` (rua dmarc@zenkai.com.vn). With neither set nothing is sent and a warning is logged. Templates: `medusa-backend/src/lib/portal/email-templates.ts`.
