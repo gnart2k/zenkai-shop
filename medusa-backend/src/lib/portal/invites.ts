@@ -131,7 +131,8 @@ export async function acceptInvite(
     const existing = await auth.authenticate('emailpass', credentials);
     if (!existing.success || !existing.authIdentity) {
       throw new MedusaError(
-        MedusaError.Types.CONFLICT,
+        // INVALID_DATA, not CONFLICT: Medusa replaces a conflict's message with a generic one.
+        MedusaError.Types.INVALID_DATA,
         'An account with this email already exists. Enter its existing password to link it.'
       );
     }
