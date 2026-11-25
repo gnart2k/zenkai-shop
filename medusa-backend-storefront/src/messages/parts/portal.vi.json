@@ -140,7 +140,10 @@
       "previewTotal": "Tổng đơn hàng: {amount}",
       "previewTooLow": "Thấp hơn giá gốc",
       "originalPrice": "Giá gốc",
-      "suggestedPrice": "Giá đề xuất"
+      "suggestedPrice": "Giá đề xuất",
+      "customerAddress": "Địa chỉ giao hàng của khách",
+      "customerAddressPlaceholder": "Số nhà, đường, phường/xã, quận/huyện, tỉnh/thành phố",
+      "customerAddressHint": "Nơi giao đơn hàng. Địa chỉ này được điền sẵn ở bước thanh toán của khách."
     },
     "earnings": {
       "title": "Lợi nhuận",
@@ -217,7 +220,8 @@
       "reverseReason": "Lý do (không bắt buộc)",
       "reverseBtn": "Hoàn lợi nhuận",
       "originalPrice": "Giá gốc (nền tính lợi nhuận)",
-      "suggestedNow": "Giá đề xuất (giá cửa hàng)"
+      "suggestedNow": "Giá đề xuất (giá cửa hàng)",
+      "address": "Địa chỉ"
     },
     "collabs": {
       "title": "Cộng tác viên",

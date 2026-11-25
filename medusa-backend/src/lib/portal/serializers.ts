@@ -20,6 +20,7 @@ export function serializeCollaboratorRequest(r: AnyRequest) {
     customer_name: r.customer_name,
     customer_email: r.customer_email,
     customer_phone: r.customer_phone,
+    customer_address: r.customer_address ?? null,
     status: r.status,
     reject_reason: r.reject_reason,
     order_id: r.order_id,

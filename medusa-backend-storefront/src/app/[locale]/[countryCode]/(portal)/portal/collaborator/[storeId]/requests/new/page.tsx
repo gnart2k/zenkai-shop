@@ -5,6 +5,7 @@ import { RequestPricing } from "@modules/portal/request-pricing"
 import { SubmitButton } from "@modules/portal/submit-button"
 import { Field, Hidden, Notice, PageHeader, money } from "@modules/portal/ui"
 import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
 import { getTranslations } from "next-intl/server"
 
 type Catalog = {
@@ -105,6 +106,11 @@ export default async function NewRequestPage({
               <Field label={t("customerEmail")} name="customer_email" type="email" required />
             </div>
             <Field label={t("customerPhone")} name="customer_phone" type="tel" />
+            <div className="space-y-1.5">
+              <Label htmlFor="customer_address">{t("customerAddress")}</Label>
+              <Textarea id="customer_address" name="customer_address" required minLength={5} maxLength={300} rows={3} placeholder={t("customerAddressPlaceholder")} />
+              <p className="text-xs text-muted-foreground">{t("customerAddressHint")}</p>
+            </div>
             <div className="space-y-1.5">
               <Label htmlFor="proof">{t("proof")}</Label>
               <input

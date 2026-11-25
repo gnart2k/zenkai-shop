@@ -140,7 +140,10 @@
       "previewTotal": "Order total: {amount}",
       "previewTooLow": "Below the original price",
       "originalPrice": "Original price",
-      "suggestedPrice": "Suggested price"
+      "suggestedPrice": "Suggested price",
+      "customerAddress": "Customer delivery address",
+      "customerAddressPlaceholder": "House number, street, ward, district, province",
+      "customerAddressHint": "Where the order is delivered. It is prefilled in the customer's checkout."
     },
     "earnings": {
       "title": "Profit",
@@ -217,7 +220,8 @@
       "reverseReason": "Reason (optional)",
       "reverseBtn": "Reverse profit",
       "originalPrice": "Original price (collaborator base)",
-      "suggestedNow": "Suggested price (store price)"
+      "suggestedNow": "Suggested price (store price)",
+      "address": "Address"
     },
     "collabs": {
       "title": "Collaborators",

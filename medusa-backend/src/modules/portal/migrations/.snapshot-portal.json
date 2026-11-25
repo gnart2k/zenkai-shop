@@ -1,5 +1,7 @@
 {
-  "namespaces": ["public"],
+  "namespaces": [
+    "public"
+  ],
   "name": "public",
   "tables": [
     {
@@ -156,7 +158,9 @@
         },
         {
           "keyName": "collaborator_pkey",
-          "columnNames": ["id"],
+          "columnNames": [
+            "id"
+          ],
           "composite": false,
           "constraint": true,
           "primary": true,
@@ -409,6 +413,22 @@
           "enumItems": [],
           "mappedType": "text"
         },
+        "customer_address": {
+          "name": "customer_address",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "text"
+        },
         "proof_url": {
           "name": "proof_url",
           "type": "text",
@@ -454,7 +474,13 @@
           "scale": null,
           "default": "'pending'",
           "comment": null,
-          "enumItems": ["pending", "approved", "rejected", "paid", "cancelled"],
+          "enumItems": [
+            "pending",
+            "approved",
+            "rejected",
+            "paid",
+            "cancelled"
+          ],
           "mappedType": "enum"
         },
         "reject_reason": {
@@ -700,7 +726,9 @@
         },
         {
           "keyName": "collab_request_pkey",
-          "columnNames": ["id"],
+          "columnNames": [
+            "id"
+          ],
           "composite": false,
           "constraint": true,
           "primary": true,
@@ -806,7 +834,10 @@
           "scale": null,
           "default": null,
           "comment": null,
-          "enumItems": ["earning", "reversal"],
+          "enumItems": [
+            "earning",
+            "reversal"
+          ],
           "mappedType": "enum"
         },
         "amount": {
@@ -979,7 +1010,9 @@
         },
         {
           "keyName": "earning_ledger_entry_pkey",
-          "columnNames": ["id"],
+          "columnNames": [
+            "id"
+          ],
           "composite": false,
           "constraint": true,
           "primary": true,
@@ -1101,7 +1134,10 @@
           "scale": null,
           "default": "'pending'",
           "comment": null,
-          "enumItems": ["pending", "paid"],
+          "enumItems": [
+            "pending",
+            "paid"
+          ],
           "mappedType": "enum"
         },
         "paid_at": {
@@ -1215,7 +1251,9 @@
         },
         {
           "keyName": "payout_pkey",
-          "columnNames": ["id"],
+          "columnNames": [
+            "id"
+          ],
           "composite": false,
           "constraint": true,
           "primary": true,
@@ -1380,7 +1418,9 @@
         },
         {
           "keyName": "portal_admin_pkey",
-          "columnNames": ["id"],
+          "columnNames": [
+            "id"
+          ],
           "composite": false,
           "constraint": true,
           "primary": true,
@@ -1570,7 +1610,9 @@
         },
         {
           "keyName": "portal_setting_pkey",
-          "columnNames": ["id"],
+          "columnNames": [
+            "id"
+          ],
           "composite": false,
           "constraint": true,
           "primary": true,
@@ -1644,7 +1686,11 @@
           "scale": null,
           "default": "'invited'",
           "comment": null,
-          "enumItems": ["invited", "active", "revoked"],
+          "enumItems": [
+            "invited",
+            "active",
+            "revoked"
+          ],
           "mappedType": "enum"
         },
         "created_at": {
@@ -1719,7 +1765,9 @@
         },
         {
           "keyName": "store_collaborator_pkey",
-          "columnNames": ["id"],
+          "columnNames": [
+            "id"
+          ],
           "composite": false,
           "constraint": true,
           "primary": true,
@@ -1900,7 +1948,9 @@
         },
         {
           "keyName": "variant_cost_pkey",
-          "columnNames": ["id"],
+          "columnNames": [
+            "id"
+          ],
           "composite": false,
           "constraint": true,
           "primary": true,

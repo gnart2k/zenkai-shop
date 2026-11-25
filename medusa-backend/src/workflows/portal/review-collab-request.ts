@@ -60,6 +60,25 @@ const prepareCartStep = createStep(
         currency_code: request.currency_code,
         sales_channel_id: store.default_sales_channel_id as string,
         email: request.customer_email,
+        // The customer's checkout starts with the address the collaborator collected.
+        ...(request.customer_address
+          ? {
+              shipping_address: {
+                first_name: request.customer_name,
+                last_name: '',
+                address_1: request.customer_address,
+                phone: request.customer_phone ?? undefined,
+                country_code: 'vn',
+              },
+              billing_address: {
+                first_name: request.customer_name,
+                last_name: '',
+                address_1: request.customer_address,
+                phone: request.customer_phone ?? undefined,
+                country_code: 'vn',
+              },
+            }
+          : {}),
         items: [
           {
             variant_id: request.variant_id,

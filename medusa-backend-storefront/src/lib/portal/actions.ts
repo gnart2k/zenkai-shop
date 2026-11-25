@@ -159,6 +159,7 @@ export async function createRequest(f: FormData) {
           customer_name: str(f, "customer_name"),
           customer_email: str(f, "customer_email"),
           customer_phone: str(f, "customer_phone") || null,
+          customer_address: str(f, "customer_address"),
           proof_url: uploaded.url,
           proof_file_id: uploaded.id,
         },

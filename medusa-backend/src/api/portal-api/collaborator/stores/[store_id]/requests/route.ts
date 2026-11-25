@@ -11,6 +11,7 @@ const schema = z.object({
   customer_name: z.string().min(1),
   customer_email: z.string().email(),
   customer_phone: z.string().optional().nullable(),
+  customer_address: z.string().trim().min(5).max(300),
   proof_url: z.string().url(),
   proof_file_id: z.string().optional().nullable(),
 });

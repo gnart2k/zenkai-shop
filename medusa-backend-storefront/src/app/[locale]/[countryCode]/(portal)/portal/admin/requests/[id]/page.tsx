@@ -95,6 +95,7 @@ export default async function ReviewPage({
             <Row k={t("review.customer")} v={r.customer_name} />
             <Row k={t("review.email")} v={r.customer_email} />
             <Row k={t("review.phone")} v={r.customer_phone ?? "-"} />
+            <Row k={t("review.address")} v={r.customer_address ?? "-"} />
             <Row k={t("review.collaborator")} v={d.collaborator.name ?? d.collaborator.email} />
           </CardContent>
         </Card>

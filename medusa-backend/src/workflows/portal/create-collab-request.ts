@@ -21,6 +21,7 @@ export type CreateCollabRequestInput = {
   customer_name: string;
   customer_email: string;
   customer_phone?: string | null;
+  customer_address?: string | null;
   proof_url: string;
   proof_file_id?: string | null;
 };
@@ -67,6 +68,7 @@ const buildRequestStep = createStep(
       customer_name: input.customer_name,
       customer_email: input.customer_email,
       customer_phone: input.customer_phone ?? null,
+      customer_address: input.customer_address ?? null,
       proof_url: input.proof_url,
       proof_file_id: input.proof_file_id ?? null,
       status: 'pending' as const,

@@ -27,6 +27,8 @@ const CollabRequest = model
     customer_name: model.text(),
     customer_email: model.text(),
     customer_phone: model.text().nullable(),
+    /** Delivery address given by the collaborator (free text); prefilled into the customer's checkout. */
+    customer_address: model.text().nullable(),
     proof_url: model.text(),
     proof_file_id: model.text().nullable(),
     status: model.enum([...COLLAB_REQUEST_STATUSES]).default('pending'),
