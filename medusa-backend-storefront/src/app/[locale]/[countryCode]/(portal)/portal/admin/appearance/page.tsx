@@ -56,7 +56,16 @@ export default async function AppearancePage({
     <>
       <PageHeader title={t("title")} description={t("subtitle")}>
         <Button asChild variant="outline">
-          <a href={`/api/preview-exit?to=${encodeURIComponent(`/${p.locale}/${STOREFRONT_REGION}`)}`} target="_blank" rel="noreferrer">
+          <a
+            // The portal has its own host: open the store on the storefront host when one is configured.
+            href={
+              process.env.PORTAL_STOREFRONT_URL
+                ? `${process.env.PORTAL_STOREFRONT_URL.replace(/\/$/, "")}/${p.locale}/${STOREFRONT_REGION}`
+                : `/api/preview-exit?to=${encodeURIComponent(`/${p.locale}/${STOREFRONT_REGION}`)}`
+            }
+            target="_blank"
+            rel="noreferrer"
+          >
             <ExternalLink />
             {t("openStore")}
           </a>
