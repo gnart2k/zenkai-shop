@@ -1,3 +1,4 @@
+import { publicUrl } from "@lib/util/public-url"
 import { BACKEND_URL, JWT_COOKIE } from "@lib/portal/api"
 import { cookies } from "next/headers"
 import { NextRequest, NextResponse } from "next/server"
@@ -11,7 +12,7 @@ export async function GET(
   const token = (await cookies()).get(JWT_COOKIE)?.value
   if (!token) {
     return NextResponse.redirect(
-      new URL("/portal/login", _req.url)
+      publicUrl(_req, "/portal/login")
     )
   }
   const upstream = await fetch(`${BACKEND_URL}/portal-api/admin/requests/${id}/proof`, {

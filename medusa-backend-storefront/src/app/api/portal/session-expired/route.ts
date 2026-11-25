@@ -1,3 +1,4 @@
+import { publicUrl } from "@lib/util/public-url"
 import { NextRequest, NextResponse } from "next/server"
 
 /**
@@ -9,7 +10,7 @@ export async function GET(request: NextRequest) {
   // Where to land: the portal login page (same-site paths only).
   const to = request.nextUrl.searchParams.get("to") ?? ""
   const target = /^\/portal\/login(\?expired=1)?$/.test(to) ? to : "/portal/login?expired=1"
-  const res = NextResponse.redirect(new URL(target, request.url))
+  const res = NextResponse.redirect(publicUrl(request, target))
   res.cookies.set("_portal_jwt", "", { maxAge: 0, path: "/" })
   res.cookies.set("_portal_actor", "", { maxAge: 0, path: "/" })
   return res

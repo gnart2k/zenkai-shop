@@ -1,3 +1,4 @@
+import { publicUrl } from "@lib/util/public-url"
 import { PortalError, portalFetch } from "@lib/portal/api"
 import { buildStorefrontConfig } from "@lib/portal/storefront-save"
 import { NextRequest, NextResponse } from "next/server"
@@ -22,7 +23,7 @@ export async function POST(request: NextRequest) {
     const cfg = await buildStorefrontConfig(f)
     await portalFetch("/portal-api/admin/storefront/draft", { method: "PUT", body: cfg })
     const { token } = await portalFetch<{ token: string }>("/portal-api/admin/storefront/preview", { body: {} })
-    return NextResponse.redirect(new URL(`/preview${site}${path}?_preview=${encodeURIComponent(token)}`, request.url), 303)
+    return NextResponse.redirect(publicUrl(request, `/preview${site}${path}?_preview=${encodeURIComponent(token)}`), 303)
   } catch (e) {
     if (e instanceof PortalError) {
       const msg = e.message.replace(/[<>&]/g, "")

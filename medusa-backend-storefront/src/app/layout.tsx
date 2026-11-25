@@ -3,6 +3,7 @@ import { getHeroSlides } from "@lib/data/hero"
 import { getStoreBranding } from "@lib/data/store-branding"
 import { getStorefront } from "@lib/data/storefront-config"
 import { getBaseURL } from "@lib/util/env"
+import { publicOrigin } from "@lib/util/public-url"
 import { Metadata } from "next"
 import { headers } from "next/headers"
 import "styles/globals.css"
@@ -32,8 +33,7 @@ export async function generateMetadata(): Promise<Metadata> {
   // Links must point at the host being visited: one app serves many stores/domains.
   const h = await headers()
   const host = h.get("x-forwarded-host") || h.get("host")
-  const proto = h.get("x-forwarded-proto") || (host?.startsWith("localhost") || host?.startsWith("127.") ? "http" : "https")
-  const base = host ? `${proto.split(",")[0]}://${host}` : getBaseURL()
+  const base = host ? publicOrigin(h, getBaseURL()) : getBaseURL()
   const image = await shareImage(branding.logo)
   return {
     metadataBase: new URL(base),
