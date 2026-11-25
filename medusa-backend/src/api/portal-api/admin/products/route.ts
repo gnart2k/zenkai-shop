@@ -12,6 +12,8 @@ const createSchema = z.object({
   status: z.enum(['draft', 'published']).default('draft'),
   category_ids: z.array(z.string()).default([]),
   thumbnail: z.string().max(500).nullable().optional(),
+  images: z.array(z.string().max(500)).max(20).optional(),
+  video_url: z.string().max(500).nullable().optional(),
   variant: z.object({
     title: z.string().min(1).max(100).default('Tiêu chuẩn'),
     sku: z.string().max(100).nullable().optional(),

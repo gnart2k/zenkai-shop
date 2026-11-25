@@ -248,23 +248,14 @@ const optNum = (f: FormData, k: string) => {
   return v === "" ? null : Number(v.replace(/[, ]/g, ""))
 }
 
-/** Uploads the chosen image (if any) and returns its relative /media URL. */
-async function uploadProductImage(f: FormData): Promise<string | undefined> {
-  const file = f.get("image")
-  if (!(file instanceof File) || file.size === 0) {
-    return undefined
-  }
-  const { file: uploaded } = await portalFetch<{ file: { url: string } }>(
-    "/portal-api/admin/uploads",
-    {
-      body: {
-        filename: file.name,
-        mime_type: file.type,
-        content_base64: Buffer.from(await file.arrayBuffer()).toString("base64"),
-      },
-    }
-  )
-  return uploaded.url
+/** The gallery (ordered /media or https URLs, first = main image) and video the form sends. */
+function mediaFromForm(f: FormData): { images: string[]; video_url: string | null } {
+  let images: string[] = []
+  try {
+    const parsed = JSON.parse(str(f, "images") || "[]")
+    if (Array.isArray(parsed)) images = parsed.filter((u): u is string => typeof u === "string")
+  } catch {}
+  return { images, video_url: str(f, "video_url") || null }
 }
 
 export async function createProduct(f: FormData) {
@@ -272,7 +263,7 @@ export async function createProduct(f: FormData) {
   return run(
     f,
     async () => {
-      const thumbnail = await uploadProductImage(f)
+      const { images, video_url } = mediaFromForm(f)
       await portalFetch("/portal-api/admin/products", {
         body: {
           title: str(f, "title"),
@@ -280,7 +271,8 @@ export async function createProduct(f: FormData) {
           handle: str(f, "handle") || null,
           status: f.get("published") ? "published" : "draft",
           category_ids: f.getAll("category_ids").map(String),
-          thumbnail: thumbnail ?? null,
+          images,
+          video_url,
           variant: {
             title: str(f, "variant_title") || "Tiêu chuẩn",
             sku: str(f, "sku") || null,
@@ -302,7 +294,7 @@ export async function updateProduct(f: FormData) {
   return run(
     f,
     async () => {
-      const thumbnail = await uploadProductImage(f)
+      const { images, video_url } = mediaFromForm(f)
       const variants = str(f, "variant_ids")
         .split(",")
         .filter(Boolean)
@@ -324,7 +316,8 @@ export async function updateProduct(f: FormData) {
           handle: str(f, "handle") || undefined,
           status: f.get("published") ? "published" : "draft",
           category_ids: f.getAll("category_ids").map(String),
-          ...(thumbnail ? { thumbnail } : {}),
+          images,
+          video_url,
           variants,
         },
       })

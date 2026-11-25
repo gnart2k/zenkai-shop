@@ -5,10 +5,10 @@ import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
 import { createProduct, deleteProduct, updateProduct } from "@lib/portal/actions"
-import { ImageIcon } from "lucide-react"
 import { getTranslations } from "next-intl/server"
 import { ConfirmDelete } from "./confirm-delete"
 import { PricingFields } from "./pricing-fields"
+import { ProductMedia } from "./product-media"
 import { SubmitButton } from "./submit-button"
 import { Field, Hidden } from "./ui"
 
@@ -19,6 +19,8 @@ export type AdminProduct = {
   description: string | null
   status: string
   thumbnail: string | null
+  images: string[]
+  video_url: string | null
   categories: { id: string; name: string }[]
   variants: {
     id: string
@@ -158,25 +160,30 @@ export async function ProductForm({
 
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">{f("image")}</CardTitle>
-              <CardDescription>{f("imageHint")}</CardDescription>
+              <CardTitle className="text-base">{f("media")}</CardTitle>
+              <CardDescription>{f("mediaHint")}</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="relative grid aspect-square w-full place-items-center overflow-hidden rounded-lg border bg-muted">
-                {product?.thumbnail ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={product.thumbnail} alt={product.title} className="absolute inset-0 h-full w-full object-cover" />
-                ) : (
-                  <ImageIcon className="size-10 text-muted-foreground" />
-                )}
-              </div>
-              <input
-                name="image"
-                type="file"
-                accept="image/png,image/jpeg,image/webp"
-                className="block w-full cursor-pointer rounded-md border border-input bg-background text-sm file:mr-3 file:cursor-pointer file:border-0 file:bg-muted file:px-3 file:py-2 file:text-sm file:font-medium"
+            <CardContent>
+              <ProductMedia
+                initialImages={product?.images?.length ? product.images : product?.thumbnail ? [product.thumbnail] : []}
+                initialVideo={product?.video_url ?? null}
+                labels={{
+                  addImages: f("addImages"),
+                  imagesHint: f("imageHint"),
+                  main: f("mainImage"),
+                  makeMain: f("makeMain"),
+                  moveLeft: f("moveLeft"),
+                  moveRight: f("moveRight"),
+                  remove: f("removeMedia"),
+                  video: f("video"),
+                  videoHint: f("videoHint"),
+                  addVideo: f("addVideo"),
+                  uploading: f("uploadingMedia"),
+                  failed: f("uploadFailed"),
+                  sessionExpired: f("sessionExpired"),
+                  empty: f("noImages"),
+                }}
               />
-              {product?.thumbnail ? <p className="text-xs text-muted-foreground">{f("imageChange")}</p> : null}
             </CardContent>
           </Card>
 

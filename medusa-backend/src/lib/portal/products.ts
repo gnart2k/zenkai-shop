@@ -105,6 +105,7 @@ const PRODUCT_FIELDS = [
   'description',
   'status',
   'thumbnail',
+  'metadata',
   'images.url',
   'categories.id',
   'categories.name',
@@ -138,6 +139,7 @@ async function shapeProducts(
     description: p.description,
     status: p.status,
     thumbnail: p.thumbnail,
+    video_url: (p.metadata?.video_url as string | undefined) ?? null,
     images: (p.images ?? []).map((i: any) => i.url),
     categories: (p.categories ?? []).map((c: any) => ({ id: c.id, name: c.name })),
     variants: (p.variants ?? []).map((v: any) => {
@@ -280,6 +282,13 @@ async function setQuantity(
 
 // ---- Products ---------------------------------------------------------------
 
+/** Media URLs the portal may store: our own /media/<id> files or https links. Nothing else. */
+export function cleanMediaUrl(url: string): string {
+  const u = url.trim();
+  if (/^\/media\/[A-Za-z0-9._-]+$/.test(u) || /^https:\/\/[^\s<>"']+$/.test(u)) return u;
+  throw new MedusaError(MedusaError.Types.INVALID_DATA, 'Invalid media URL');
+}
+
 export type CreateProductInput = {
   title: string;
   description?: string | null;
@@ -287,6 +296,10 @@ export type CreateProductInput = {
   status: 'draft' | 'published';
   category_ids: string[];
   thumbnail?: string | null;
+  /** Gallery, in order; the first image is the product's main image (thumbnail). */
+  images?: string[];
+  /** Product video (/media/<id> upload or https URL), shown first on the storefront. */
+  video_url?: string | null;
   variant: {
     title: string;
     sku?: string | null;
@@ -305,6 +318,10 @@ export async function createStoreProduct(
   const ctx = await storeContext(container, storeId);
   const v = input.variant;
   validatePricing(v.price, v.original_price ?? v.price, v.original_cost ?? null);
+  const gallery = (
+    input.images?.length ? input.images : input.thumbnail ? [input.thumbnail] : []
+  ).map(cleanMediaUrl);
+  const video = input.video_url ? cleanMediaUrl(input.video_url) : null;
 
   const handle = await uniqueHandle(container, 'product', slugify(input.handle || input.title));
   const optionTitle = 'Phiên bản';
@@ -316,12 +333,12 @@ export async function createStoreProduct(
           handle,
           description: input.description ?? undefined,
           status: input.status,
-          thumbnail: input.thumbnail ?? undefined,
-          images: input.thumbnail ? [{ url: input.thumbnail }] : undefined,
+          thumbnail: gallery[0] ?? undefined,
+          images: gallery.length ? gallery.map((url) => ({ url })) : undefined,
           category_ids: input.category_ids,
           sales_channels: [{ id: ctx.salesChannelId }],
           shipping_profile_id: ctx.shippingProfileId ?? undefined,
-          metadata: { portal_store_id: storeId },
+          metadata: { portal_store_id: storeId, ...(video ? { video_url: video } : {}) },
           options: [{ title: optionTitle, values: [v.title] }],
           variants: [
             {
@@ -359,6 +376,10 @@ export type UpdateProductInput = {
   status?: 'draft' | 'published';
   category_ids?: string[];
   thumbnail?: string | null;
+  /** Full ordered gallery; replaces the current images (first = main image). */
+  images?: string[];
+  /** Set or clear (null) the product video. */
+  video_url?: string | null;
   variants?: {
     id: string;
     title?: string;
@@ -393,7 +414,11 @@ export async function updateStoreProduct(
   if (input.handle && input.handle !== current.handle) {
     update.handle = await uniqueHandle(container, 'product', slugify(input.handle));
   }
-  if (input.thumbnail !== undefined && input.thumbnail !== current.thumbnail) {
+  if (input.images !== undefined) {
+    const gallery = input.images.map(cleanMediaUrl);
+    update.images = gallery.map((url) => ({ url }));
+    update.thumbnail = gallery[0] ?? null;
+  } else if (input.thumbnail !== undefined && input.thumbnail !== current.thumbnail) {
     update.thumbnail = input.thumbnail;
     // The new main image goes first; the other gallery images stay.
     update.images = input.thumbnail
@@ -406,6 +431,16 @@ export async function updateStoreProduct(
       : current.images
           .filter((u: string) => u !== current.thumbnail)
           .map((url: string) => ({ url }));
+  }
+  if (input.video_url !== undefined) {
+    // Keep the other metadata (portal_store_id, ...); only the video key changes.
+    const raw = await productModule.retrieveProduct(productId, { select: ['id', 'metadata'] });
+    const metadata: Record<string, unknown> = {
+      ...((raw.metadata as Record<string, unknown>) ?? {}),
+    };
+    if (input.video_url) metadata.video_url = cleanMediaUrl(input.video_url);
+    else delete metadata.video_url;
+    update.metadata = metadata;
   }
   if (Object.keys(update).length) {
     await updateProductsWorkflow(container as any).run({

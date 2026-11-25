@@ -16,7 +16,8 @@ export default defineMiddlewares({
     {
       matcher: '/portal-api/admin/uploads',
       method: ['POST'],
-      bodyParser: { sizeLimit: '8mb' },
+      // Product videos (up to 20 MB) arrive base64-encoded.
+      bodyParser: { sizeLimit: '30mb' },
     },
     {
       matcher: '/portal-api/collaborator*',

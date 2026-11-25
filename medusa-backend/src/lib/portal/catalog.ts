@@ -169,6 +169,84 @@ export async function getStoreCatalog(
 }
 
 /**
+ * One product of a store for a collaborator: everything needed to promote and sell it (gallery,
+ * video, description, categories, the two prices per variant). Never original cost. Only
+ * published products sold in this store's sales channel.
+ */
+export async function getStoreProductDetail(
+  container: Container,
+  storeId: string,
+  productId: string
+) {
+  const query = container.resolve(ContainerRegistrationKeys.QUERY);
+  const store = await getStore(container, storeId);
+  const currency = storeCurrency(store);
+  const notFound = () => new MedusaError(MedusaError.Types.NOT_FOUND, 'Product not found');
+  if (!store.default_sales_channel_id) throw notFound();
+  const { data: links } = await query.graph({
+    entity: 'product_sales_channel',
+    fields: ['product_id'],
+    filters: { sales_channel_id: store.default_sales_channel_id, product_id: productId },
+  });
+  if (!(links as unknown[]).length) throw notFound();
+  const { data } = await query.graph({
+    entity: 'product',
+    fields: [
+      'id',
+      'title',
+      'handle',
+      'description',
+      'thumbnail',
+      'metadata',
+      'images.url',
+      'images.rank',
+      'categories.id',
+      'categories.name',
+      'variants.id',
+      'variants.sku',
+      'variants.title',
+      'variants.price_set.prices.amount',
+      'variants.price_set.prices.currency_code',
+      'variants.price_set.prices.rules_count',
+    ],
+    filters: { id: productId, status: 'published' },
+  });
+  const p = (data as any[])[0];
+  if (!p) throw notFound();
+  const portal = container.resolve<PortalModuleService>(PORTAL_MODULE);
+  const vcs = await portal.listVariantCosts({
+    variant_id: (p.variants ?? []).map((v: any) => v.id),
+  });
+  const originalOf = new Map(
+    vcs.filter((c) => c.original_price != null).map((c) => [c.variant_id, Number(c.original_price)])
+  );
+  const images: string[] = [...(p.images ?? [])]
+    .sort((a: any, b: any) => (a.rank ?? 0) - (b.rank ?? 0))
+    .map((i: any) => i.url);
+  if (p.thumbnail && !images.includes(p.thumbnail)) images.unshift(p.thumbnail);
+  return {
+    product: {
+      id: p.id as string,
+      title: p.title as string,
+      handle: p.handle as string,
+      description: (p.description as string | null) ?? null,
+      thumbnail: (p.thumbnail as string | null) ?? null,
+      images,
+      video_url: (p.metadata?.video_url as string | undefined) ?? null,
+      categories: (p.categories ?? []).map((c: any) => ({ id: c.id, name: c.name })),
+      variants: (p.variants ?? []).map((v: any) => ({
+        id: v.id,
+        sku: v.sku,
+        title: v.title,
+        suggested_price: pickPrice(v.price_set?.prices, currency),
+        original_price: originalOf.get(v.id) ?? pickPrice(v.price_set?.prices, currency),
+      })),
+    },
+    currency_code: currency,
+  };
+}
+
+/**
  * The suggested price IS the store price: the variant's store-wide price in the
  * store's default currency. Updating it here updates it in the store too.
  *

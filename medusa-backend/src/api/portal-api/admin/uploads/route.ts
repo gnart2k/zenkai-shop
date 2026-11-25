@@ -5,11 +5,16 @@ import { uploadFilesWorkflow } from '@medusajs/medusa/core-flows';
 import { parse } from '../../../../lib/portal/http';
 import { slugify } from '../../../../lib/portal/products';
 
-const MAX_BYTES = 5 * 1024 * 1024;
+const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
+const MAX_VIDEO_BYTES = 20 * 1024 * 1024;
 const EXT: Record<string, string> = {
   'image/png': 'png',
   'image/jpeg': 'jpg',
   'image/webp': 'webp',
+  'image/x-icon': 'ico',
+  'image/vnd.microsoft.icon': 'ico',
+  'video/mp4': 'mp4',
+  'video/webm': 'webm',
 };
 
 const schema = z.object({
@@ -20,6 +25,8 @@ const schema = z.object({
     'image/webp',
     'image/x-icon',
     'image/vnd.microsoft.icon',
+    'video/mp4',
+    'video/webm',
   ]),
   content_base64: z.string().min(1),
 });
@@ -32,8 +39,12 @@ const schema = z.object({
 export async function POST(req: AuthenticatedMedusaRequest, res: MedusaResponse) {
   const body = parse(schema, req.body);
   const buffer = Buffer.from(body.content_base64, 'base64');
-  if (!buffer.length || buffer.length > MAX_BYTES) {
-    throw new MedusaError(MedusaError.Types.INVALID_DATA, 'File must be between 1 byte and 5 MB');
+  const isVideo = body.mime_type.startsWith('video/');
+  if (!buffer.length || buffer.length > (isVideo ? MAX_VIDEO_BYTES : MAX_IMAGE_BYTES)) {
+    throw new MedusaError(
+      MedusaError.Types.INVALID_DATA,
+      isVideo ? 'Video must be between 1 byte and 20 MB' : 'File must be between 1 byte and 5 MB'
+    );
   }
   const base = slugify(body.filename.replace(/\.[^.]+$/, '')).slice(0, 60);
   const { result } = await uploadFilesWorkflow(req.scope).run({

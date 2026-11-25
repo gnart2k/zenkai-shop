@@ -16,6 +16,8 @@ const updateSchema = z.object({
   status: z.enum(['draft', 'published']).optional(),
   category_ids: z.array(z.string()).optional(),
   thumbnail: z.string().max(500).nullable().optional(),
+  images: z.array(z.string().max(500)).max(20).optional(),
+  video_url: z.string().max(500).nullable().optional(),
   variants: z
     .array(
       z.object({

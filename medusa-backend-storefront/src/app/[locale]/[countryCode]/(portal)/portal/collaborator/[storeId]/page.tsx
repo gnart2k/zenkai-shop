@@ -55,7 +55,7 @@ export default async function ProductsPage({
                   : null
               return (
                 <Card key={v.id} className="flex flex-col overflow-hidden">
-                  <div className="relative aspect-[4/3] w-full overflow-hidden bg-muted">
+                  <a href={`${base}/collaborator/${p.storeId}/products/${prod.id}`} className="relative block aspect-[4/3] w-full overflow-hidden bg-muted">
                     {prod.thumbnail ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={prod.thumbnail} alt={prod.title} className="absolute inset-0 h-full w-full object-cover" loading="lazy" />
@@ -64,10 +64,12 @@ export default async function ProductsPage({
                         <ImageOff className="size-8" />
                       </div>
                     )}
-                  </div>
+                  </a>
                   <CardContent className="flex flex-1 flex-col gap-3 p-4">
                     <div>
-                      <p className="font-medium leading-snug">{prod.title}</p>
+                      <a href={`${base}/collaborator/${p.storeId}/products/${prod.id}`} className="font-medium leading-snug hover:underline">
+                        {prod.title}
+                      </a>
                       <p className="text-xs text-muted-foreground">
                         {[v.title, v.sku].filter(Boolean).join(" · ")}
                       </p>
@@ -87,7 +89,10 @@ export default async function ProductsPage({
                         {t("products.potential", { amount: m(potential) })}
                       </p>
                     ) : null}
-                    <div className="mt-auto pt-1">
+                    <div className="mt-auto space-y-2 pt-1">
+                      <Button asChild variant="outline" className="w-full">
+                        <a href={`${base}/collaborator/${p.storeId}/products/${prod.id}`}>{t("products.viewDetails")}</a>
+                      </Button>
                       {v.original_price === null ? null : (
                         <Button asChild className="w-full">
                           <a href={`${base}/collaborator/${p.storeId}/requests/new?variant_id=${v.id}`}>
