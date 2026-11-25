@@ -46,7 +46,7 @@ export default async function AdminRequests({
         <Empty icon={ClipboardList} title={t("adminRequests.empty")} />
       ) : (
         <Card className="overflow-hidden">
-          <Table>
+          <Table className="rt">
             <TableHeader>
               <TableRow>
                 <TableHead>{t("adminRequests.date")}</TableHead>
@@ -63,15 +63,15 @@ export default async function AdminRequests({
               {requests.map((r) => (
                 <TableRow key={r.id}>
                   <TableCell className="whitespace-nowrap">{date(r.created_at, p.locale)}</TableCell>
-                  <TableCell>{r.collaborator_email}</TableCell>
-                  <TableCell>
+                  <TableCell data-label={t("adminRequests.collaborator")}>{r.collaborator_email}</TableCell>
+                  <TableCell data-label={t("adminRequests.product")}>
                     <div className="font-medium">{r.product_title}</div>
                     <div className="text-xs text-muted-foreground">{r.sku}</div>
                   </TableCell>
-                  <TableCell className="text-right">{r.quantity}</TableCell>
-                  <TableCell className="text-right">{money(Number(r.commercial_price), r.currency_code, p.locale)}</TableCell>
-                  <TableCell className="text-right">{money(Number(r.deposit_amount), r.currency_code, p.locale)}</TableCell>
-                  <TableCell>
+                  <TableCell data-label={t("adminRequests.qty")} className="text-right">{r.quantity}</TableCell>
+                  <TableCell data-label={t("adminRequests.price")} className="text-right">{money(Number(r.commercial_price), r.currency_code, p.locale)}</TableCell>
+                  <TableCell data-label={t("adminRequests.deposit")} className="text-right">{money(Number(r.deposit_amount), r.currency_code, p.locale)}</TableCell>
+                  <TableCell data-label={t("adminRequests.status")}>
                     <StatusBadge status={r.status} label={t(`status.${r.status}` as never)} />
                   </TableCell>
                   <TableCell>

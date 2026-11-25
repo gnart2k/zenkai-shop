@@ -63,7 +63,7 @@ export default async function AdminProducts({
         </Empty>
       ) : (
         <Card className="overflow-hidden">
-          <Table>
+          <Table className="rt">
             <TableHeader>
               <TableRow>
                 <TableHead>{t("adminProducts.product")}</TableHead>
@@ -111,13 +111,13 @@ export default async function AdminProducts({
                         </div>
                       </div>
                     </TableCell>
-                    <TableCell>
+                    <TableCell data-label={t("adminProducts.status")}>
                       <StatusBadge status={prod.status} label={t(`status.${prod.status}` as never)} />
                     </TableCell>
-                    <TableCell className="text-right">{m(v?.suggested_price ?? null)}</TableCell>
-                    <TableCell className="text-right">{m(v?.original_price ?? null)}</TableCell>
-                    <TableCell className="text-right text-muted-foreground">{m(v?.original_cost ?? null)}</TableCell>
-                    <TableCell className="text-right">
+                    <TableCell data-label={t("adminProducts.suggestedPrice")} className="text-right">{m(v?.suggested_price ?? null)}</TableCell>
+                    <TableCell data-label={t("adminProducts.originalPrice")} className="text-right">{m(v?.original_price ?? null)}</TableCell>
+                    <TableCell data-label={t("adminProducts.originalCost")} className="text-right text-muted-foreground">{m(v?.original_cost ?? null)}</TableCell>
+                    <TableCell data-label={t("adminProducts.stock")} className="text-right">
                       {v?.quantity === null || v?.quantity === undefined ? (
                         <span className="text-xs text-muted-foreground">{t("adminProducts.notTracked")}</span>
                       ) : (

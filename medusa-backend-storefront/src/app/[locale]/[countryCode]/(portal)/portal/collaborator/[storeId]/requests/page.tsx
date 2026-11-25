@@ -51,7 +51,7 @@ export default async function RequestsPage({
         <Empty icon={ClipboardList} title={t("requests.empty")} />
       ) : (
         <Card className="overflow-hidden">
-          <Table>
+          <Table className="rt">
             <TableHeader>
               <TableRow>
                 <TableHead>{t("requests.date")}</TableHead>
@@ -68,18 +68,18 @@ export default async function RequestsPage({
               {requests.map((r) => (
                 <TableRow key={r.id}>
                   <TableCell className="whitespace-nowrap">{date(r.created_at, p.locale)}</TableCell>
-                  <TableCell>
+                  <TableCell data-label={t("requests.product")}>
                     <div className="font-medium">{r.product_title}</div>
                     <div className="text-xs text-muted-foreground">{r.sku}</div>
                   </TableCell>
-                  <TableCell className="text-right">{r.quantity}</TableCell>
-                  <TableCell className="text-right">{money(r.commercial_price, r.currency_code, p.locale)}</TableCell>
-                  <TableCell className="text-right font-medium text-emerald-700">
+                  <TableCell data-label={t("requests.qty")} className="text-right">{r.quantity}</TableCell>
+                  <TableCell data-label={t("requests.yourPrice")} className="text-right">{money(r.commercial_price, r.currency_code, p.locale)}</TableCell>
+                  <TableCell data-label={t("requests.yourProfit")} className="text-right font-medium text-emerald-700">
                     {money((r.commercial_price - r.original_price) * r.quantity, r.currency_code, p.locale)}
                   </TableCell>
-                  <TableCell className="text-right">{money(r.deposit_amount, r.currency_code, p.locale)}</TableCell>
-                  <TableCell>{r.customer_name}</TableCell>
-                  <TableCell>
+                  <TableCell data-label={t("requests.deposit")} className="text-right">{money(r.deposit_amount, r.currency_code, p.locale)}</TableCell>
+                  <TableCell data-label={t("requests.customer")}>{r.customer_name}</TableCell>
+                  <TableCell data-label={t("requests.status")}>
                     <StatusBadge status={r.status} label={t(`status.${r.status}` as never)} />
                     {r.reject_reason ? (
                       <div className="mt-1 max-w-48 text-xs text-destructive">{r.reject_reason}</div>

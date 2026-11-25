@@ -45,7 +45,7 @@ export default async function PayoutsPage({
                   <Empty icon={Wallet} title={t("payouts.nothingOwed")} />
                 </div>
               ) : (
-                <Table>
+                <Table className="rt">
                   <TableHeader>
                     <TableRow>
                       <TableHead>{t("payouts.collaborator")}</TableHead>
@@ -58,8 +58,8 @@ export default async function PayoutsPage({
                     {owed.map((o) => (
                       <TableRow key={`${o.collaborator_id}${o.currency_code}`}>
                         <TableCell>{email(o.collaborator_id)}</TableCell>
-                        <TableCell className="text-right">{o.entries}</TableCell>
-                        <TableCell className={`text-right font-medium ${o.net < 0 ? "text-destructive" : ""}`}>
+                        <TableCell data-label={t("payouts.entries")} className="text-right">{o.entries}</TableCell>
+                        <TableCell data-label={t("payouts.net")} className={`text-right font-medium ${o.net < 0 ? "text-destructive" : ""}`}>
                           {money(o.net, o.currency_code, p.locale)}
                         </TableCell>
                         <TableCell className="text-xs text-muted-foreground">{o.net <= 0 ? t("payouts.carried") : ""}</TableCell>
@@ -81,7 +81,7 @@ export default async function PayoutsPage({
                   <Empty icon={Wallet} title={t("payouts.noPayouts")} />
                 </div>
               ) : (
-                <Table>
+                <Table className="rt">
                   <TableHeader>
                     <TableRow>
                       <TableHead>{t("payouts.created")}</TableHead>
@@ -96,10 +96,10 @@ export default async function PayoutsPage({
                     {payouts.map((x) => (
                       <TableRow key={x.id}>
                         <TableCell>{date(x.created_at, p.locale)}</TableCell>
-                        <TableCell>{x.period}</TableCell>
-                        <TableCell>{email(x.collaborator_id)}</TableCell>
-                        <TableCell className="text-right">{money(Number(x.amount), x.currency_code, p.locale)}</TableCell>
-                        <TableCell>
+                        <TableCell data-label={t("payouts.period")}>{x.period}</TableCell>
+                        <TableCell data-label={t("payouts.collaborator")}>{email(x.collaborator_id)}</TableCell>
+                        <TableCell data-label={t("payouts.amount")} className="text-right">{money(Number(x.amount), x.currency_code, p.locale)}</TableCell>
+                        <TableCell data-label={t("payouts.status")}>
                           <StatusBadge status={x.status === "pending" ? "pending" : "paid"} label={x.status === "pending" ? t("status.payoutPending") : t("status.paid")} />
                         </TableCell>
                         <TableCell className="text-right">

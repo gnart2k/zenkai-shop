@@ -60,7 +60,7 @@ export default async function EarningsPage({
                 <Empty icon={Coins} title={t("earnings.empty")} />
               </div>
             ) : (
-              <Table>
+              <Table className="rt">
                 <TableHeader>
                   <TableRow>
                     <TableHead>{t("earnings.date")}</TableHead>
@@ -73,14 +73,14 @@ export default async function EarningsPage({
                   {e.entries.map((x) => (
                     <TableRow key={x.id}>
                       <TableCell className="whitespace-nowrap">{date(x.created_at, locale)}</TableCell>
-                      <TableCell>
+                      <TableCell data-label={t("earnings.type")}>
                         {t(`ledgerType.${x.type}` as never)}
                         {x.note ? <div className="text-xs text-muted-foreground">{x.note}</div> : null}
                       </TableCell>
-                      <TableCell className={`text-right font-medium ${x.amount < 0 ? "text-destructive" : "text-emerald-700"}`}>
+                      <TableCell data-label={t("earnings.amount")} className={`text-right font-medium ${x.amount < 0 ? "text-destructive" : "text-emerald-700"}`}>
                         {money(x.amount, x.currency_code, locale)}
                       </TableCell>
-                      <TableCell>{x.settled ? t("earnings.yes") : t("earnings.no")}</TableCell>
+                      <TableCell data-label={t("earnings.settled")}>{x.settled ? t("earnings.yes") : t("earnings.no")}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -99,7 +99,7 @@ export default async function EarningsPage({
                 <Empty icon={Wallet} title={t("earnings.noPayouts")} />
               </div>
             ) : (
-              <Table>
+              <Table className="rt">
                 <TableHeader>
                   <TableRow>
                     <TableHead>{t("earnings.period")}</TableHead>
@@ -111,8 +111,8 @@ export default async function EarningsPage({
                   {e.payouts.map((x) => (
                     <TableRow key={x.id}>
                       <TableCell>{x.period}</TableCell>
-                      <TableCell className="text-right">{money(x.amount, x.currency_code, locale)}</TableCell>
-                      <TableCell>
+                      <TableCell data-label={t("earnings.amount")} className="text-right">{money(x.amount, x.currency_code, locale)}</TableCell>
+                      <TableCell data-label={t("earnings.status")}>
                         <StatusBadge
                           status={x.status === "pending" ? "pending" : "paid"}
                           label={x.status === "pending" ? t("status.payoutPending") : `${t("status.paid")} ${date(x.paid_at, locale)}`}

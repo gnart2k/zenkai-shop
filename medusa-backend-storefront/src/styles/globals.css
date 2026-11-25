@@ -201,3 +201,57 @@
     @apply text-[32px] leading-[44px] font-semibold;
   }
 }
+
+/* Data tables become stacked cards on phones (cells carry data-label for the column name). */
+@media (max-width: 767px) {
+  table.rt,
+  table.rt tbody,
+  table.rt tr,
+  table.rt td {
+    display: block;
+    width: 100%;
+  }
+  table.rt thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+  }
+  table.rt tr {
+    border-bottom: 1px solid hsl(var(--border));
+    padding: 0.75rem 1rem;
+  }
+  table.rt tr:last-child {
+    border-bottom: 0;
+  }
+  table.rt td {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.2rem 0;
+    text-align: right;
+    white-space: normal;
+  }
+  table.rt td::before {
+    content: attr(data-label);
+    flex-shrink: 0;
+    font-size: 0.75rem;
+    color: hsl(var(--muted-foreground));
+    text-align: left;
+  }
+  table.rt td:not([data-label]):first-child {
+    display: block;
+    text-align: left;
+    font-weight: 500;
+    padding-bottom: 0.35rem;
+  }
+  table.rt td:not([data-label]):not(:first-child) {
+    justify-content: flex-end;
+    padding-top: 0.5rem;
+  }
+  table.rt td:not([data-label])::before {
+    content: none;
+  }
+}

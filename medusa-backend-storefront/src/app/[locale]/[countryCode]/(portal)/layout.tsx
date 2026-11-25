@@ -57,7 +57,7 @@ export default async function PortalLayout({
             <span className="grid size-8 place-items-center rounded-md bg-primary text-primary-foreground">
               <Store className="size-4" />
             </span>
-            {t("common.brand")}
+            <span className={stores.length ? "hidden sm:inline" : undefined}>{t("common.brand")}</span>
           </a>
           {actor ? (
             <span className="hidden rounded-full border px-2 py-0.5 text-xs text-muted-foreground sm:inline">

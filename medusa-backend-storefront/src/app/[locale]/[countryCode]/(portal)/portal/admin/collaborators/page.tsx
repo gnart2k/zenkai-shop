@@ -59,7 +59,7 @@ export default async function CollaboratorsPage({
             <Empty icon={Users} title={t("collabs.empty")} />
           ) : (
             <Card className="overflow-hidden">
-              <Table>
+              <Table className="rt">
                 <TableHeader>
                   <TableRow>
                     <TableHead>{t("collabs.email")}</TableHead>
@@ -72,8 +72,8 @@ export default async function CollaboratorsPage({
                   {collaborators.map((c) => (
                     <TableRow key={c.id}>
                       <TableCell className="font-medium">{c.email}</TableCell>
-                      <TableCell>{c.name ?? "-"}</TableCell>
-                      <TableCell>
+                      <TableCell data-label={t("collabs.name")}>{c.name ?? "-"}</TableCell>
+                      <TableCell data-label={t("collabs.status")}>
                         <StatusBadge status={c.status} label={t(`status.${c.status}` as never)} />
                       </TableCell>
                       <TableCell className="text-right">
