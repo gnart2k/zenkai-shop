@@ -24,6 +24,17 @@ const RESERVED = new Set([
   'media',
   'store',
   'stores',
+  'shop',
+  'collab',
+  's3',
+  'drive',
+  'ao',
+  'dev',
+  'test',
+  'staging',
+  'smtp',
+  'ns1',
+  'ns2',
 ]);
 
 export type CustomDomain = { host: string; verified_at: string | null };

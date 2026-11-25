@@ -141,7 +141,11 @@ const PortalsPage = () => {
                     {s.settings.address ? (
                       <a
                         className="text-xs underline"
-                        href={`http://${s.settings.address}:4100`}
+                        href={
+                          s.settings.base_domain === 'localhost'
+                            ? `http://${s.settings.address}:4100`
+                            : `https://${s.settings.address}`
+                        }
                         target="_blank"
                         rel="noreferrer"
                       >
