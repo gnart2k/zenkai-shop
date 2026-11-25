@@ -1,9 +1,11 @@
 import { listCartShippingMethods } from "@lib/data/fulfillment"
 import { listCartPaymentMethods } from "@lib/data/payment"
+import { paymentsEnabled } from "@lib/util/payments"
 import { cartRequiresShipping } from "@lib/util/physical-variant"
 import { HttpTypes } from "@medusajs/types"
 import Addresses from "@modules/checkout/components/addresses"
 import Payment from "@modules/checkout/components/payment"
+import PaymentsUnavailable from "@modules/checkout/components/payments-unavailable"
 import Review from "@modules/checkout/components/review"
 import Shipping from "@modules/checkout/components/shipping"
 
@@ -42,13 +44,19 @@ export default async function CheckoutForm({
         />
       ) : null}
 
-      <Payment
-        cart={cart}
-        availablePaymentMethods={paymentMethods}
-        requiresShipping={requiresShipping}
-      />
+      {paymentsEnabled() ? (
+        <>
+          <Payment
+            cart={cart}
+            availablePaymentMethods={paymentMethods}
+            requiresShipping={requiresShipping}
+          />
 
-      <Review cart={cart} />
+          <Review cart={cart} />
+        </>
+      ) : (
+        <PaymentsUnavailable />
+      )}
     </div>
   )
 }

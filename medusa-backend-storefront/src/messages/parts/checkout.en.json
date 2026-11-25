@@ -135,5 +135,9 @@
     "quoteUnavailable": "Shipping quote unavailable for this option.",
     "ghnStandard": "GHN Standard",
     "continue": "Continue to payment"
+  },
+  "CheckoutPaymentsOff": {
+    "title": "Online payment is not available yet",
+    "text": "We are still setting up payment. Your address and shipping choices are saved. Please contact the shop to complete your order."
   }
 }

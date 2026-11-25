@@ -135,5 +135,9 @@
     "quoteUnavailable": "Chưa có phí vận chuyển cho lựa chọn này.",
     "ghnStandard": "Giao hàng tiêu chuẩn (GHN)",
     "continue": "Tiếp tục đến bước thanh toán"
+  },
+  "CheckoutPaymentsOff": {
+    "title": "Thanh toán trực tuyến chưa khả dụng",
+    "text": "Chúng tôi đang cấu hình cổng thanh toán. Địa chỉ và phương thức vận chuyển của bạn đã được lưu. Vui lòng liên hệ cửa hàng để hoàn tất đơn hàng."
   }
 }

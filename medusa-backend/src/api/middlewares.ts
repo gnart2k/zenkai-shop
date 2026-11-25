@@ -1,10 +1,27 @@
-import { authenticate, defineMiddlewares } from '@medusajs/framework/http';
+import {
+  authenticate,
+  defineMiddlewares,
+  type MedusaNextFunction,
+  type MedusaRequest,
+  type MedusaResponse,
+} from '@medusajs/framework/http';
 import { z } from '@medusajs/framework/zod';
 import { portalCors, requirePortalAdmin, requireStoreMembership } from '../lib/portal/http';
 import { COLLABORATOR_ACTOR, PORTAL_ADMIN_ACTOR } from '../modules/portal/lib/constants';
 
+/** While online payment is not configured (PAYMENTS_ENABLED=false) no cart can be completed or paid. */
+const paymentsGate = (req: MedusaRequest, res: MedusaResponse, next: MedusaNextFunction) => {
+  if (process.env.PAYMENTS_ENABLED === 'false') {
+    res.status(503).json({ message: 'Online payment is not available yet' });
+    return;
+  }
+  next();
+};
+
 export default defineMiddlewares({
   routes: [
+    { matcher: '/store/carts/:id/complete', method: ['POST'], middlewares: [paymentsGate] },
+    { matcher: '/store/payment-collections*', method: ['POST'], middlewares: [paymentsGate] },
     // --- Portal: collaborators and single-store portal admins -----------------
     { matcher: '/portal-api*', middlewares: [portalCors] },
     {
