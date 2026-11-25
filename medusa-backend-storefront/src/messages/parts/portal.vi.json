@@ -312,7 +312,13 @@
       "categoryNotFound": "Không tìm thấy danh mục.",
       "variantNotFound": "Không tìm thấy phân loại trên sản phẩm này.",
       "skuTaken": "SKU này đã được sản phẩm khác sử dụng.",
-      "collabHasHistory": "Cộng tác viên này đã có lợi nhuận hoặc chi trả nên không thể xóa. Hãy thu hồi quyền truy cập thay thế."
+      "collabHasHistory": "Cộng tác viên này đã có lợi nhuận hoặc chi trả nên không thể xóa. Hãy thu hồi quyền truy cập thay thế.",
+      "pageFailed": "Đã xảy ra lỗi",
+      "pageFailedHint": "Không tải được trang này. Hãy thử lại hoặc quay về trang chủ.",
+      "retry": "Thử lại",
+      "goHome": "Về cổng đối tác",
+      "notFound": "Không tìm thấy trang",
+      "notFoundHint": "Nội dung bạn tìm không tồn tại hoặc bạn không có quyền truy cập."
     },
     "productForm": {
       "titleNew": "Thêm sản phẩm",

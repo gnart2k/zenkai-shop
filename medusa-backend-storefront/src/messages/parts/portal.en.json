@@ -312,7 +312,13 @@
       "categoryNotFound": "Category not found.",
       "variantNotFound": "Variant not found on this product.",
       "skuTaken": "This SKU is already used by another product.",
-      "collabHasHistory": "This collaborator has earnings or payouts and cannot be deleted. Revoke their access instead."
+      "collabHasHistory": "This collaborator has earnings or payouts and cannot be deleted. Revoke their access instead.",
+      "pageFailed": "Something went wrong",
+      "pageFailedHint": "This page could not be loaded. Try again, or go back to the start.",
+      "retry": "Try again",
+      "goHome": "Back to the portal",
+      "notFound": "Page not found",
+      "notFoundHint": "The item you are looking for does not exist or you do not have access to it."
     },
     "productForm": {
       "titleNew": "New product",

@@ -1,10 +1,11 @@
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { portalBase, portalFetch } from "@lib/portal/api"
+import { PortalError, portalBase, portalFetch } from "@lib/portal/api"
 import { CopyButton } from "@modules/portal/copy-button"
 import { money } from "@modules/portal/ui"
 import { ArrowLeft, Download, ImageOff } from "lucide-react"
 import { getTranslations } from "next-intl/server"
+import { notFound } from "next/navigation"
 
 type Detail = {
   currency_code: string
@@ -35,9 +36,15 @@ export default async function CollaboratorProductDetail({
   const p = await params
   const base = portalBase(p)
   const t = await getTranslations({ locale: p.locale, namespace: "Portal" })
-  const { product, currency_code } = await portalFetch<Detail>(
+  const detail = await portalFetch<Detail>(
     `/portal-api/collaborator/stores/${p.storeId}/products/${p.productId}`
-  )
+  ).catch((e) => {
+    // An unknown / unpublished product is a plain 404, not a server error.
+    if (e instanceof PortalError && e.status === 404) return null
+    throw e
+  })
+  if (!detail) notFound()
+  const { product, currency_code } = detail
   const m = (n: number | null) => money(n, currency_code, p.locale)
   const images = product.images.length ? product.images : product.thumbnail ? [product.thumbnail] : []
   const slug =
