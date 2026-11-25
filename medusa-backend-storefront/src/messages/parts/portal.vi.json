@@ -103,7 +103,10 @@
       "copy": "Sao chép",
       "copied": "Đã sao chép",
       "copySku": "Sao chép SKU",
-      "variantsAndPrices": "Phiên bản và giá"
+      "variantsAndPrices": "Phiên bản và giá",
+      "downloadAll": "Tải tất cả (ZIP)",
+      "categories": "Danh mục",
+      "externalLinks": "Liên kết media bên ngoài:"
     },
     "requests": {
       "title": "Yêu cầu của tôi",

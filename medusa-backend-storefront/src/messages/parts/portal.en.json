@@ -103,7 +103,10 @@
       "copy": "Copy",
       "copied": "Copied",
       "copySku": "Copy SKU",
-      "variantsAndPrices": "Versions and prices"
+      "variantsAndPrices": "Versions and prices",
+      "downloadAll": "Download all (ZIP)",
+      "categories": "Categories",
+      "externalLinks": "External media links:"
     },
     "requests": {
       "title": "My requests",

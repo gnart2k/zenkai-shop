@@ -65,6 +65,19 @@ export default async function CollaboratorProductDetail({
         </a>
       </Button>
 
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h1 className="text-2xl font-semibold leading-snug">{product.title}</h1>
+        {images.length > 0 || product.video_url ? (
+          <Button asChild>
+            {/* a plain link: the response is a ZIP download */}
+            <a href={`${base}/collaborator/${p.storeId}/products/${product.id}/download`} download>
+              <Download />
+              {t("products.downloadAll")}
+            </a>
+          </Button>
+        ) : null}
+      </div>
+
       <div className="grid gap-6 lg:grid-cols-5">
         <div className="space-y-4 lg:col-span-3">
           {product.video_url ? (
@@ -110,7 +123,6 @@ export default async function CollaboratorProductDetail({
 
         <div className="space-y-4 lg:col-span-2">
           <div>
-            <h1 className="text-2xl font-semibold leading-snug">{product.title}</h1>
             {product.categories.length ? (
               <p className="mt-1 text-sm text-muted-foreground">{product.categories.map((c) => c.name).join(" · ")}</p>
             ) : null}
