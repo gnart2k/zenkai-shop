@@ -110,7 +110,7 @@ const notifyApprovedStep = createStep(
     const portal = container.resolve<PortalModuleService>(PORTAL_MODULE);
     const request = await portal.retrieveCollabRequest(input.request_id);
     const collaborator = await portal.retrieveCollaborator(request.collaborator_id);
-    const payment_link = buildPaymentLink(request.id);
+    const payment_link = await buildPaymentLink(container, request);
     const data = { request_id: request.id, payment_link };
     await sendPortalEmail(container, {
       to: collaborator.email,

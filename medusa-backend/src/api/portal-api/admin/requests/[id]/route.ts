@@ -19,9 +19,9 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
     request,
     collaborator: { id: collaborator.id, email: collaborator.email, name: collaborator.name },
     original_cost,
-    // No email provider yet, so the admin can copy the customer's link from here.
+    // The admin can copy the customer's link from here (it is also emailed).
     payment_link: ['approved', 'paid'].includes(request.status)
-      ? buildPaymentLink(request.id)
+      ? await buildPaymentLink(req.scope, request)
       : null,
     collaborator_earning: computeEarning(
       Number(request.commercial_price),
