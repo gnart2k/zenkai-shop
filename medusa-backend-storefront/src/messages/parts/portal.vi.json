@@ -242,7 +242,10 @@
       "uncategorized": "Chưa phân loại",
       "created": "Đã tạo sản phẩm.",
       "deleted": "Đã xóa sản phẩm.",
-      "private": "Nội bộ"
+      "private": "Nội bộ",
+      "exportExcel": "Xuất Excel",
+      "variant": "Phân loại",
+      "image": "Hình ảnh"
     },
     "payouts": {
       "title": "Chi trả",

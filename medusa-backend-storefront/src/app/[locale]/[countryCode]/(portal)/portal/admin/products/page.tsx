@@ -5,7 +5,7 @@ import { deleteProduct } from "@lib/portal/actions"
 import { portalBase, portalFetch } from "@lib/portal/api"
 import { ConfirmDelete } from "@modules/portal/confirm-delete"
 import { Empty, Notice, PageHeader, Pager, StatusBadge, money } from "@modules/portal/ui"
-import { ImageOff, Lock, Package, Pencil, Plus } from "lucide-react"
+import { Download, ImageOff, Lock, Package, Pencil, Plus } from "lucide-react"
 import { getTranslations } from "next-intl/server"
 import type { AdminProduct } from "@modules/portal/product-form"
 
@@ -32,6 +32,15 @@ export default async function AdminProducts({
   return (
     <>
       <PageHeader title={t("adminProducts.title")} description={t("adminProducts.subtitle")}>
+        {c.products.length > 0 ? (
+          <Button asChild variant="outline">
+            {/* a plain link: the response is a file download */}
+            <a href={`${base}/admin/products/export`} download>
+              <Download />
+              {t("adminProducts.exportExcel")}
+            </a>
+          </Button>
+        ) : null}
         <Button asChild>
           <a href={`${base}/admin/products/new`}>
             <Plus />

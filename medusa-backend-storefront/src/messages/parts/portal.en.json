@@ -242,7 +242,10 @@
       "uncategorized": "No category",
       "created": "Product created.",
       "deleted": "Product deleted.",
-      "private": "Private"
+      "private": "Private",
+      "exportExcel": "Export Excel",
+      "variant": "Variant",
+      "image": "Image"
     },
     "payouts": {
       "title": "Payouts",
