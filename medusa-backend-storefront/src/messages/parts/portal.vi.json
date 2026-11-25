@@ -218,7 +218,11 @@
       "sendInvite": "Gửi lời mời",
       "empty": "Chưa có cộng tác viên nào.",
       "status": "Trạng thái",
-      "revoke": "Thu hồi"
+      "revoke": "Thu hồi",
+      "delete": "Xóa",
+      "deleteTitle": "Xóa cộng tác viên này?",
+      "deleteText": "{email} sẽ bị xóa khỏi cửa hàng cùng các yêu cầu của họ và không thể khôi phục. Cộng tác viên đã có lợi nhuận hoặc chi trả thì không xóa được, hãy thu hồi quyền thay thế.",
+      "deleted": "Đã xóa cộng tác viên."
     },
     "adminProducts": {
       "title": "Sản phẩm",
@@ -298,7 +302,8 @@
       "productNotFound": "Không tìm thấy sản phẩm trong cửa hàng này.",
       "categoryNotFound": "Không tìm thấy danh mục.",
       "variantNotFound": "Không tìm thấy phân loại trên sản phẩm này.",
-      "skuTaken": "SKU này đã được sản phẩm khác sử dụng."
+      "skuTaken": "SKU này đã được sản phẩm khác sử dụng.",
+      "collabHasHistory": "Cộng tác viên này đã có lợi nhuận hoặc chi trả nên không thể xóa. Hãy thu hồi quyền truy cập thay thế."
     },
     "productForm": {
       "titleNew": "Thêm sản phẩm",

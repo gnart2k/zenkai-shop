@@ -2,8 +2,9 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { inviteCollaborator, revokeCollaborator } from "@lib/portal/actions"
+import { deleteCollaborator, inviteCollaborator, revokeCollaborator } from "@lib/portal/actions"
 import { portalBase, portalFetch } from "@lib/portal/api"
+import { ConfirmDelete } from "@modules/portal/confirm-delete"
 import { SubmitButton } from "@modules/portal/submit-button"
 import { Empty, Field, Hidden, Notice, PageHeader, StatusBadge } from "@modules/portal/ui"
 import { Users } from "lucide-react"
@@ -28,7 +29,7 @@ export default async function CollaboratorsPage({
   return (
     <>
       <PageHeader title={t("collabs.title")} />
-      <Notice error={sp.error} ok={sp.added ? t("collabs.added") : undefined} />
+      <Notice error={sp.error} ok={sp.added ? t("collabs.added") : sp.deleted ? t("collabs.deleted") : undefined} />
       {sp.invite_link ? (
         <Card className="mb-4 border-emerald-300 bg-emerald-50">
           <CardContent className="space-y-2 p-4">
@@ -76,15 +77,27 @@ export default async function CollaboratorsPage({
                         <StatusBadge status={c.status} label={t(`status.${c.status}` as never)} />
                       </TableCell>
                       <TableCell className="text-right">
-                        {c.status !== "revoked" ? (
-                          <form action={revokeCollaborator}>
-                            <Hidden name="id" value={c.id} />
-                            <Hidden name="returnTo" value={returnTo} />
-                            <Button size="sm" variant="outline" className="text-destructive hover:text-destructive">
-                              {t("collabs.revoke")}
-                            </Button>
-                          </form>
-                        ) : null}
+                        <div className="flex justify-end gap-2">
+                          {c.status !== "revoked" ? (
+                            <form action={revokeCollaborator}>
+                              <Hidden name="id" value={c.id} />
+                              <Hidden name="returnTo" value={returnTo} />
+                              <Button size="sm" variant="outline" className="text-destructive hover:text-destructive">
+                                {t("collabs.revoke")}
+                              </Button>
+                            </form>
+                          ) : null}
+                          <ConfirmDelete
+                            iconOnly
+                            action={deleteCollaborator}
+                            fields={{ id: c.id, returnTo }}
+                            title={t("collabs.deleteTitle")}
+                            text={t("collabs.deleteText", { email: c.email })}
+                            triggerLabel={t("collabs.delete")}
+                            confirmLabel={t("collabs.delete")}
+                            cancelLabel={t("common.cancel")}
+                          />
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}

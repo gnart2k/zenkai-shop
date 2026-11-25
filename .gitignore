@@ -37,3 +37,6 @@ Thumbs.db
 .cache/
 /data/
 # (src/lib/data is source code, not data)
+
+# secrets
+CREDENTIAL.md

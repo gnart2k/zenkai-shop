@@ -218,7 +218,11 @@
       "sendInvite": "Send invite",
       "empty": "No collaborators yet.",
       "status": "Status",
-      "revoke": "Revoke"
+      "revoke": "Revoke",
+      "delete": "Delete",
+      "deleteTitle": "Delete this collaborator?",
+      "deleteText": "{email} will be removed from your store together with their requests. This cannot be undone. Collaborators with earnings or payouts cannot be deleted; revoke them instead.",
+      "deleted": "Collaborator deleted."
     },
     "adminProducts": {
       "title": "Products",
@@ -298,7 +302,8 @@
       "productNotFound": "Product not found in this store.",
       "categoryNotFound": "Category not found.",
       "variantNotFound": "Variant not found on this product.",
-      "skuTaken": "This SKU is already used by another product."
+      "skuTaken": "This SKU is already used by another product.",
+      "collabHasHistory": "This collaborator has earnings or payouts and cannot be deleted. Revoke their access instead."
     },
     "productForm": {
       "titleNew": "New product",

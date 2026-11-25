@@ -38,6 +38,7 @@ const BACKEND_ERRORS: [RegExp, string][] = [
   [/Original price cannot be higher/, "originalTooHigh"],
   [/Original cost cannot be higher/, "costTooHigh"],
   [/open collaborator requests/, "openRequests"],
+  [/earnings or payouts/, "collabHasHistory"],
   [/category is shared/, "categoryShared"],
   [/no stock location/, "noStockLocation"],
   [/Product not found/, "productNotFound"],
@@ -210,6 +211,15 @@ export async function revokeCollaborator(f: FormData) {
   const id = str(f, "id")
   return run(f, async () => {
     await portalFetch(`/portal-api/admin/collaborators/${id}`, { method: "DELETE" })
+  })
+}
+
+/** Permanent delete (clean-up of test data). Refused by the backend when there are earnings/payouts. */
+export async function deleteCollaborator(f: FormData) {
+  const id = str(f, "id")
+  return run(f, async () => {
+    await portalFetch(`/portal-api/admin/collaborators/${id}?permanent=true`, { method: "DELETE" })
+    return withParam(str(f, "returnTo"), "deleted", "1")
   })
 }
 
